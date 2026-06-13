@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "echo \"P1.0 has no browser flows yet\""
+    "test:e2e": "node scripts/public-pages-smoke.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
