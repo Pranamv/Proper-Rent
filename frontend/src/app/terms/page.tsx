@@ -18,7 +18,7 @@ export const metadata: Metadata = pageMetadata({
 const termsSections = [
   {
     title: "Informational website",
-    body: "The public pages and chatbot provide general Proper Rent, letting-process, and fintech information. They are not legal, financial, or tenancy advice.",
+    body: "The public pages and chatbot provide general Proper Rent, letting-process, and Scraye fintech product information. They are not legal, financial, affordability, mortgage, tax, or tenancy advice.",
   },
   {
     title: "No live listing claims",
@@ -26,19 +26,23 @@ const termsSections = [
   },
   {
     title: "Human follow-up",
-    body: "Submitting a renter or landlord form records an enquiry for agent review. It does not guarantee a property, tenancy, listing, product approval, or completion.",
+    body: "Submitting a renter or landlord form records an enquiry for agent review. It does not guarantee a property, tenancy, landlord listing, viewing, product approval, or transaction completion.",
   },
   {
     title: "Chatbot boundaries",
-    body: "The chatbot must not collect full name, email, or phone. Contact details should be submitted through the relevant consented form.",
+    body: "The chatbot must not collect full name, email, or phone. Contact details should be submitted through the relevant consented form. Chatbot replies may be imperfect and are reviewed through the human follow-up workflow.",
   },
   {
     title: "Third-party services",
     body: "Proper Rent uses external infrastructure and service providers for database, authentication, email delivery, and model access.",
   },
   {
-    title: "Launch review",
-    body: "Final legal and operational wording should be reviewed before accepting the first real lead.",
+    title: "Acceptable use",
+    body: "Do not spam the forms or chatbot, submit unlawful or misleading content, attempt to bypass rate limits or admin authentication, probe the service, or use automated traffic that harms the website or its providers.",
+  },
+  {
+    title: "Privacy and consent",
+    body: "Form submissions are subject to the Privacy Policy and the consent wording shown at the point of submission. The consent version is stored with successful renter and landlord enquiries.",
   },
 ];
 

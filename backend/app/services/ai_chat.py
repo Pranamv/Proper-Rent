@@ -26,6 +26,7 @@ MAX_CHAT_MESSAGE_CHARS = 1000
 CHAT_HISTORY_LIMIT = 12
 CHAT_REPLY_MAX_TOKENS = 500
 CHAT_TEMPERATURE = 0.2
+MAX_CHAT_TURNS_PER_SESSION = 50
 
 ChatChannel = Literal["website", "whatsapp", "facebook"]
 SuggestedAction = Literal["show_intake_form"]
@@ -136,6 +137,10 @@ class AIChatResult:
     is_fallback: bool = False
 
 
+class ChatSessionAbuseLimitExceeded(Exception):
+    pass
+
+
 class AIChatService:
     def __init__(
         self,
@@ -153,6 +158,7 @@ class AIChatService:
         message: str,
         renter_id: UUID | None = None,
         channel: ChatChannel = "website",
+        max_turns_per_session: int = MAX_CHAT_TURNS_PER_SESSION,
     ) -> AIChatResult:
         normalized_message = truncate_chat_message(message)
         injection_pattern = detect_prompt_injection_pattern(normalized_message)
@@ -162,6 +168,10 @@ class AIChatService:
         conversation = await self.get_or_create_conversation(
             session_id=session_id,
             channel=channel,
+        )
+        enforce_chat_session_turn_limit(
+            conversation.transcript,
+            max_turns_per_session=max_turns_per_session,
         )
         renter = await self.load_context_renter(session_id=session_id, renter_id=renter_id)
         if renter is not None and conversation.renter_id is None:
@@ -451,6 +461,16 @@ def build_ai_summary(
     if renter_loaded:
         summary += " Linked renter profile context was used."
     return summary
+
+
+def enforce_chat_session_turn_limit(
+    transcript: Sequence[TranscriptEntry],
+    *,
+    max_turns_per_session: int,
+) -> None:
+    user_turn_count = sum(1 for entry in transcript if entry.get("role") == "user")
+    if user_turn_count >= max_turns_per_session:
+        raise ChatSessionAbuseLimitExceeded()
 
 
 def truncate_chat_message(message: str) -> str:

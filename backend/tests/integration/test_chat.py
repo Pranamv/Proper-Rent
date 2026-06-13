@@ -142,6 +142,51 @@ def test_chat_endpoint_returns_public_shape_and_persists_conversation(
     assert "Phase 1 has no live properties/listing data" in call_text
 
 
+def test_chat_endpoint_rate_limits_public_requests(
+    chat_context: ChatEndpointContext,
+) -> None:
+    chat_context.client.app.state.settings.chat_rate_limit_max_requests = 1
+
+    first_response = chat_context.client.post(
+        "/api/v1/chat",
+        json={"session_id": "rate-session-1", "message": "Hello"},
+    )
+    second_response = chat_context.client.post(
+        "/api/v1/chat",
+        json={"session_id": "rate-session-2", "message": "Hello again"},
+    )
+
+    assert first_response.status_code == 200
+    assert second_response.status_code == 429
+    assert second_response.json() == {"detail": "Too many requests. Try again later."}
+    assert int(second_response.headers["retry-after"]) > 0
+    assert len(chat_context.llm.calls) == 1
+
+
+def test_chat_endpoint_blocks_abusive_session_before_llm_call(
+    chat_context: ChatEndpointContext,
+) -> None:
+    chat_context.client.app.state.settings.chat_session_max_turns = 1
+
+    first_response = chat_context.client.post(
+        "/api/v1/chat",
+        json={"session_id": "abuse-session", "message": "Hello"},
+    )
+    second_response = chat_context.client.post(
+        "/api/v1/chat",
+        json={"session_id": "abuse-session", "message": "Can I keep going?"},
+    )
+
+    assert first_response.status_code == 200
+    assert second_response.status_code == 429
+    assert second_response.json() == {
+        "detail": (
+            "Chat session limit reached. Submit the intake form or start a new session later."
+        )
+    }
+    assert len(chat_context.llm.calls) == 1
+
+
 def test_chat_endpoint_validation_errors_do_not_create_conversation(
     chat_context: ChatEndpointContext,
 ) -> None:

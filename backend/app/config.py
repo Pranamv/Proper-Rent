@@ -29,6 +29,14 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     api_v1_prefix: str = "/api/v1"
     cors_allowed_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    consent_version: str = "2026-06-13"
+
+    public_rate_limit_enabled: bool = True
+    public_rate_limit_window_seconds: int = Field(default=60, ge=1)
+    chat_rate_limit_max_requests: int = Field(default=30, ge=1)
+    leads_rate_limit_max_requests: int = Field(default=30, ge=1)
+    landlords_rate_limit_max_requests: int = Field(default=30, ge=1)
+    chat_session_max_turns: int = Field(default=50, ge=1)
 
     database_url: str | None = None
     test_database_url: str = "sqlite+aiosqlite:///:memory:"

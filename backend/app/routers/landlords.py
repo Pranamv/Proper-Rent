@@ -5,7 +5,12 @@ from fastapi import APIRouter, BackgroundTasks, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db_session
-from app.dependencies import get_notification_service
+from app.dependencies import (
+    SettingsDependency,
+    enforce_landlords_rate_limit,
+    get_notification_service,
+    validate_consent_version,
+)
 from app.models import Landlord
 from app.schemas.landlord import LandlordIntakeRequest, LandlordIntakeResponse
 from app.services.notifications import NotificationService
@@ -24,13 +29,16 @@ LANDLORD_INTAKE_MESSAGE = (
     "/landlords",
     response_model=LandlordIntakeResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(enforce_landlords_rate_limit)],
 )
 async def create_landlord_intake(
     payload: LandlordIntakeRequest,
+    settings: SettingsDependency,
     session: DbSession,
     notifications: Notifications,
     background_tasks: BackgroundTasks,
 ) -> LandlordIntakeResponse:
+    validate_consent_version(payload.consent_version, settings)
     normalized_email = normalize_email(str(payload.email))
     landlord = Landlord(
         full_name=payload.full_name,

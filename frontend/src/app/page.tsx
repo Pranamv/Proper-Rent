@@ -136,7 +136,7 @@ export default function Home() {
 
         <CtaBand
           title="Ready to speak to Proper Rent?"
-          body="Register your requirements or property details. The next form slices will connect these calls to action directly to the live backend endpoints."
+          body="Register your requirements or property details. The forms submit to the live backend with consent and human follow-up."
           primaryHref={site.routes.renterRegister}
           primaryLabel="Renter registration"
           secondaryHref={site.routes.landlordRegister}

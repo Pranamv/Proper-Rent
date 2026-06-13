@@ -15,9 +15,8 @@ import {
 } from "@/components/ui/field";
 import { ApiError, publicApi } from "@/lib/api";
 import type { LandlordIntakeRequest, LandlordIntakeResponse } from "@/lib/api";
+import { CONSENT_VERSION, consentCopy } from "@/lib/consent";
 import { site } from "@/lib/site";
-
-const CONSENT_VERSION = "2026-06-13";
 
 type FormValues = {
   fullName: string;
@@ -325,9 +324,7 @@ export function LandlordIntakeForm() {
                       >
                         I consent to Proper Rent
                       </FieldLabel>{" "}
-                      storing my landlord enquiry, contacting me about the property, and
-                      sharing relevant details with the human agent for follow-up. I agree to
-                      the{" "}
+                      {consentCopy.landlord} I agree to the{" "}
                       <Link className="font-semibold underline" href={site.routes.privacy}>
                         Privacy Policy
                       </Link>{" "}

@@ -11,3 +11,6 @@ def test_health_returns_status_and_version() -> None:
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "version": "test-version"}
+    assert response.headers["x-content-type-options"] == "nosniff"
+    assert response.headers["x-frame-options"] == "DENY"
+    assert response.headers["referrer-policy"] == "strict-origin-when-cross-origin"

@@ -16,11 +16,10 @@ import {
 } from "@/components/ui/field";
 import { ApiError, publicApi } from "@/lib/api";
 import type { RenterLeadRequest, RenterLeadResponse } from "@/lib/api";
+import { CONSENT_VERSION, consentCopy } from "@/lib/consent";
 import { resolvePublicSessionId } from "@/lib/session";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
-
-const CONSENT_VERSION = "2026-06-13";
 
 const steps = [
   {
@@ -618,9 +617,7 @@ export function RenterIntakeForm() {
                       >
                         I consent to Proper Rent
                       </FieldLabel>{" "}
-                      storing my renter enquiry, contacting me about my requirements, and
-                      sharing relevant details with the human agent for follow-up. I agree to
-                      the{" "}
+                      {consentCopy.renter} I agree to the{" "}
                       <Link className="font-semibold underline" href={site.routes.privacy}>
                         Privacy Policy
                       </Link>{" "}

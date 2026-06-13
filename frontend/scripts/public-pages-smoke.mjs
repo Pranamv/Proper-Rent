@@ -55,6 +55,10 @@ const renterRegisterSource = readFileSync("src/app/register/renter/page.tsx", "u
 const landlordRegisterSource = readFileSync("src/app/register/landlord/page.tsx", "utf8");
 const siteShellSource = readFileSync("src/components/layout/site-shell.tsx", "utf8");
 const chatWidgetSource = readFileSync("src/components/chat/chat-widget.tsx", "utf8");
+const renterFormSource = readFileSync("src/components/forms/renter-intake-form.tsx", "utf8");
+const landlordFormSource = readFileSync("src/components/forms/landlord-intake-form.tsx", "utf8");
+const consentSource = readFileSync("src/lib/consent.ts", "utf8");
+const nextConfigSource = readFileSync("next.config.ts", "utf8");
 const adminLandlordsSource = readFileSync(
   "src/app/admin/(protected)/landlords/page.tsx",
   "utf8",
@@ -87,6 +91,21 @@ assert.match(
   /LandlordIntakeForm/,
   "Landlord registration page is missing the intake form",
 );
+assert.match(
+  renterFormSource,
+  /consentCopy\.renter/,
+  "Renter form must use shared consent copy",
+);
+assert.match(
+  landlordFormSource,
+  /consentCopy\.landlord/,
+  "Landlord form must use shared consent copy",
+);
+assert.match(
+  consentSource,
+  /DEFAULT_CONSENT_VERSION = "2026-06-13"/,
+  "Consent version default must match the backend default",
+);
 assert.match(siteShellSource, /ChatWidget/, "Public shell is missing the chatbot widget");
 assert.match(chatWidgetSource, /createChatReply/, "Chat widget does not call the chat API");
 assert.match(chatWidgetSource, /aria-live="polite"/, "Chat widget is missing aria-live");
@@ -114,6 +133,16 @@ assert.match(
   analyticsSource,
   /NODE_ENV === "production"/,
   "Analytics must be disabled outside production builds",
+);
+assert.match(
+  nextConfigSource,
+  /X-Content-Type-Options/,
+  "Next config must set baseline security headers",
+);
+assert.match(
+  nextConfigSource,
+  /X-Frame-Options/,
+  "Next config must set clickjacking protection",
 );
 assert.match(
   adminLandlordsSource,

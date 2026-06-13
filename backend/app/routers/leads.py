@@ -8,7 +8,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db_session
-from app.dependencies import get_notification_service
+from app.dependencies import (
+    SettingsDependency,
+    enforce_leads_rate_limit,
+    get_notification_service,
+    validate_consent_version,
+)
 from app.models import Conversation, Renter
 from app.schemas.renter import RenterLeadRequest, RenterLeadResponse
 from app.services.lead_scoring import HOT_LEAD_THRESHOLD, LeadScoringInput, score_lead
@@ -27,14 +32,17 @@ DUPLICATE_LEAD_MESSAGE = "We already have your details. Our team will be in touc
     "/leads",
     response_model=RenterLeadResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(enforce_leads_rate_limit)],
 )
 async def create_renter_lead(
     payload: RenterLeadRequest,
     response: Response,
+    settings: SettingsDependency,
     session: DbSession,
     notifications: Notifications,
     background_tasks: BackgroundTasks,
 ) -> RenterLeadResponse:
+    validate_consent_version(payload.consent_version, settings)
     normalized_email = normalize_email(str(payload.email))
 
     existing_renter = await find_renter_by_email(session, normalized_email)

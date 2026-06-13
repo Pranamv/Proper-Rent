@@ -9,6 +9,12 @@ def test_test_environment_allows_missing_integration_secrets() -> None:
 
     assert settings.app_env == "test"
     assert settings.api_v1_prefix == "/api/v1"
+    assert settings.consent_version == "2026-06-13"
+    assert settings.public_rate_limit_window_seconds == 60
+    assert settings.chat_rate_limit_max_requests == 30
+    assert settings.leads_rate_limit_max_requests == 30
+    assert settings.landlords_rate_limit_max_requests == 30
+    assert settings.chat_session_max_turns == 50
     assert settings.resolved_database_url() == "sqlite+aiosqlite:///:memory:"
 
 

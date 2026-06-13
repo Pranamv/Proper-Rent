@@ -178,6 +178,40 @@ def test_create_landlord_intake_rejects_missing_consent_without_side_effects(
     assert landlord_context.notifications.calls == []
 
 
+def test_create_landlord_intake_rejects_stale_consent_version_without_side_effects(
+    landlord_context: LandlordEndpointContext,
+) -> None:
+    payload = valid_landlord_payload(consent_version="2026-01-01")
+
+    response = landlord_context.client.post("/api/v1/landlords", json=payload)
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Unsupported consent version."}
+    assert asyncio.run(count_landlords(landlord_context.session_factory)) == 0
+    assert landlord_context.notifications.calls == []
+
+
+def test_create_landlord_intake_rate_limits_public_requests(
+    landlord_context: LandlordEndpointContext,
+) -> None:
+    landlord_context.client.app.state.settings.landlords_rate_limit_max_requests = 1
+
+    first_response = landlord_context.client.post(
+        "/api/v1/landlords",
+        json=valid_landlord_payload(email="rate-one@example.com"),
+    )
+    second_response = landlord_context.client.post(
+        "/api/v1/landlords",
+        json=valid_landlord_payload(email="rate-two@example.com"),
+    )
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 429
+    assert second_response.json() == {"detail": "Too many requests. Try again later."}
+    assert int(second_response.headers["retry-after"]) > 0
+    assert asyncio.run(count_landlords(landlord_context.session_factory)) == 1
+
+
 def test_create_landlord_intake_always_sends_agent_notification(
     landlord_context: LandlordEndpointContext,
 ) -> None:

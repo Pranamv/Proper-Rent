@@ -181,6 +181,40 @@ def test_create_renter_lead_rejects_missing_consent_without_side_effects(
     assert lead_context.notifications.calls == []
 
 
+def test_create_renter_lead_rejects_stale_consent_version_without_side_effects(
+    lead_context: LeadEndpointContext,
+) -> None:
+    payload = valid_renter_payload(consent_version="2026-01-01")
+
+    response = lead_context.client.post("/api/v1/leads", json=payload)
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Unsupported consent version."}
+    assert asyncio.run(count_renters(lead_context.session_factory)) == 0
+    assert lead_context.notifications.calls == []
+
+
+def test_create_renter_lead_rate_limits_public_requests(
+    lead_context: LeadEndpointContext,
+) -> None:
+    lead_context.client.app.state.settings.leads_rate_limit_max_requests = 1
+
+    first_response = lead_context.client.post(
+        "/api/v1/leads",
+        json=valid_renter_payload(email="rate-one@example.com", session_id="rate-one"),
+    )
+    second_response = lead_context.client.post(
+        "/api/v1/leads",
+        json=valid_renter_payload(email="rate-two@example.com", session_id="rate-two"),
+    )
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 429
+    assert second_response.json() == {"detail": "Too many requests. Try again later."}
+    assert int(second_response.headers["retry-after"]) > 0
+    assert asyncio.run(count_renters(lead_context.session_factory)) == 1
+
+
 def test_duplicate_email_returns_existing_renter_and_skips_duplicate_notifications(
     lead_context: LeadEndpointContext,
 ) -> None:
