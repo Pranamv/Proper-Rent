@@ -7,8 +7,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    // Run on every request except Next.js internals and static assets.
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  // Only authenticated areas need session refresh in Phase 1. Public marketing
+  // pages don't use Supabase, so keep the Supabase round-trip (and any missing
+  // config) off the critical path. Expand this when the renter dashboard lands.
+  matcher: ["/admin/:path*"],
 };
