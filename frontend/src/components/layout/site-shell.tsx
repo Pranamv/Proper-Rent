@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { CookielessAnalytics } from "@/components/analytics/cookieless-analytics";
 import { ChatWidget } from "@/components/chat/chat-widget";
 import { Container } from "@/components/layout/container";
 import { StatusPill } from "@/components/ui/status-pill";
@@ -55,6 +56,7 @@ export function SiteShell({ children, status = "Phase 1 foundation" }: SiteShell
         </Container>
       </header>
       <main id="main-content">{children}</main>
+      <CookielessAnalytics />
       <ChatWidget />
       <footer className="border-t border-border bg-surface/70">
         <Container className="grid gap-5 py-8 lg:grid-cols-[1fr_auto] lg:items-center">

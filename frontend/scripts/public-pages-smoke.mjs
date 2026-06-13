@@ -55,6 +55,10 @@ const renterRegisterSource = readFileSync("src/app/register/renter/page.tsx", "u
 const landlordRegisterSource = readFileSync("src/app/register/landlord/page.tsx", "utf8");
 const siteShellSource = readFileSync("src/components/layout/site-shell.tsx", "utf8");
 const chatWidgetSource = readFileSync("src/components/chat/chat-widget.tsx", "utf8");
+const analyticsSource = readFileSync(
+  "src/components/analytics/cookieless-analytics.tsx",
+  "utf8",
+);
 assert.match(rentersSource, /FaqSection/, "Renters page is missing FAQ rendering");
 assert.match(landlordsSource, /FaqSection/, "Landlords page is missing FAQ rendering");
 assert.match(
@@ -80,9 +84,49 @@ assert.match(
   /motion-reduce/,
   "Chat widget is missing reduced-motion handling",
 );
+assert.match(
+  siteShellSource,
+  /CookielessAnalytics/,
+  "Public shell is missing cookieless analytics",
+);
+assert.match(
+  analyticsSource,
+  /plausible\.io\/js\/script\.js/,
+  "Cookieless analytics should use the Plausible script",
+);
+assert.match(
+  analyticsSource,
+  /NODE_ENV === "production"/,
+  "Analytics must be disabled outside production builds",
+);
 
 assert.ok(existsSync(".next/server/app/sitemap.xml.body"), "Missing generated sitemap");
 assert.ok(existsSync(".next/server/app/robots.txt.body"), "Missing generated robots.txt");
+
+for (const route of routes) {
+  const output = readFileSync(route.output, "utf8");
+  assert.match(output, /rel="canonical"/, `${route.path} is missing a canonical URL`);
+  const canonicalHref = output.match(/rel="canonical" href="([^"]+)"/)?.[1] ?? "";
+  assert.ok(canonicalHref, `${route.path} canonical URL is missing href`);
+  assert.equal(
+    canonicalHref.includes("?"),
+    false,
+    `${route.path} canonical URL must not include query parameters`,
+  );
+  assert.equal(
+    canonicalHref.includes("utm_"),
+    false,
+    `${route.path} canonical URL must not include UTM parameters`,
+  );
+
+  if (!process.env.NEXT_PUBLIC_ANALYTICS_DOMAIN) {
+    assert.doesNotMatch(
+      output,
+      /plausible\.io\/js\/script\.js/,
+      `${route.path} should not include analytics when NEXT_PUBLIC_ANALYTICS_DOMAIN is empty`,
+    );
+  }
+}
 
 for (const forbiddenRoute of ["src/app/listings", "src/app/properties"]) {
   assert.equal(existsSync(forbiddenRoute), false, `${forbiddenRoute} must not exist in Phase 1`);
