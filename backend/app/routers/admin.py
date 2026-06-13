@@ -8,18 +8,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db_session
 from app.dependencies import AuthenticatedAdmin, require_admin
-from app.models import Agent, Conversation, Renter
+from app.models import Agent, Conversation, Landlord, Renter
 from app.models.constants import RENTER_STATUSES
 from app.schemas.admin import (
     AdminAuthCheckResponse,
     AdminConversation,
+    AdminLandlordDetail,
+    AdminLandlordListItem,
+    AdminLandlordListResponse,
+    AdminLandlordUpdateRequest,
     AdminLeadDetail,
     AdminLeadListItem,
     AdminLeadListResponse,
     AdminLeadSummary,
     AdminLeadUpdateRequest,
 )
-from app.schemas.base import RenterLeadStatus
+from app.schemas.base import LandlordStatus, RenterLeadStatus
 from app.services.lead_scoring import HOT_LEAD_THRESHOLD
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -149,6 +153,84 @@ async def list_admin_lead_conversations(
     return [AdminConversation.model_validate(conversation) for conversation in conversations]
 
 
+@router.get(
+    "/landlords",
+    response_model=AdminLandlordListResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def list_admin_landlords(
+    _admin: AdminDependency,
+    session: DbSession,
+    landlord_status: Annotated[LandlordStatus | None, Query(alias="status")] = None,
+    page: Annotated[int, Query(ge=1)] = 1,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> AdminLandlordListResponse:
+    filtered_query = apply_landlord_filters(
+        select(Landlord),
+        landlord_status=landlord_status,
+    )
+    total_query = apply_landlord_filters(
+        select(func.count()).select_from(Landlord),
+        landlord_status=landlord_status,
+    )
+
+    total = int(await session.scalar(total_query) or 0)
+    landlords = (
+        await session.scalars(
+            filtered_query.order_by(Landlord.created_at.desc())
+            .offset((page - 1) * limit)
+            .limit(limit)
+        )
+    ).all()
+
+    return AdminLandlordListResponse(
+        total=total,
+        page=page,
+        limit=limit,
+        results=[AdminLandlordListItem.model_validate(landlord) for landlord in landlords],
+    )
+
+
+@router.get(
+    "/landlords/{landlord_id}",
+    response_model=AdminLandlordDetail,
+    status_code=status.HTTP_200_OK,
+)
+async def get_admin_landlord(
+    landlord_id: UUID,
+    _admin: AdminDependency,
+    session: DbSession,
+) -> AdminLandlordDetail:
+    landlord = await get_landlord_or_404(session, landlord_id)
+    return AdminLandlordDetail.model_validate(landlord)
+
+
+@router.patch(
+    "/landlords/{landlord_id}",
+    response_model=AdminLandlordDetail,
+    status_code=status.HTTP_200_OK,
+)
+async def update_admin_landlord(
+    landlord_id: UUID,
+    payload: AdminLandlordUpdateRequest,
+    _admin: AdminDependency,
+    session: DbSession,
+) -> AdminLandlordDetail:
+    landlord = await get_landlord_or_404(session, landlord_id)
+
+    if payload.status is not None:
+        landlord.status = payload.status
+
+    if "notes" in payload.model_fields_set:
+        landlord.notes = payload.notes
+
+    landlord.updated_at = datetime.now(UTC)
+    await session.commit()
+    await session.refresh(landlord)
+
+    return AdminLandlordDetail.model_validate(landlord)
+
+
 def apply_lead_filters(
     query: Select[tuple[Renter]] | Select[tuple[int]],
     *,
@@ -159,6 +241,16 @@ def apply_lead_filters(
         query = query.where(Renter.lead_status == lead_status)
     if assigned_agent_id is not None:
         query = query.where(Renter.assigned_agent_id == assigned_agent_id)
+    return query
+
+
+def apply_landlord_filters(
+    query: Select[tuple[Landlord]] | Select[tuple[int]],
+    *,
+    landlord_status: LandlordStatus | None,
+) -> Select[tuple[Landlord]] | Select[tuple[int]]:
+    if landlord_status is not None:
+        query = query.where(Landlord.status == landlord_status)
     return query
 
 
@@ -205,6 +297,16 @@ async def get_renter_or_404(session: AsyncSession, renter_id: UUID) -> Renter:
             detail="Lead not found",
         )
     return renter
+
+
+async def get_landlord_or_404(session: AsyncSession, landlord_id: UUID) -> Landlord:
+    landlord = await session.get(Landlord, landlord_id)
+    if landlord is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Landlord lead not found",
+        )
+    return landlord
 
 
 async def validate_agent_exists(session: AsyncSession, agent_id: UUID) -> None:

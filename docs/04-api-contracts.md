@@ -257,6 +257,8 @@ Returns one full landlord record for the admin detail view.
 { "status": "contacted", "notes": "string" }
 ```
 
+**Errors:** `404` if the landlord lead does not exist, `422` for an invalid status value.
+
 ---
 
 ## Transactions & commission tracker — deferred to optional later scope
