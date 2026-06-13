@@ -1,6 +1,8 @@
 import { publicConfig } from "@/lib/config";
 import type {
   AdminAuthCheckResponse,
+  AdminLeadListResponse,
+  AdminLeadStatus,
   ChatRequest,
   ChatResponse,
   HealthResponse,
@@ -12,6 +14,13 @@ import type {
 
 type JsonRequestInit = Omit<RequestInit, "body"> & {
   body?: unknown;
+};
+
+type AdminLeadListParams = {
+  assignedAgentId?: string;
+  page?: number;
+  limit?: number;
+  status?: AdminLeadStatus;
 };
 
 export class ApiError extends Error {
@@ -69,6 +78,10 @@ export const adminApi = {
     apiFetch<AdminAuthCheckResponse>("/admin/auth/check", {
       headers: { Authorization: `Bearer ${accessToken}` },
     }),
+  listLeads: (accessToken: string, params: AdminLeadListParams = {}) =>
+    apiFetch<AdminLeadListResponse>(`/admin/leads${buildLeadQuery(params)}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }),
 } as const;
 
 async function parseJsonResponse(response: Response): Promise<unknown> {
@@ -82,4 +95,23 @@ async function parseJsonResponse(response: Response): Promise<unknown> {
   } catch {
     return text;
   }
+}
+
+function buildLeadQuery(params: AdminLeadListParams) {
+  const query = new URLSearchParams();
+  if (params.status) {
+    query.set("status", params.status);
+  }
+  if (params.assignedAgentId) {
+    query.set("assigned_agent_id", params.assignedAgentId);
+  }
+  if (params.page) {
+    query.set("page", String(params.page));
+  }
+  if (params.limit) {
+    query.set("limit", String(params.limit));
+  }
+
+  const queryString = query.toString();
+  return queryString ? `?${queryString}` : "";
 }

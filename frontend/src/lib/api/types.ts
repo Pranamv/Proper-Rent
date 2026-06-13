@@ -79,3 +79,66 @@ export type AdminAuthCheckResponse = {
   email: string;
   role: "admin";
 };
+
+export type AdminLeadStatus =
+  | "new"
+  | "contacted"
+  | "qualified"
+  | "viewing_arranged"
+  | "offer_made"
+  | "let_agreed"
+  | "completed"
+  | "lost";
+
+export type AdminLeadSummary = {
+  new_leads_today: number;
+  hot_leads_pending: number;
+  pipeline_by_stage: Record<AdminLeadStatus, number>;
+};
+
+export type AdminLeadListItem = {
+  id: string;
+  source_channel: "website" | "whatsapp" | "facebook" | "referral";
+  session_id?: string | null;
+  full_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  bedrooms_required?: number | null;
+  areas_preferred?: string[] | null;
+  max_rent?: number | string | null;
+  move_in_from?: string | null;
+  move_in_by?: string | null;
+  employment_status?:
+    | "employed_full"
+    | "employed_part"
+    | "self_employed"
+    | "student"
+    | "universal_credit"
+    | "other"
+    | null;
+  annual_income_range?: string | null;
+  has_guarantor?: "yes" | "no" | "unsure" | null;
+  deposit_availability?: "full" | "partial" | "limited" | null;
+  current_housing?: "renting" | "family" | "owning" | null;
+  how_heard?: string | null;
+  furnished_preference?: "furnished" | "unfurnished" | "no_preference" | null;
+  pets?: string | null;
+  accessibility_needs?: string | null;
+  has_rented_before?: boolean | null;
+  notes?: string | null;
+  intent_score: number;
+  lead_status: AdminLeadStatus;
+  assigned_agent_id?: string | null;
+  scraye_introduction_id?: string | null;
+  fintech_flags: Record<string, unknown>;
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type AdminLeadListResponse = {
+  total: number;
+  page: number;
+  limit: number;
+  summary: AdminLeadSummary;
+  results: AdminLeadListItem[];
+};

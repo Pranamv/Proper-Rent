@@ -1,6 +1,10 @@
 export { adminApi, ApiError, apiFetch, publicApi } from "@/lib/api/client";
 export type {
   AdminAuthCheckResponse,
+  AdminLeadListItem,
+  AdminLeadListResponse,
+  AdminLeadStatus,
+  AdminLeadSummary,
   ChatRequest,
   ChatResponse,
   HealthResponse,

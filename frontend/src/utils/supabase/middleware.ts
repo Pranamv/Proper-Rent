@@ -41,6 +41,7 @@ export const updateSession = async (request: NextRequest) => {
   if (!user && request.nextUrl.pathname !== "/admin/login") {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/admin/login";
+    redirectUrl.search = "";
     redirectUrl.searchParams.set(
       "redirectTo",
       `${request.nextUrl.pathname}${request.nextUrl.search}`,

@@ -186,6 +186,57 @@ def test_admin_leads_list_filters_paginates_and_returns_summary(
     }
 
 
+def test_admin_leads_list_orders_by_score_then_created_at(
+    admin_leads_context: AdminLeadsContext,
+) -> None:
+    asyncio.run(
+        seed_agent(
+            admin_leads_context.session_factory,
+            name="Admin User",
+            email="admin@example.com",
+            role="admin",
+        )
+    )
+    now = datetime.now(UTC)
+    asyncio.run(
+        seed_renters(
+            admin_leads_context.session_factory,
+            [
+                renter_seed(
+                    email="low-newest@example.com",
+                    full_name="Low Newest",
+                    intent_score=40,
+                    created_at=now,
+                ),
+                renter_seed(
+                    email="hot-older@example.com",
+                    full_name="Hot Older",
+                    intent_score=85,
+                    created_at=now - timedelta(minutes=10),
+                ),
+                renter_seed(
+                    email="hot-newer@example.com",
+                    full_name="Hot Newer",
+                    intent_score=85,
+                    created_at=now - timedelta(minutes=5),
+                ),
+            ],
+        )
+    )
+
+    response = admin_leads_context.client.get(
+        "/api/v1/admin/leads",
+        headers=auth_headers(build_token(email="admin@example.com")),
+    )
+
+    assert response.status_code == 200
+    assert [result["email"] for result in response.json()["results"]] == [
+        "hot-newer@example.com",
+        "hot-older@example.com",
+        "low-newest@example.com",
+    ]
+
+
 def test_admin_lead_detail_returns_404_for_missing_lead(
     admin_leads_context: AdminLeadsContext,
 ) -> None:

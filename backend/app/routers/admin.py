@@ -72,7 +72,7 @@ async def list_admin_leads(
     total = int(await session.scalar(total_query) or 0)
     renters = (
         await session.scalars(
-            filtered_query.order_by(Renter.created_at.desc())
+            filtered_query.order_by(Renter.intent_score.desc(), Renter.created_at.desc())
             .offset((page - 1) * limit)
             .limit(limit)
         )

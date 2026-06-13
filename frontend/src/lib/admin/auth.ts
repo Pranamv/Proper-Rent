@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 import { adminApi, ApiError } from "@/lib/api";
 import type { AdminAuthCheckResponse } from "@/lib/api";
@@ -10,6 +11,7 @@ import { createClient } from "@/utils/supabase/server";
 export type AdminAuthState =
   | {
       status: "authenticated";
+      accessToken: string;
       admin: AdminAuthCheckResponse;
     }
   | {
@@ -26,7 +28,7 @@ export type AdminAuthState =
       status: "backend_error";
     };
 
-export async function getAdminAuthState(): Promise<AdminAuthState> {
+export const getAdminAuthState = cache(async (): Promise<AdminAuthState> => {
   if (!isSupabaseConfigured) {
     return { status: "misconfigured" };
   }
@@ -53,6 +55,7 @@ export async function getAdminAuthState(): Promise<AdminAuthState> {
   try {
     return {
       status: "authenticated",
+      accessToken: session.access_token,
       admin: await adminApi.checkAuth(session.access_token),
     };
   } catch (error) {
@@ -71,4 +74,4 @@ export async function getAdminAuthState(): Promise<AdminAuthState> {
 
     return { status: "backend_error" };
   }
-}
+});
