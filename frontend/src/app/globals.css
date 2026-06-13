@@ -1,0 +1,236 @@
+:root {
+  --color-page: #f6faf8;
+  --color-surface: #ffffff;
+  --color-ink: #14332d;
+  --color-muted: #526a63;
+  --color-line: #d9e8e2;
+  --color-primary: #0b6b55;
+  --color-primary-strong: #084b3d;
+  --color-accent: #d8f2e7;
+  --shadow-soft: 0 18px 50px rgb(20 51 45 / 10%);
+  --radius-card: 8px;
+  --font-sans: Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--color-page);
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  color: var(--color-ink);
+  background: var(--color-page);
+  font-family: var(--font-sans);
+}
+
+a {
+  color: inherit;
+}
+
+button,
+a {
+  outline-color: var(--color-primary);
+  outline-offset: 3px;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.site-header {
+  border-bottom: 1px solid var(--color-line);
+  background: rgb(246 250 248 / 88%);
+  backdrop-filter: blur(10px);
+}
+
+.site-header__inner {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 0;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.brand__mark {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #ffffff;
+  background: var(--color-primary);
+  font-size: 0.95rem;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  padding: 0 14px;
+  color: var(--color-muted);
+  background: var(--color-surface);
+  font-size: 0.9rem;
+}
+
+.page {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 56px 0;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 36px;
+  align-items: stretch;
+}
+
+.hero__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 420px;
+}
+
+.eyebrow {
+  margin: 0 0 14px;
+  color: var(--color-primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0;
+  max-width: 720px;
+  font-size: clamp(2.3rem, 5vw, 4.7rem);
+  line-height: 0.98;
+}
+
+.hero__copy {
+  max-width: 620px;
+  margin: 22px 0 0;
+  color: var(--color-muted);
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+
+.health-link {
+  width: fit-content;
+  margin-top: 28px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  padding: 13px 18px;
+  color: #ffffff;
+  background: var(--color-primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.health-link:hover {
+  background: var(--color-primary-strong);
+}
+
+.foundation-panel {
+  display: grid;
+  gap: 14px;
+  align-content: center;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: 18px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.foundation-card {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: 18px;
+}
+
+.foundation-card h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.foundation-card p {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.55;
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 30px;
+}
+
+.meta-item {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  background: rgb(255 255 255 / 72%);
+}
+
+.meta-item span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.meta-item p {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 820px) {
+  .site-header__inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page {
+    padding: 34px 0;
+  }
+
+  .hero,
+  .meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__content {
+    min-height: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
+

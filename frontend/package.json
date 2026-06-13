@@ -1,0 +1,31 @@
+{
+  "name": "proper-rent-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22 <26",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "echo \"P1.0 has no browser flows yet\""
+  },
+  "dependencies": {
+    "next": "^15.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.25.0",
+    "eslint-config-next": "^15.3.0",
+    "typescript": "^5.8.0"
+  }
+}
