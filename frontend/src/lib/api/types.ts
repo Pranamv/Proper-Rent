@@ -142,3 +142,30 @@ export type AdminLeadListResponse = {
   summary: AdminLeadSummary;
   results: AdminLeadListItem[];
 };
+
+export type AdminLeadDetail = AdminLeadListItem & {
+  consent_given: boolean;
+  consent_version: string;
+  consent_at: string;
+};
+
+export type AdminLeadUpdateRequest = {
+  assigned_agent_id?: string | null;
+  lead_status?: AdminLeadStatus;
+  notes?: string | null;
+};
+
+export type AdminConversation = {
+  id: string;
+  renter_id?: string | null;
+  session_id: string;
+  channel: "website" | "whatsapp" | "facebook";
+  external_id?: string | null;
+  transcript: Record<string, unknown>[];
+  ai_summary?: string | null;
+  intent_score_output?: number | null;
+  started_at: string;
+  ended_at?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+};

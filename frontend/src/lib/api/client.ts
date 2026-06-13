@@ -1,8 +1,11 @@
 import { publicConfig } from "@/lib/config";
 import type {
   AdminAuthCheckResponse,
+  AdminConversation,
+  AdminLeadDetail,
   AdminLeadListResponse,
   AdminLeadStatus,
+  AdminLeadUpdateRequest,
   ChatRequest,
   ChatResponse,
   HealthResponse,
@@ -81,6 +84,24 @@ export const adminApi = {
   listLeads: (accessToken: string, params: AdminLeadListParams = {}) =>
     apiFetch<AdminLeadListResponse>(`/admin/leads${buildLeadQuery(params)}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
+    }),
+  getLead: (accessToken: string, leadId: string) =>
+    apiFetch<AdminLeadDetail>(`/admin/leads/${leadId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }),
+  listLeadConversations: (accessToken: string, leadId: string) =>
+    apiFetch<AdminConversation[]>(`/admin/leads/${leadId}/conversation`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }),
+  updateLead: (
+    accessToken: string,
+    leadId: string,
+    payload: AdminLeadUpdateRequest,
+  ) =>
+    apiFetch<AdminLeadDetail>(`/admin/leads/${leadId}`, {
+      body: payload,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      method: "PATCH",
     }),
 } as const;
 

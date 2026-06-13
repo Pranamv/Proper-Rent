@@ -96,7 +96,8 @@ export default async function AdminLeadsPage({ searchParams }: AdminLeadsPagePro
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
               Prioritise new renter enquiries by urgency, status, and required
-              follow-up. Detail, notes, and status editing land in P1.5.3.
+              follow-up. Open a lead to review conversation context and update
+              notes, assignment, or status.
             </p>
           </div>
           <StatusPill tone={leadResponse.total > 0 ? "success" : "neutral"}>
@@ -331,12 +332,17 @@ function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
           {leads.map((lead) => (
             <tr className="align-top hover:bg-surface-subtle/70" key={lead.id}>
               <td className="px-4 py-4">
-                <p className="font-semibold text-foreground">
+                <Link
+                  className="font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  href={`/admin/leads/${lead.id}`}
+                >
                   {lead.full_name || "Unnamed renter"}
-                </p>
+                </Link>
                 <p className="mt-1 text-muted">{lead.email || "No email"}</p>
                 <p className="mt-1 text-muted">{lead.phone || "No phone"}</p>
-                <p className="mt-2 text-xs text-muted">Source: {formatLabel(lead.source_channel)}</p>
+                <p className="mt-2 text-xs text-muted">
+                  Source: {formatLabel(lead.source_channel)}
+                </p>
               </td>
               <td className="px-4 py-4">
                 <span
@@ -352,7 +358,12 @@ function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
                 </p>
               </td>
               <td className="px-4 py-4">
-                <span className={cn("rounded-full border px-3 py-1 font-semibold", statusClasses(lead.lead_status))}>
+                <span
+                  className={cn(
+                    "rounded-full border px-3 py-1 font-semibold",
+                    statusClasses(lead.lead_status),
+                  )}
+                >
                   {statusLabel(lead.lead_status)}
                 </span>
                 {lead.assigned_agent_id ? (
@@ -474,7 +485,13 @@ function LeadPagination({
             Previous
           </Link>
         ) : (
-          <span className={buttonClasses({ className: "opacity-50", size: "sm", variant: "secondary" })}>
+          <span
+            className={buttonClasses({
+              className: "opacity-50",
+              size: "sm",
+              variant: "secondary",
+            })}
+          >
             Previous
           </span>
         )}
@@ -493,7 +510,13 @@ function LeadPagination({
             Next
           </Link>
         ) : (
-          <span className={buttonClasses({ className: "opacity-50", size: "sm", variant: "secondary" })}>
+          <span
+            className={buttonClasses({
+              className: "opacity-50",
+              size: "sm",
+              variant: "secondary",
+            })}
+          >
             Next
           </span>
         )}
