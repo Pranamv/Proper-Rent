@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import Settings, get_settings
 from app.routers.health import router as health_router
+from app.routers.landlords import router as landlords_router
 from app.routers.leads import router as leads_router
 
 
@@ -24,6 +25,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
 
     app.include_router(health_router, prefix=resolved_settings.api_v1_prefix)
+    app.include_router(landlords_router, prefix=resolved_settings.api_v1_prefix)
     app.include_router(leads_router, prefix=resolved_settings.api_v1_prefix)
     return app
 
