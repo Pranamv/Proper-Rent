@@ -5,7 +5,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.schemas import ErrorResponse
-from app.schemas.admin import AdminLeadListItem
+from app.schemas.admin import AdminAuthCheckResponse, AdminLeadListItem
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.schemas.landlord import LandlordIntakeRequest, LandlordIntakeResponse
 from app.schemas.renter import RenterLeadRequest, RenterLeadResponse
@@ -96,6 +96,22 @@ def test_admin_lead_schema_can_expose_internal_fields() -> None:
     assert schema.intent_score == 75
     assert schema.fintech_flags == {"deposit_share": True, "guarantor": False}
     assert schema.assigned_agent_id == payload["assigned_agent_id"]
+
+
+def test_admin_auth_check_schema_exposes_admin_identity() -> None:
+    agent_id = uuid4()
+
+    schema = AdminAuthCheckResponse(
+        agent_id=agent_id,
+        email="admin@example.com",
+        role="admin",
+    )
+
+    assert schema.model_dump() == {
+        "agent_id": agent_id,
+        "email": "admin@example.com",
+        "role": "admin",
+    }
 
 
 def test_chat_request_rejects_overlong_message() -> None:

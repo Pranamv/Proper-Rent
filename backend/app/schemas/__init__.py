@@ -1,6 +1,7 @@
 """Pydantic API contracts for public and admin routes."""
 
 from app.schemas.admin import (
+    AdminAuthCheckResponse,
     AdminConversation,
     AdminLandlordDetail,
     AdminLandlordListItem,
@@ -19,6 +20,7 @@ from app.schemas.landlord import LandlordIntakeRequest, LandlordIntakeResponse
 from app.schemas.renter import RenterLeadRequest, RenterLeadResponse
 
 __all__ = [
+    "AdminAuthCheckResponse",
     "AdminConversation",
     "AdminLandlordDetail",
     "AdminLandlordListItem",

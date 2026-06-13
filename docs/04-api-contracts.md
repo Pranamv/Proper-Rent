@@ -147,6 +147,20 @@ Phase 1 has no `properties` data — the chatbot answers fintech/process questio
 
 ## Admin (auth required, `agents.role='admin'` → else 403)
 
+### `GET /api/v1/admin/auth/check`
+Lightweight protected route for validating Supabase JWT admin access before loading real admin data.
+
+**Response 200:**
+```json
+{
+  "agent_id": "uuid",
+  "email": "admin@example.com",
+  "role": "admin"
+}
+```
+
+**Errors:** `401` missing/invalid bearer token, `403` valid Supabase user without an `agents` row or without `agents.role='admin'`.
+
 ### `GET /api/v1/admin/leads`
 Paginated pipeline. Filters: `status`, `assigned_agent_id`, `page`, `limit`. Returns full renter records including internal fields and operational summary counts.
 

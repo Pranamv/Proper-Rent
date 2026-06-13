@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Literal
 from uuid import UUID
 
 from pydantic import Field
@@ -16,6 +17,12 @@ from app.schemas.base import (
     TimestampedSchema,
     Transcript,
 )
+
+
+class AdminAuthCheckResponse(ApiSchema):
+    agent_id: UUID
+    email: str
+    role: Literal["admin"]
 
 
 class AdminLeadSummary(ApiSchema):
