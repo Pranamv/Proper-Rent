@@ -1,5 +1,6 @@
 import asyncio
 import os
+import re
 from pathlib import Path
 
 import pytest
@@ -142,7 +143,11 @@ def assert_table_contracts(inspector, *, expect_postgres: bool = False) -> None:
         assert "ARRAY" in str(transactions_columns["fintech_products_used"]["type"]).upper()
         annual_rent_computed = transactions_columns["annual_rent"].get("computed")
         assert isinstance(annual_rent_computed, dict)
-        assert "monthly_rent * 12" in str(annual_rent_computed.get("sqltext"))
+        # PostgreSQL normalizes generated-column expressions when it stores them,
+        # so "monthly_rent * 12" is reflected back as "(monthly_rent * (12)::numeric)".
+        # Assert on the meaningful structure rather than the verbatim source text.
+        sqltext = str(annual_rent_computed.get("sqltext"))
+        assert re.search(r"monthly_rent\s*\*\s*\(?12\b", sqltext), sqltext
 
 
 def column_map(inspector, table_name: str) -> dict[str, dict[str, object]]:  # type: ignore[no-untyped-def]
