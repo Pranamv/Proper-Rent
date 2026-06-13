@@ -73,3 +73,9 @@ export type LandlordIntakeResponse = {
   landlord_id: string;
   message: string;
 };
+
+export type AdminAuthCheckResponse = {
+  agent_id: string;
+  email: string;
+  role: "admin";
+};

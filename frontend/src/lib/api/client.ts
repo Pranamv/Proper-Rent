@@ -1,5 +1,6 @@
 import { publicConfig } from "@/lib/config";
 import type {
+  AdminAuthCheckResponse,
   ChatRequest,
   ChatResponse,
   HealthResponse,
@@ -61,6 +62,13 @@ export const publicApi = {
     apiFetch<RenterLeadResponse>("/leads", { body: payload }),
   createLandlordIntake: (payload: LandlordIntakeRequest) =>
     apiFetch<LandlordIntakeResponse>("/landlords", { body: payload }),
+} as const;
+
+export const adminApi = {
+  checkAuth: (accessToken: string) =>
+    apiFetch<AdminAuthCheckResponse>("/admin/auth/check", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }),
 } as const;
 
 async function parseJsonResponse(response: Response): Promise<unknown> {

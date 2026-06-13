@@ -1,5 +1,6 @@
-export { ApiError, apiFetch, publicApi } from "@/lib/api/client";
+export { adminApi, ApiError, apiFetch, publicApi } from "@/lib/api/client";
 export type {
+  AdminAuthCheckResponse,
   ChatRequest,
   ChatResponse,
   HealthResponse,

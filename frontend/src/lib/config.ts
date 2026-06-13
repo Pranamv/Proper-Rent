@@ -6,7 +6,15 @@ export const publicConfig = {
   siteUrl: stripTrailingSlash(process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL),
   analyticsDomain: process.env.NEXT_PUBLIC_ANALYTICS_DOMAIN ?? "",
   analyticsSiteId: process.env.NEXT_PUBLIC_ANALYTICS_SITE_ID ?? "",
+  supabase: {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "",
+  },
 } as const;
+
+export const isSupabaseConfigured = Boolean(
+  publicConfig.supabase.url && publicConfig.supabase.publishableKey,
+);
 
 function stripTrailingSlash(value: string) {
   return value.replace(/\/+$/, "");
