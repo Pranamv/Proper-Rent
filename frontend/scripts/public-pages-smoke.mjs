@@ -33,6 +33,11 @@ const routes = [
     source: "src/app/register/renter/page.tsx",
     output: ".next/server/app/register/renter.html",
   },
+  {
+    path: "/register/landlord",
+    source: "src/app/register/landlord/page.tsx",
+    output: ".next/server/app/register/landlord.html",
+  },
 ];
 
 for (const route of routes) {
@@ -47,12 +52,33 @@ for (const route of routes) {
 const rentersSource = readFileSync("src/app/renters/page.tsx", "utf8");
 const landlordsSource = readFileSync("src/app/landlords/page.tsx", "utf8");
 const renterRegisterSource = readFileSync("src/app/register/renter/page.tsx", "utf8");
+const landlordRegisterSource = readFileSync("src/app/register/landlord/page.tsx", "utf8");
+const siteShellSource = readFileSync("src/components/layout/site-shell.tsx", "utf8");
+const chatWidgetSource = readFileSync("src/components/chat/chat-widget.tsx", "utf8");
 assert.match(rentersSource, /FaqSection/, "Renters page is missing FAQ rendering");
 assert.match(landlordsSource, /FaqSection/, "Landlords page is missing FAQ rendering");
 assert.match(
   renterRegisterSource,
   /RenterIntakeForm/,
   "Renter registration page is missing the intake form",
+);
+assert.match(
+  landlordRegisterSource,
+  /LandlordIntakeForm/,
+  "Landlord registration page is missing the intake form",
+);
+assert.match(siteShellSource, /ChatWidget/, "Public shell is missing the chatbot widget");
+assert.match(chatWidgetSource, /createChatReply/, "Chat widget does not call the chat API");
+assert.match(chatWidgetSource, /aria-live="polite"/, "Chat widget is missing aria-live");
+assert.match(
+  chatWidgetSource,
+  /show_intake_form/,
+  "Chat widget does not handle the intake-form suggested action",
+);
+assert.match(
+  chatWidgetSource,
+  /motion-reduce/,
+  "Chat widget is missing reduced-motion handling",
 );
 
 assert.ok(existsSync(".next/server/app/sitemap.xml.body"), "Missing generated sitemap");

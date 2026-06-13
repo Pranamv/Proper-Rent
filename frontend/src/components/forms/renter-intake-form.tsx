@@ -16,11 +16,11 @@ import {
 } from "@/components/ui/field";
 import { ApiError, publicApi } from "@/lib/api";
 import type { RenterLeadRequest, RenterLeadResponse } from "@/lib/api";
+import { resolvePublicSessionId } from "@/lib/session";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const CONSENT_VERSION = "2026-06-13";
-const SESSION_STORAGE_KEY = "proper-rent-session-id";
 
 const steps = [
   {
@@ -162,7 +162,7 @@ export function RenterIntakeForm() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const resolvedSessionId = resolveSessionId(params);
+    const resolvedSessionId = resolvePublicSessionId(params);
     setSessionId(resolvedSessionId);
     setValues((current) => applyQueryPrefill(current, params));
   }, []);
@@ -815,46 +815,6 @@ function applyQueryPrefill(current: FormValues, params: URLSearchParams): FormVa
     moveInFrom: params.get("move_in_from") ?? current.moveInFrom,
     moveInBy: params.get("move_in_by") ?? current.moveInBy,
   };
-}
-
-function resolveSessionId(params: URLSearchParams): string {
-  const querySessionId = params.get("session_id")?.slice(0, 128);
-  if (querySessionId) {
-    persistSessionId(querySessionId);
-    return querySessionId;
-  }
-
-  const storedSessionId = readStoredSessionId();
-  if (storedSessionId) {
-    return storedSessionId;
-  }
-
-  const nextSessionId = createSessionId();
-  persistSessionId(nextSessionId);
-  return nextSessionId;
-}
-
-function readStoredSessionId() {
-  try {
-    return window.localStorage.getItem(SESSION_STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function persistSessionId(value: string) {
-  try {
-    window.localStorage.setItem(SESSION_STORAGE_KEY, value);
-  } catch {
-    // Storage can be unavailable in private browsing. The in-memory state still works.
-  }
-}
-
-function createSessionId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 function parseAreas(value: string) {
