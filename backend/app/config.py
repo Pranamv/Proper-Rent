@@ -42,6 +42,7 @@ class Settings(BaseSettings):
     supabase_service_role_key: str | None = None
     supabase_jwt_secret: str | None = None
     resend_api_key: str | None = None
+    resend_from_email: str = "Proper Rent <hello@properrent.co.uk>"
     admin_alert_email: str | None = None
 
     sync_interval_hours: int = 12
