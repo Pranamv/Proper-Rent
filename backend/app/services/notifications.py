@@ -96,7 +96,12 @@ class ResendEmailTransport:
 
         try:
             if self.client is not None:
-                response = await self.client.post(RESEND_EMAILS_URL, headers=headers, json=payload)
+                response = await self.client.post(
+                    RESEND_EMAILS_URL,
+                    headers=headers,
+                    json=payload,
+                    timeout=EMAIL_TIMEOUT_SECONDS,
+                )
             else:
                 async with httpx.AsyncClient(timeout=EMAIL_TIMEOUT_SECONDS) as client:
                     response = await client.post(RESEND_EMAILS_URL, headers=headers, json=payload)

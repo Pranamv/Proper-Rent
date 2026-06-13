@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import Boolean, CheckConstraint, Index, Numeric, Text, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, DateTime, Index, Numeric, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, UpdatedAtMixin
@@ -70,9 +70,9 @@ class Property(UpdatedAtMixin, Base):
     raw_jsonld: Mapped[JsonObject | None] = mapped_column(json_column_type())
     normalized: Mapped[JsonObject | None] = mapped_column(json_column_type())
     content_hash: Mapped[str | None] = mapped_column(Text)
-    first_seen_at: Mapped[datetime | None] = mapped_column()
-    last_seen_at: Mapped[datetime | None] = mapped_column()
-    last_fetched_at: Mapped[datetime | None] = mapped_column()
-    missing_from_source_at: Mapped[datetime | None] = mapped_column()
-    inactive_at: Mapped[datetime | None] = mapped_column()
+    first_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_fetched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    missing_from_source_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    inactive_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     error_message: Mapped[str | None] = mapped_column(Text)

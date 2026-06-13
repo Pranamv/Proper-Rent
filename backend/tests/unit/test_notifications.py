@@ -7,6 +7,7 @@ import pytest
 
 from app.config import Settings
 from app.services.notifications import (
+    EMAIL_TIMEOUT_SECONDS,
     DeliveryStatus,
     EmailMessage,
     EmailTemplate,
@@ -236,6 +237,12 @@ async def run_resend_transport_payload_test() -> None:
     request = requests[0]
     assert request.url == httpx.URL("https://api.resend.com/emails")
     assert request.headers["authorization"] == "Bearer test-api-key"
+    assert request.extensions["timeout"] == {
+        "connect": EMAIL_TIMEOUT_SECONDS,
+        "read": EMAIL_TIMEOUT_SECONDS,
+        "write": EMAIL_TIMEOUT_SECONDS,
+        "pool": EMAIL_TIMEOUT_SECONDS,
+    }
     assert request_payload(request) == {
         "from": "Proper Rent <hello@example.com>",
         "to": ["renter@example.com"],

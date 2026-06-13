@@ -1,11 +1,16 @@
+import asyncio
+import os
 from pathlib import Path
 
+import pytest
 from alembic.config import Config
 from sqlalchemy import create_engine, inspect, text
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import command
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
+POSTGRES_TEST_DATABASE_URL_ENV = "POSTGRES_TEST_DATABASE_URL"
 
 EXPECTED_TABLES = {
     "agents",
@@ -47,7 +52,38 @@ def test_initial_migration_upgrade_and_downgrade(tmp_path: Path) -> None:
         engine.dispose()
 
 
-def assert_table_contracts(inspector) -> None:  # type: ignore[no-untyped-def]
+@pytest.mark.postgres
+def test_initial_migration_postgres_contracts() -> None:
+    database_url = os.getenv(POSTGRES_TEST_DATABASE_URL_ENV)
+    if not database_url:
+        pytest.skip(f"{POSTGRES_TEST_DATABASE_URL_ENV} is not configured")
+
+    config = make_alembic_config(database_url)
+
+    command.downgrade(config, "base")
+    command.upgrade(config, "head")
+    try:
+        asyncio.run(assert_postgres_contracts(database_url))
+    finally:
+        command.downgrade(config, "base")
+
+
+async def assert_postgres_contracts(database_url: str) -> None:
+    engine = create_async_engine(database_url)
+    try:
+        async with engine.connect() as connection:
+            await connection.run_sync(assert_postgres_schema)
+    finally:
+        await engine.dispose()
+
+
+def assert_postgres_schema(connection) -> None:  # type: ignore[no-untyped-def]
+    inspector = inspect(connection)
+    assert EXPECTED_TABLES.issubset(set(inspector.get_table_names()))
+    assert_table_contracts(inspector, expect_postgres=True)
+
+
+def assert_table_contracts(inspector, *, expect_postgres: bool = False) -> None:  # type: ignore[no-untyped-def]
     renters_columns = column_map(inspector, "renters")
     landlords_columns = column_map(inspector, "landlords")
     agents_columns = column_map(inspector, "agents")
@@ -82,6 +118,18 @@ def assert_table_contracts(inspector) -> None:  # type: ignore[no-untyped-def]
         "ix_properties_locality",
         "ix_properties_last_seen_at",
     }.issubset(property_indexes)
+
+    if expect_postgres:
+        assert str(agents_columns["id"]["type"]).upper() == "UUID"
+        assert {
+            "ix_properties_geo_gin",
+            "ix_properties_section_text_gin",
+        }.issubset(property_indexes)
+        assert "JSONB" in str(renters_columns["fintech_flags"]["type"]).upper()
+        assert "ARRAY" in str(transactions_columns["fintech_products_used"]["type"]).upper()
+        annual_rent_computed = transactions_columns["annual_rent"].get("computed")
+        assert isinstance(annual_rent_computed, dict)
+        assert "monthly_rent * 12" in str(annual_rent_computed.get("sqltext"))
 
 
 def column_map(inspector, table_name: str) -> dict[str, dict[str, object]]:  # type: ignore[no-untyped-def]

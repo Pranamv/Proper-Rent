@@ -2,7 +2,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import EmailStr, Field
+from pydantic import Field
 
 from app.schemas.base import (
     ApiSchema,
@@ -61,7 +61,7 @@ class AdminConversation(TimestampedSchema):
 class AdminLandlordListItem(TimestampedSchema):
     id: UUID
     full_name: str | None = None
-    email: EmailStr | str | None = None
+    email: str | None = None
     phone: str | None = None
     property_address: str | None = None
     bedrooms: int | None = None

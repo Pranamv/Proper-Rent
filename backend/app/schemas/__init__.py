@@ -11,6 +11,7 @@ from app.schemas.admin import (
     AdminLeadListResponse,
     AdminLeadSummary,
     AdminLeadUpdateRequest,
+    ErrorResponse,
 )
 from app.schemas.chat import ChatRequest, ChatResponse, SuggestedAction
 from app.schemas.health import HealthResponse
@@ -30,6 +31,7 @@ __all__ = [
     "AdminLeadUpdateRequest",
     "ChatRequest",
     "ChatResponse",
+    "ErrorResponse",
     "HealthResponse",
     "LandlordIntakeRequest",
     "LandlordIntakeResponse",

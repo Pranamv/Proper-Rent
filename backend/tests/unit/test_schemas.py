@@ -4,9 +4,10 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
+from app.schemas import ErrorResponse
 from app.schemas.admin import AdminLeadListItem
 from app.schemas.chat import ChatRequest, ChatResponse
-from app.schemas.landlord import LandlordIntakeRequest
+from app.schemas.landlord import LandlordIntakeRequest, LandlordIntakeResponse
 from app.schemas.renter import RenterLeadRequest, RenterLeadResponse
 
 INTERNAL_PUBLIC_FIELDS = {
@@ -36,6 +37,26 @@ def test_chat_response_only_exposes_public_fields() -> None:
 def test_renter_public_response_only_exposes_id_and_message() -> None:
     assert set(RenterLeadResponse.model_fields) == {"renter_id", "message"}
     assert INTERNAL_PUBLIC_FIELDS.isdisjoint(RenterLeadResponse.model_fields)
+
+
+def test_landlord_public_response_only_exposes_id_and_message() -> None:
+    assert set(LandlordIntakeResponse.model_fields) == {"landlord_id", "message"}
+    assert INTERNAL_PUBLIC_FIELDS.isdisjoint(LandlordIntakeResponse.model_fields)
+
+
+def test_public_response_serialization_excludes_internal_fields() -> None:
+    responses = [
+        ChatResponse(reply="Hello", suggested_action=None, session_id="session-123"),
+        RenterLeadResponse(renter_id=uuid4(), message="Thanks"),
+        LandlordIntakeResponse(landlord_id=uuid4(), message="Thanks"),
+    ]
+
+    for response in responses:
+        assert INTERNAL_PUBLIC_FIELDS.isdisjoint(response.model_dump())
+
+
+def test_error_response_is_exported_from_schemas_package() -> None:
+    assert ErrorResponse(detail="not found").model_dump() == {"detail": "not found"}
 
 
 def test_public_request_schemas_enforce_consent_true() -> None:

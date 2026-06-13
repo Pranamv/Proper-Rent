@@ -1,7 +1,8 @@
 from collections.abc import AsyncGenerator
 from functools import lru_cache
-from typing import Any
+from typing import Any, cast
 
+from fastapi import Request
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -11,6 +12,8 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import StaticPool
 
 from app.config import Settings, get_settings
+
+SESSIONMAKER_STATE_KEY = "db_sessionmaker"
 
 
 def create_engine(settings: Settings) -> AsyncEngine:
@@ -55,8 +58,22 @@ def get_sessionmaker() -> async_sessionmaker[AsyncSession]:
     )
 
 
-async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
-    session_factory = get_sessionmaker()
+def get_request_sessionmaker(request: Request) -> async_sessionmaker[AsyncSession]:
+    session_factory = cast(
+        async_sessionmaker[AsyncSession] | None,
+        getattr(request.app.state, SESSIONMAKER_STATE_KEY, None),
+    )
+    if session_factory is not None:
+        return session_factory
+
+    settings = cast(Settings | None, getattr(request.app.state, "settings", None))
+    session_factory = create_sessionmaker(settings or get_settings())
+    setattr(request.app.state, SESSIONMAKER_STATE_KEY, session_factory)
+    return session_factory
+
+
+async def get_db_session(request: Request) -> AsyncGenerator[AsyncSession, None]:
+    session_factory = get_request_sessionmaker(request)
     async with session_factory() as session:
         try:
             yield session

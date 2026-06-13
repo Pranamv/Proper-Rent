@@ -4,6 +4,7 @@ from decimal import Decimal
 from app.services.lead_scoring import (
     HOT_LEAD_THRESHOLD,
     LeadScoringInput,
+    baseline_for_area,
     build_fintech_flags,
     priority_for_score,
     score_budget_realism,
@@ -71,7 +72,12 @@ def test_budget_realism_scores_positive_budget_when_area_baseline_is_unknown() -
 
 def test_budget_realism_scores_zero_when_budget_or_bedrooms_missing() -> None:
     assert score_budget_realism(LeadScoringInput(bedrooms_required=2, max_rent=None)) == 0
+    assert score_budget_realism(LeadScoringInput(bedrooms_required=2, max_rent=0)) == 0
     assert score_budget_realism(LeadScoringInput(bedrooms_required=None, max_rent=1200)) == 0
+
+
+def test_area_baseline_extrapolates_above_largest_known_bedroom_count() -> None:
+    assert baseline_for_area("Manchester", 5) == Decimal("2200")
 
 
 def test_employment_scoring_branches() -> None:

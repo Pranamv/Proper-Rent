@@ -22,6 +22,19 @@ def test_model_import_smoke() -> None:
     assert Transaction.__tablename__ == "transactions"
 
 
+def test_property_timestamp_columns_are_timezone_aware() -> None:
+    timestamp_columns = [
+        Property.first_seen_at,
+        Property.last_seen_at,
+        Property.last_fetched_at,
+        Property.missing_from_source_at,
+        Property.inactive_at,
+    ]
+
+    for column in timestamp_columns:
+        assert column.property.columns[0].type.timezone is True
+
+
 def test_basic_create_and_read_for_active_phase_one_models() -> None:
     asyncio.run(run_basic_create_and_read())
 

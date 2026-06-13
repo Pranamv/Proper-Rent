@@ -7,9 +7,10 @@ Create Date: 2026-06-13
 
 from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 revision: str = "0001_initial_schema"
 down_revision: str | None = None
@@ -43,9 +44,7 @@ def _is_postgresql() -> bool:
 
 
 def _uuid_type() -> sa.types.TypeEngine[object]:
-    if _is_postgresql():
-        return postgresql.UUID(as_uuid=True)
-    return sa.String(length=36)
+    return sa.Uuid(as_uuid=True)
 
 
 def _uuid_default() -> sa.TextClause | None:
@@ -187,7 +186,12 @@ def upgrade() -> None:
         sa.Column("lead_status", sa.Text(), nullable=False, server_default="new"),
         sa.Column("assigned_agent_id", _uuid_type(), sa.ForeignKey("agents.id")),
         sa.Column("scraye_introduction_id", sa.Text()),
-        sa.Column("fintech_flags", _json_type(), nullable=False, server_default=_json_default("{}")),
+        sa.Column(
+            "fintech_flags",
+            _json_type(),
+            nullable=False,
+            server_default=_json_default("{}"),
+        ),
         sa.Column("consent_given", sa.Boolean(), nullable=False),
         sa.Column("consent_version", sa.Text(), nullable=False),
         sa.Column("consent_at", _timestamp(), nullable=False),
@@ -216,7 +220,10 @@ def upgrade() -> None:
         sa.Column("started_at", _timestamp(), nullable=False, server_default=sa.func.now()),
         sa.Column("ended_at", _timestamp()),
         sa.Column("created_at", _timestamp(), nullable=False, server_default=sa.func.now()),
-        sa.CheckConstraint(_allowed_values_check("channel", CHANNELS), name="ck_conversations_channel"),
+        sa.CheckConstraint(
+            _allowed_values_check("channel", CHANNELS),
+            name="ck_conversations_channel",
+        ),
     )
 
     op.create_table(
@@ -263,7 +270,11 @@ def upgrade() -> None:
         sa.Column("intro_commission_expected", sa.Numeric()),
         sa.Column("intro_commission_received", sa.Numeric()),
         sa.Column("intro_commission_paid_at", sa.Date()),
-        sa.Column("fintech_products_used", _text_array_type(), server_default=_text_array_default()),
+        sa.Column(
+            "fintech_products_used",
+            _text_array_type(),
+            server_default=_text_array_default(),
+        ),
         sa.Column("fintech_commissions_expected", sa.Numeric(), server_default="0"),
         sa.Column("fintech_commissions_received", sa.Numeric(), server_default="0"),
         sa.Column("viewing_fee_earned", sa.Numeric(), server_default="0"),
@@ -337,4 +348,3 @@ def downgrade() -> None:
     op.drop_table("renters")
     op.drop_table("properties")
     op.drop_table("agents")
-
