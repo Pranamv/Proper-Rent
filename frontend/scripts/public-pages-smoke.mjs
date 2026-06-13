@@ -55,6 +55,22 @@ const renterRegisterSource = readFileSync("src/app/register/renter/page.tsx", "u
 const landlordRegisterSource = readFileSync("src/app/register/landlord/page.tsx", "utf8");
 const siteShellSource = readFileSync("src/components/layout/site-shell.tsx", "utf8");
 const chatWidgetSource = readFileSync("src/components/chat/chat-widget.tsx", "utf8");
+const adminLandlordsSource = readFileSync(
+  "src/app/admin/(protected)/landlords/page.tsx",
+  "utf8",
+);
+const adminLandlordDetailSource = readFileSync(
+  "src/app/admin/(protected)/landlords/[landlordId]/page.tsx",
+  "utf8",
+);
+const adminLandlordActionSource = readFileSync(
+  "src/app/admin/(protected)/landlords/[landlordId]/actions.ts",
+  "utf8",
+);
+const adminLandlordFormSource = readFileSync(
+  "src/components/admin/landlord-update-form.tsx",
+  "utf8",
+);
 const analyticsSource = readFileSync(
   "src/components/analytics/cookieless-analytics.tsx",
   "utf8",
@@ -98,6 +114,41 @@ assert.match(
   analyticsSource,
   /NODE_ENV === "production"/,
   "Analytics must be disabled outside production builds",
+);
+assert.match(
+  adminLandlordsSource,
+  /listLandlords/,
+  "Admin landlords page must call the landlord list API",
+);
+assert.match(
+  adminLandlordsSource,
+  /advanced_rent_interest/,
+  "Admin landlords list must show Advanced Rent interest",
+);
+assert.match(
+  adminLandlordDetailSource,
+  /getLandlord/,
+  "Admin landlord detail page must call the landlord detail API",
+);
+assert.match(
+  adminLandlordDetailSource,
+  /LandlordUpdateForm/,
+  "Admin landlord detail page must render the update form",
+);
+assert.match(
+  adminLandlordDetailSource,
+  /Not scored/,
+  "Admin landlord detail must make clear that landlord leads are not scored",
+);
+assert.match(
+  adminLandlordActionSource,
+  /updateLandlord/,
+  "Admin landlord action must call the landlord update API",
+);
+assert.match(
+  adminLandlordFormSource,
+  /useActionState/,
+  "Admin landlord update form must wire the server action",
 );
 
 assert.ok(existsSync(".next/server/app/sitemap.xml.body"), "Missing generated sitemap");

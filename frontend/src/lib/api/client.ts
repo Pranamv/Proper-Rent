@@ -2,6 +2,10 @@ import { publicConfig } from "@/lib/config";
 import type {
   AdminAuthCheckResponse,
   AdminConversation,
+  AdminLandlordDetail,
+  AdminLandlordListResponse,
+  AdminLandlordStatus,
+  AdminLandlordUpdateRequest,
   AdminLeadDetail,
   AdminLeadListResponse,
   AdminLeadStatus,
@@ -24,6 +28,12 @@ type AdminLeadListParams = {
   page?: number;
   limit?: number;
   status?: AdminLeadStatus;
+};
+
+type AdminLandlordListParams = {
+  page?: number;
+  limit?: number;
+  status?: AdminLandlordStatus;
 };
 
 export class ApiError extends Error {
@@ -103,6 +113,24 @@ export const adminApi = {
       headers: { Authorization: `Bearer ${accessToken}` },
       method: "PATCH",
     }),
+  listLandlords: (accessToken: string, params: AdminLandlordListParams = {}) =>
+    apiFetch<AdminLandlordListResponse>(`/admin/landlords${buildLandlordQuery(params)}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }),
+  getLandlord: (accessToken: string, landlordId: string) =>
+    apiFetch<AdminLandlordDetail>(`/admin/landlords/${landlordId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }),
+  updateLandlord: (
+    accessToken: string,
+    landlordId: string,
+    payload: AdminLandlordUpdateRequest,
+  ) =>
+    apiFetch<AdminLandlordDetail>(`/admin/landlords/${landlordId}`, {
+      body: payload,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      method: "PATCH",
+    }),
 } as const;
 
 async function parseJsonResponse(response: Response): Promise<unknown> {
@@ -125,6 +153,22 @@ function buildLeadQuery(params: AdminLeadListParams) {
   }
   if (params.assignedAgentId) {
     query.set("assigned_agent_id", params.assignedAgentId);
+  }
+  if (params.page) {
+    query.set("page", String(params.page));
+  }
+  if (params.limit) {
+    query.set("limit", String(params.limit));
+  }
+
+  const queryString = query.toString();
+  return queryString ? `?${queryString}` : "";
+}
+
+function buildLandlordQuery(params: AdminLandlordListParams) {
+  const query = new URLSearchParams();
+  if (params.status) {
+    query.set("status", params.status);
   }
   if (params.page) {
     query.set("page", String(params.page));

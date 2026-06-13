@@ -155,6 +155,43 @@ export type AdminLeadUpdateRequest = {
   notes?: string | null;
 };
 
+export type AdminLandlordStatus = "new" | "contacted" | "listed" | "inactive";
+
+export type AdminLandlordListItem = {
+  id: string;
+  full_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  property_address?: string | null;
+  bedrooms?: number | null;
+  asking_rent?: number | string | null;
+  available_from?: string | null;
+  advanced_rent_interest?: boolean | null;
+  listing_interest?: boolean | null;
+  status: AdminLandlordStatus;
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type AdminLandlordListResponse = {
+  total: number;
+  page: number;
+  limit: number;
+  results: AdminLandlordListItem[];
+};
+
+export type AdminLandlordDetail = AdminLandlordListItem & {
+  consent_given: boolean;
+  consent_version: string;
+  consent_at: string;
+  notes?: string | null;
+};
+
+export type AdminLandlordUpdateRequest = {
+  status?: AdminLandlordStatus;
+  notes?: string | null;
+};
+
 export type AdminConversation = {
   id: string;
   renter_id?: string | null;

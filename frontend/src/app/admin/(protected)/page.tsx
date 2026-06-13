@@ -26,7 +26,7 @@ const workspaceCards = [
   },
   {
     title: "Landlords",
-    body: "P1.5.4 adds landlord list and detail views powered by the admin landlords API.",
+    body: "Review landlord submissions, product interest, notes, and status using the admin landlords API.",
     href: "/admin/landlords",
     label: "Open landlords",
   },

@@ -2,6 +2,11 @@ export { adminApi, ApiError, apiFetch, publicApi } from "@/lib/api/client";
 export type {
   AdminAuthCheckResponse,
   AdminConversation,
+  AdminLandlordDetail,
+  AdminLandlordListItem,
+  AdminLandlordListResponse,
+  AdminLandlordStatus,
+  AdminLandlordUpdateRequest,
   AdminLeadDetail,
   AdminLeadListItem,
   AdminLeadListResponse,
