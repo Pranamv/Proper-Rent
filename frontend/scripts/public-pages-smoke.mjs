@@ -28,6 +28,11 @@ const routes = [
     source: "src/app/terms/page.tsx",
     output: ".next/server/app/terms.html",
   },
+  {
+    path: "/register/renter",
+    source: "src/app/register/renter/page.tsx",
+    output: ".next/server/app/register/renter.html",
+  },
 ];
 
 for (const route of routes) {
@@ -41,8 +46,14 @@ for (const route of routes) {
 
 const rentersSource = readFileSync("src/app/renters/page.tsx", "utf8");
 const landlordsSource = readFileSync("src/app/landlords/page.tsx", "utf8");
+const renterRegisterSource = readFileSync("src/app/register/renter/page.tsx", "utf8");
 assert.match(rentersSource, /FaqSection/, "Renters page is missing FAQ rendering");
 assert.match(landlordsSource, /FaqSection/, "Landlords page is missing FAQ rendering");
+assert.match(
+  renterRegisterSource,
+  /RenterIntakeForm/,
+  "Renter registration page is missing the intake form",
+);
 
 assert.ok(existsSync(".next/server/app/sitemap.xml.body"), "Missing generated sitemap");
 assert.ok(existsSync(".next/server/app/robots.txt.body"), "Missing generated robots.txt");

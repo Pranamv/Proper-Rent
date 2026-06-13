@@ -78,3 +78,41 @@ export function TextArea({
     />
   );
 }
+
+export function SelectInput({
+  className,
+  ...props
+}: ComponentPropsWithoutRef<"select">) {
+  return (
+    <select
+      className={cn(
+        "h-11 w-full rounded-md border border-border bg-surface px-3 text-sm",
+        "text-foreground",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export function CheckboxInput({
+  className,
+  ...props
+}: ComponentPropsWithoutRef<"input">) {
+  return (
+    <input
+      className={cn(
+        "size-4 rounded border-border bg-surface text-primary",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        className,
+      )}
+      {...props}
+      type="checkbox"
+    />
+  );
+}
