@@ -214,6 +214,8 @@ Returns one full renter record including internal fields for the admin detail vi
 { "lead_status": "viewing_arranged", "assigned_agent_id": "uuid", "notes": "string" }
 ```
 
+**Errors:** `404` if the lead does not exist, `422` if `assigned_agent_id` does not reference an agent.
+
 ### `GET /api/v1/admin/leads/{renter_id}/conversation`
 Returns all `conversations` rows linked to `renter_id` (each with `transcript` + `ai_summary`), ordered by `started_at`. A renter may have more than one conversation (e.g. a pre-registration session and a later one).
 
