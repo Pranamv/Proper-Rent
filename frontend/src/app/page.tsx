@@ -1,19 +1,22 @@
-import Link from "next/link";
-
+import { Container } from "@/components/layout/container";
+import { SiteShell } from "@/components/layout/site-shell";
+import { buttonClasses } from "@/components/ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { publicConfig } from "@/lib/config";
+import { motionClasses } from "@/lib/motion";
 
 const foundationItems = [
   {
-    title: "Public Website",
-    body: "Next.js app shell ready for renter, landlord, process, privacy, and terms pages.",
+    title: "Layout System",
+    body: "Shared shell, container, metadata, focus states, and reduced-motion defaults are ready for public and admin surfaces.",
   },
   {
-    title: "Backend API",
-    body: "FastAPI service mounted at /api/v1 with a health contract and environment validation.",
+    title: "Design Tokens",
+    body: "Tailwind consumes one CSS-variable token set for colour, type, radii, spacing, shadows, and motion.",
   },
   {
-    title: "Phase Boundaries",
-    body: "No listing routes, Scraye sync, social channels, RAG, or commission tracker in this phase.",
+    title: "API Patterns",
+    body: "Typed client helpers cover health, chat, renter intake, and landlord intake without exposing backend internals.",
   },
 ];
 
@@ -34,53 +37,73 @@ const metaItems = [
 
 export default function Home() {
   return (
-    <div className="app-shell">
-      <header className="site-header">
-        <div className="site-header__inner">
-          <Link className="brand" href="/" aria-label="Proper Rent home">
-            <span className="brand__mark" aria-hidden="true">
-              PR
-            </span>
-            <span>Proper Rent</span>
-          </Link>
-          <span className="status-pill">Phase 1 foundation</span>
-        </div>
-      </header>
-
-      <main className="page">
-        <section className="hero" aria-labelledby="home-title">
-          <div className="hero__content">
-            <p className="eyebrow">Website + Chatbot MVP</p>
-            <h1 id="home-title">Proper Rent</h1>
-            <p className="hero__copy">
-              A focused foundation for renter and landlord intake, a general
-              fintech/process chatbot, and the future admin workflow that routes every
-              website lead to a human agent.
+    <SiteShell>
+      <Container className="py-10 sm:py-14">
+        <section
+          className="grid items-stretch gap-9 lg:grid-cols-[1.08fr_0.92fr]"
+          aria-labelledby="home-title"
+        >
+          <div
+            className={`flex min-h-[360px] flex-col justify-center ${motionClasses.enter}`}
+          >
+            <p className="mb-4 text-sm font-bold uppercase tracking-[0.08em] text-primary">
+              Website + Chatbot MVP
             </p>
-            <a className="health-link" href={`${publicConfig.apiBaseUrl}/health`}>
-              API health
-            </a>
+            <h1
+              id="home-title"
+              className="max-w-3xl text-5xl font-bold leading-[0.98] text-foreground sm:text-6xl"
+            >
+              Proper Rent
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
+              A focused frontend foundation for renter and landlord intake, a
+              general fintech/process chatbot, and the future admin workflow that
+              routes every website lead to a human agent.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <a
+                className={buttonClasses({ size: "lg" })}
+                href={`${publicConfig.apiBaseUrl}/health`}
+              >
+                API health
+              </a>
+              <a className={buttonClasses({ variant: "secondary", size: "lg" })} href="#runtime">
+                Runtime config
+              </a>
+            </div>
           </div>
 
-          <div className="foundation-panel" aria-label="Foundation workstreams">
+          <div
+            className="grid content-center gap-4 rounded-md border border-border bg-surface/80 p-4 shadow-soft"
+            aria-label="Foundation workstreams"
+          >
             {foundationItems.map((item) => (
-              <article className="foundation-card" key={item.title}>
-                <h2>{item.title}</h2>
-                <p>{item.body}</p>
-              </article>
+              <Card className="shadow-none" key={item.title}>
+                <CardHeader>
+                  <CardTitle>{item.title}</CardTitle>
+                  <CardDescription>{item.body}</CardDescription>
+                </CardHeader>
+              </Card>
             ))}
           </div>
         </section>
 
-        <section className="meta-grid" aria-label="Runtime configuration">
+        <section
+          id="runtime"
+          className="mt-8 grid gap-4 sm:grid-cols-3"
+          aria-label="Runtime configuration"
+        >
           {metaItems.map((item) => (
-            <div className="meta-item" key={item.label}>
-              <span>{item.label}</span>
-              <p>{item.value}</p>
+            <div
+              className="rounded-md border border-border bg-surface/75 p-4"
+              key={item.label}
+            >
+              <span className="block text-sm font-bold text-primary">{item.label}</span>
+              <p className="mt-2 break-words text-sm leading-6 text-muted">{item.value}</p>
             </div>
           ))}
         </section>
-      </main>
-    </div>
+      </Container>
+    </SiteShell>
   );
 }
