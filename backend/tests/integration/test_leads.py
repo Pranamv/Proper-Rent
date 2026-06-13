@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import AsyncGenerator, Generator
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
@@ -33,6 +33,7 @@ class NotificationCall:
 class FakeNotificationService:
     def __init__(self) -> None:
         self.calls: list[NotificationCall] = []
+        self.confirmation_should_fail = False
 
     async def send_renter_confirmation(
         self,
@@ -48,6 +49,15 @@ class FakeNotificationService:
                 to_email=renter_email,
             )
         )
+        if self.confirmation_should_fail:
+            # Mirror the real service: delivery failures are returned, not raised.
+            return EmailDelivery(
+                template=EmailTemplate.RENTER_CONFIRMATION,
+                recipient_kind=RecipientKind.RENTER,
+                entity_id=renter_id,
+                status=DeliveryStatus.FAILED,
+                error_type="EmailTransportError",
+            )
         return EmailDelivery(
             template=EmailTemplate.RENTER_CONFIRMATION,
             recipient_kind=RecipientKind.RENTER,
@@ -227,6 +237,50 @@ def test_non_hot_renter_lead_sends_confirmation_without_agent_alert(
     ]
 
 
+def test_concurrent_duplicate_email_falls_back_to_existing_without_500(
+    lead_context: LeadEndpointContext,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    existing_id = asyncio.run(seed_renter(lead_context.session_factory, email="renter@example.com"))
+
+    from app.routers import leads as leads_module
+
+    real_find = leads_module.find_renter_by_email
+    state = {"calls": 0}
+
+    async def flaky_find(session: AsyncSession, normalized_email: str) -> Renter | None:
+        # Simulate the race: the pre-insert lookup misses a row a concurrent
+        # request committed, so the flush hits uq_renters_email_lower.
+        state["calls"] += 1
+        if state["calls"] == 1:
+            return None
+        return await real_find(session, normalized_email)
+
+    monkeypatch.setattr(leads_module, "find_renter_by_email", flaky_find)
+
+    response = lead_context.client.post("/api/v1/leads", json=valid_renter_payload(session_id=None))
+
+    assert response.status_code == 200
+    assert response.json()["renter_id"] == str(existing_id)
+    assert asyncio.run(count_renters(lead_context.session_factory)) == 1
+    assert lead_context.notifications.calls == []
+
+
+def test_lead_is_persisted_even_when_confirmation_delivery_fails(
+    lead_context: LeadEndpointContext,
+) -> None:
+    lead_context.notifications.confirmation_should_fail = True
+
+    response = lead_context.client.post("/api/v1/leads", json=valid_renter_payload(session_id=None))
+
+    assert response.status_code == 201
+    renter = asyncio.run(fetch_renter(lead_context.session_factory, response.json()["renter_id"]))
+    assert renter is not None
+    assert renter.email == "renter@example.com"
+    # Confirmation was still attempted (best-effort, after the response).
+    assert lead_context.notifications.calls[0].template == EmailTemplate.RENTER_CONFIRMATION
+
+
 def valid_renter_payload(**overrides: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "source_channel": "website",
@@ -271,6 +325,24 @@ async def create_conversation(
             )
         )
         await session.commit()
+
+
+async def seed_renter(
+    session_factory: async_sessionmaker[AsyncSession],
+    *,
+    email: str,
+) -> UUID:
+    async with session_factory() as session:
+        renter = Renter(
+            source_channel="website",
+            email=email,
+            consent_given=True,
+            consent_version=CONSENT_VERSION,
+            consent_at=datetime.now(UTC),
+        )
+        session.add(renter)
+        await session.commit()
+        return renter.id
 
 
 async def fetch_renter(

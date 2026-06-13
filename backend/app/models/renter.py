@@ -15,6 +15,9 @@ from sqlalchemy import (
     Integer,
     Numeric,
     Text,
+    column,
+    func,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -44,6 +47,16 @@ class Renter(UuidPrimaryKeyMixin, CreatedAtMixin, UpdatedAtMixin, Base):
         Index("ix_renters_lead_status", "lead_status"),
         Index("ix_renters_assigned_agent_id", "assigned_agent_id"),
         Index("ix_renters_created_at", "created_at"),
+        # Case-insensitive uniqueness for the idempotent duplicate-email contract.
+        # Partial so the many NULL-email rows (e.g. social-channel leads) are exempt.
+        # Emails are stored normalized, so lower() is index-backed for lookups too.
+        Index(
+            "uq_renters_email_lower",
+            func.lower(column("email")),
+            unique=True,
+            postgresql_where=text("email IS NOT NULL"),
+            sqlite_where=text("email IS NOT NULL"),
+        ),
     )
 
     source_channel: Mapped[str] = mapped_column(Text, nullable=False)

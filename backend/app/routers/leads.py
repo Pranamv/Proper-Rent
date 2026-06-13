@@ -2,8 +2,9 @@ from datetime import UTC, datetime
 from typing import Annotated, cast
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Response, status
 from sqlalchemy import func, or_, select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db_session
@@ -32,23 +33,17 @@ async def create_renter_lead(
     response: Response,
     session: DbSession,
     notifications: Notifications,
+    background_tasks: BackgroundTasks,
 ) -> RenterLeadResponse:
     normalized_email = normalize_email(str(payload.email))
+
     existing_renter = await find_renter_by_email(session, normalized_email)
-
     if existing_renter is not None:
-        if payload.session_id:
-            await link_session_conversations(
-                session=session,
-                session_id=payload.session_id,
-                renter_id=existing_renter.id,
-            )
-            await session.commit()
-
-        response.status_code = status.HTTP_200_OK
-        return RenterLeadResponse(
-            renter_id=existing_renter.id,
-            message=DUPLICATE_LEAD_MESSAGE,
+        return await respond_with_existing_renter(
+            session=session,
+            response=response,
+            session_id=payload.session_id,
+            existing_renter=existing_renter,
         )
 
     scoring_result = score_lead(build_scoring_input(payload, normalized_email=normalized_email))
@@ -82,7 +77,23 @@ async def create_renter_lead(
         consent_at=datetime.now(UTC),
     )
     session.add(renter)
-    await session.flush()
+
+    try:
+        await session.flush()
+    except IntegrityError:
+        # A concurrent request inserted the same email between our lookup and
+        # flush (uq_renters_email_lower). Fall back to the idempotent duplicate
+        # response instead of surfacing a 500.
+        await session.rollback()
+        existing_renter = await find_renter_by_email(session, normalized_email)
+        if existing_renter is None:
+            raise
+        return await respond_with_existing_renter(
+            session=session,
+            response=response,
+            session_id=payload.session_id,
+            existing_renter=existing_renter,
+        )
 
     if payload.session_id:
         await link_session_conversations(
@@ -93,19 +104,43 @@ async def create_renter_lead(
 
     await session.commit()
 
-    await notifications.send_renter_confirmation(
+    # Email delivery is best-effort and must never block or fail the response.
+    # The renter is already persisted; run notifications after the response is
+    # sent so a slow/unavailable provider cannot stall the intake form.
+    background_tasks.add_task(
+        notifications.send_renter_confirmation,
         renter_id=renter.id,
         renter_email=normalized_email,
         consent_version=payload.consent_version,
     )
     if scoring_result.intent_score >= HOT_LEAD_THRESHOLD:
-        await notifications.send_hot_renter_alert(
+        background_tasks.add_task(
+            notifications.send_hot_renter_alert,
             renter_id=renter.id,
             intent_score=scoring_result.intent_score,
             consent_version=payload.consent_version,
         )
 
     return RenterLeadResponse(renter_id=renter.id, message=NEW_LEAD_MESSAGE)
+
+
+async def respond_with_existing_renter(
+    *,
+    session: AsyncSession,
+    response: Response,
+    session_id: str | None,
+    existing_renter: Renter,
+) -> RenterLeadResponse:
+    if session_id:
+        await link_session_conversations(
+            session=session,
+            session_id=session_id,
+            renter_id=existing_renter.id,
+        )
+        await session.commit()
+
+    response.status_code = status.HTTP_200_OK
+    return RenterLeadResponse(renter_id=existing_renter.id, message=DUPLICATE_LEAD_MESSAGE)
 
 
 async def find_renter_by_email(session: AsyncSession, normalized_email: str) -> Renter | None:
