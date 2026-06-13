@@ -1,6 +1,8 @@
-from pydantic import BaseModel
+from typing import Literal
+
+from app.schemas.base import ApiSchema
 
 
-class HealthResponse(BaseModel):
-    status: str
+class HealthResponse(ApiSchema):
+    status: Literal["ok"]
     version: str

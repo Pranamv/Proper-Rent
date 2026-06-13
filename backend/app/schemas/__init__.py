@@ -1,1 +1,39 @@
-"""Pydantic schema package."""
+"""Pydantic API contracts for public and admin routes."""
+
+from app.schemas.admin import (
+    AdminConversation,
+    AdminLandlordDetail,
+    AdminLandlordListItem,
+    AdminLandlordListResponse,
+    AdminLandlordUpdateRequest,
+    AdminLeadDetail,
+    AdminLeadListItem,
+    AdminLeadListResponse,
+    AdminLeadSummary,
+    AdminLeadUpdateRequest,
+)
+from app.schemas.chat import ChatRequest, ChatResponse, SuggestedAction
+from app.schemas.health import HealthResponse
+from app.schemas.landlord import LandlordIntakeRequest, LandlordIntakeResponse
+from app.schemas.renter import RenterLeadRequest, RenterLeadResponse
+
+__all__ = [
+    "AdminConversation",
+    "AdminLandlordDetail",
+    "AdminLandlordListItem",
+    "AdminLandlordListResponse",
+    "AdminLandlordUpdateRequest",
+    "AdminLeadDetail",
+    "AdminLeadListItem",
+    "AdminLeadListResponse",
+    "AdminLeadSummary",
+    "AdminLeadUpdateRequest",
+    "ChatRequest",
+    "ChatResponse",
+    "HealthResponse",
+    "LandlordIntakeRequest",
+    "LandlordIntakeResponse",
+    "RenterLeadRequest",
+    "RenterLeadResponse",
+    "SuggestedAction",
+]
