@@ -34,6 +34,11 @@ AGENT_ROLES = ("agent", "admin")
 CHANNELS = ("website", "whatsapp", "facebook")
 SOURCES = ("website", "whatsapp", "facebook", "referral")
 
+# Tables to lock down on PostgreSQL/Supabase. RLS is enabled with no policies so
+# the PostgREST-exposed anon/authenticated roles are denied, while FastAPI's
+# owner connection over DATABASE_URL still bypasses RLS. SQLite has no RLS.
+RLS_TABLES = ("agents", "properties", "renters", "conversations", "landlords", "transactions")
+
 
 def _dialect_name() -> str:
     return op.get_bind().dialect.name
@@ -317,8 +322,20 @@ def upgrade() -> None:
     op.create_index("ix_transactions_status", "transactions", ["status"])
     op.create_index("ix_transactions_renter_id", "transactions", ["renter_id"])
 
+    if _is_postgresql():
+        for table_name in RLS_TABLES:
+            op.execute(f"ALTER TABLE {table_name} ENABLE ROW LEVEL SECURITY")
+        # Alembic's own version table is also PostgREST-exposed; lock it down too.
+        # It exists by the time upgrade() runs (IF EXISTS guards offline/--sql runs).
+        op.execute("ALTER TABLE IF EXISTS alembic_version ENABLE ROW LEVEL SECURITY")
+
 
 def downgrade() -> None:
+    # The RLS_TABLES are dropped below, which removes their RLS state; only
+    # alembic_version survives a downgrade, so reverse the lock-down on it.
+    if _is_postgresql():
+        op.execute("ALTER TABLE IF EXISTS alembic_version DISABLE ROW LEVEL SECURITY")
+
     op.drop_index("ix_transactions_renter_id", table_name="transactions")
     op.drop_index("ix_transactions_status", table_name="transactions")
     op.drop_index("ix_landlords_created_at", table_name="landlords")

@@ -81,6 +81,19 @@ def assert_postgres_schema(connection) -> None:  # type: ignore[no-untyped-def]
     inspector = inspect(connection)
     assert EXPECTED_TABLES.issubset(set(inspector.get_table_names()))
     assert_table_contracts(inspector, expect_postgres=True)
+    assert_row_level_security_enabled(connection)
+
+
+def assert_row_level_security_enabled(connection) -> None:  # type: ignore[no-untyped-def]
+    rows = connection.execute(
+        text(
+            "SELECT relname FROM pg_class c "
+            "JOIN pg_namespace n ON n.oid = c.relnamespace "
+            "WHERE n.nspname = 'public' AND c.relrowsecurity"
+        )
+    ).fetchall()
+    rls_tables = {row[0] for row in rows}
+    assert EXPECTED_TABLES.issubset(rls_tables)
 
 
 def assert_table_contracts(inspector, *, expect_postgres: bool = False) -> None:  # type: ignore[no-untyped-def]
