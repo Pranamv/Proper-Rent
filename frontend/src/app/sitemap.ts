@@ -9,6 +9,8 @@ const sitemapRoutes = [
   site.routes.howItWorks,
   site.routes.privacy,
   site.routes.terms,
+  site.routes.renterRegister,
+  site.routes.landlordRegister,
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {

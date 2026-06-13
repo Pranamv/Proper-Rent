@@ -59,8 +59,8 @@ export type LandlordIntakeRequest = {
   email: string;
   phone: string;
   property_address: string;
-  bedrooms?: number | null;
-  asking_rent?: number | null;
+  bedrooms: number;
+  asking_rent: number;
   available_from?: string | null;
   advanced_rent_interest: boolean;
   listing_interest: boolean;
