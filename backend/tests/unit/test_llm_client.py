@@ -93,7 +93,13 @@ def test_openrouter_client_falls_back_without_api_key() -> None:
 
 
 async def run_missing_api_key_test() -> None:
-    llm = OpenRouterClient(settings=Settings(app_env="test", llm_model="test/model"))
+    llm = OpenRouterClient(
+        settings=Settings(
+            app_env="test",
+            llm_model="test/model",
+            openrouter_api_key=None,
+        )
+    )
 
     completion = await llm.complete_chat([ChatMessage(role="user", content="Hello")])
 

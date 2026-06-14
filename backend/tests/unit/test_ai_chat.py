@@ -57,7 +57,7 @@ async def run_pii_free_persistence_test() -> None:
                 session_id="session-1",
                 message=(
                     "My email is renter@example.com and phone is 07123 456789. "
-                    "I want to book a viewing ASAP."
+                    "I want to register ASAP."
                 ),
             )
             await session.commit()
@@ -251,6 +251,43 @@ async def run_fallback_reply_test() -> None:
 
         assert conversation is not None
         assert conversation.transcript[-1]["content"] == LLM_FALLBACK_REPLY
+    finally:
+        await engine.dispose()
+
+
+def test_ai_chat_uses_canned_reply_without_llm_call() -> None:
+    asyncio.run(run_canned_reply_test())
+
+
+async def run_canned_reply_test() -> None:
+    engine, session_factory = await build_session_factory()
+    llm = FakeLLMClient(
+        LLMCompletion(content="This should not be used. [ACTION: none]", model="test/model")
+    )
+
+    try:
+        async with session_factory() as session:
+            service = AIChatService(session=session, llm_client=llm)
+            result = await service.respond(
+                session_id="canned-session",
+                message="Can I book a viewing?",
+            )
+            await session.commit()
+
+        assert result.response_source == "canned"
+        assert result.is_fallback is False
+        assert result.suggested_action == "show_intake_form"
+        assert "renter intake form" in result.reply
+        assert llm.calls == []
+
+        async with session_factory() as session:
+            conversation = await fetch_conversation(session, session_id="canned-session")
+
+        assert conversation is not None
+        assert conversation.transcript[0]["content"] == "Can I book a viewing?"
+        assert "renter intake form" in conversation.transcript[1]["content"]
+        assert conversation.intent_score_output is not None
+        assert conversation.intent_score_output >= 45
     finally:
         await engine.dispose()
 

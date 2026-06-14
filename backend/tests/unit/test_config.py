@@ -19,20 +19,18 @@ def test_test_environment_allows_missing_integration_secrets() -> None:
 
 
 def test_local_environment_allows_missing_database_until_dependency_use() -> None:
-    settings = Settings(app_env="local")
+    settings = Settings(app_env="local", database_url=None)
 
     with pytest.raises(ValueError, match="DATABASE_URL is required"):
         settings.resolved_database_url()
 
 
-def test_deployment_environment_requires_integration_settings(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    for field_name in REQUIRED_DEPLOYMENT_SETTINGS:
-        monkeypatch.delenv(field_name.upper(), raising=False)
-
+def test_deployment_environment_requires_integration_settings() -> None:
     with pytest.raises(ValidationError) as exc_info:
-        Settings(app_env="production")
+        Settings(
+            app_env="production",
+            **{field_name: None for field_name in REQUIRED_DEPLOYMENT_SETTINGS},
+        )
 
     message = str(exc_info.value)
     assert "Missing required deployment settings" in message

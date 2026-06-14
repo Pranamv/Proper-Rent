@@ -148,7 +148,10 @@ def test_missing_admin_alert_email_skips_agent_notifications_without_transport_c
 
 async def run_missing_admin_alert_email_skip() -> None:
     transport = FakeEmailTransport()
-    service = NotificationService(settings=Settings(app_env="test"), transport=transport)
+    service = NotificationService(
+        settings=Settings(app_env="test", admin_alert_email=None),
+        transport=transport,
+    )
 
     delivery = await service.send_hot_renter_alert(
         renter_id=uuid4(),

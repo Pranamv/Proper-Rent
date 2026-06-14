@@ -64,7 +64,7 @@ def chat_context() -> Generator[ChatEndpointContext, None, None]:
     llm = FakeLLMClient(
         LLMCompletion(
             content=(
-                "Deposit Share can help reduce upfront deposit pressure. [ACTION: show_intake_form]"
+                "A human Proper Rent agent can help with next steps. [ACTION: show_intake_form]"
             ),
             model="test/model",
         )
@@ -107,14 +107,14 @@ def test_chat_endpoint_returns_public_shape_and_persists_conversation(
         "/api/v1/chat",
         json={
             "session_id": "session-chat",
-            "message": "What is Deposit Share? I want to register.",
+            "message": "Can you explain the application process?",
         },
     )
 
     assert response.status_code == 200
     body = response.json()
     assert body == {
-        "reply": "Deposit Share can help reduce upfront deposit pressure.",
+        "reply": "A human Proper Rent agent can help with next steps.",
         "suggested_action": "show_intake_form",
         "session_id": "session-chat",
     }
@@ -128,18 +128,44 @@ def test_chat_endpoint_returns_public_shape_and_persists_conversation(
     assert conversation is not None
     assert conversation.channel == "website"
     assert conversation.transcript[0]["role"] == "user"
-    assert conversation.transcript[0]["content"] == "What is Deposit Share? I want to register."
+    assert conversation.transcript[0]["content"] == "Can you explain the application process?"
     assert conversation.transcript[1]["role"] == "assistant"
     assert conversation.transcript[1]["content"] == (
-        "Deposit Share can help reduce upfront deposit pressure."
+        "A human Proper Rent agent can help with next steps."
     )
     assert conversation.intent_score_output is not None
     assert conversation.ai_summary is not None
 
     assert chat_context.llm.calls
     call_text = "\n".join(message.content for message in chat_context.llm.calls[0])
-    assert "Deposit Share" in call_text
+    assert "Can you explain the application process?" in call_text
     assert "Phase 1 has no live properties/listing data" in call_text
+
+
+def test_chat_endpoint_uses_canned_reply_without_llm_call(
+    chat_context: ChatEndpointContext,
+) -> None:
+    response = chat_context.client.post(
+        "/api/v1/chat",
+        json={
+            "session_id": "session-canned-chat",
+            "message": "Can I book a viewing?",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["suggested_action"] == "show_intake_form"
+    assert body["session_id"] == "session-canned-chat"
+    assert "renter intake form" in body["reply"]
+    assert chat_context.llm.calls == []
+
+    conversation = asyncio.run(
+        fetch_conversation(chat_context.session_factory, session_id="session-canned-chat")
+    )
+    assert conversation is not None
+    assert conversation.transcript[0]["content"] == "Can I book a viewing?"
+    assert "renter intake form" in conversation.transcript[1]["content"]
 
 
 def test_chat_endpoint_rate_limits_public_requests(

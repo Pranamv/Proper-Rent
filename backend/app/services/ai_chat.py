@@ -4,6 +4,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
+from time import perf_counter
 from typing import Any, Literal, Protocol, cast
 from uuid import UUID
 
@@ -24,12 +25,13 @@ logger = logging.getLogger(__name__)
 
 MAX_CHAT_MESSAGE_CHARS = 1000
 CHAT_HISTORY_LIMIT = 12
-CHAT_REPLY_MAX_TOKENS = 500
+CHAT_REPLY_MAX_TOKENS = 300
 CHAT_TEMPERATURE = 0.2
 MAX_CHAT_TURNS_PER_SESSION = 50
 
 ChatChannel = Literal["website", "whatsapp", "facebook"]
 SuggestedAction = Literal["show_intake_form"]
+ChatResponseSource = Literal["canned", "llm", "fallback"]
 TranscriptEntry = dict[str, Any]
 
 ALLOWED_SUGGESTED_ACTION = "show_intake_form"
@@ -64,6 +66,61 @@ URGENT_MOVE_PHRASES = (
     "this week",
     "immediately",
     "urgent",
+)
+
+
+@dataclass(frozen=True)
+class CannedChatReply:
+    reply: str
+    suggested_action: SuggestedAction | None = None
+
+
+CANNED_CHAT_REPLIES: tuple[tuple[str, tuple[str, ...], CannedChatReply], ...] = (
+    (
+        "how_proper_rent_works",
+        ("how does proper rent work", "what does proper rent do"),
+        CannedChatReply(
+            reply=(
+                "Proper Rent helps renters ask general letting questions and register "
+                "their requirements. A human agent then confirms live availability, "
+                "viewings, and next steps."
+            ),
+        ),
+    ),
+    (
+        "live_available_properties",
+        ("live available properties", "live properties", "available listings", "live listings"),
+        CannedChatReply(
+            reply=(
+                "Not directly in Phase 1. I can explain the process, but a human Proper "
+                "Rent agent confirms current availability after you register your requirements."
+            ),
+            suggested_action="show_intake_form",
+        ),
+    ),
+    (
+        "deposit_or_guarantor",
+        ("deposit share", "guarantor"),
+        CannedChatReply(
+            reply=(
+                "Deposit Share may reduce upfront deposit pressure. Guarantor options can "
+                "help students, international renters, self-employed renters, Universal Credit "
+                "tenants, or renters with limited credit history. Final eligibility and figures "
+                "are confirmed by the provider or agent."
+            ),
+        ),
+    ),
+    (
+        "book_viewing",
+        ("book a viewing", "book viewing", "arrange a viewing", "schedule a viewing"),
+        CannedChatReply(
+            reply=(
+                "Yes. Use the renter intake form with your requirements, and a human Proper "
+                "Rent agent will follow up to confirm current availability and viewing options."
+            ),
+            suggested_action="show_intake_form",
+        ),
+    ),
 )
 REQUIREMENT_PHRASES = (
     "budget",
@@ -135,6 +192,7 @@ class AIChatResult:
     suggested_action: SuggestedAction | None
     session_id: str
     is_fallback: bool = False
+    response_source: ChatResponseSource = "llm"
 
 
 class ChatSessionAbuseLimitExceeded(Exception):
@@ -177,17 +235,30 @@ class AIChatService:
         if renter is not None and conversation.renter_id is None:
             conversation.renter_id = renter.id
 
-        llm_messages = build_llm_messages(
-            conversation=conversation,
-            user_message=normalized_message,
-            renter=renter,
-        )
-        completion = await self.llm_client.complete_chat(
-            llm_messages,
-            temperature=CHAT_TEMPERATURE,
-            max_tokens=CHAT_REPLY_MAX_TOKENS,
-        )
-        reply, suggested_action = parse_llm_reply(completion.content)
+        canned_reply = find_canned_chat_reply(normalized_message)
+        completion: LLMCompletion | None = None
+        response_source: ChatResponseSource = "canned"
+        if canned_reply is not None:
+            reply = canned_reply.reply
+            suggested_action = canned_reply.suggested_action
+        else:
+            llm_messages = build_llm_messages(
+                conversation=conversation,
+                user_message=normalized_message,
+                renter=renter,
+            )
+            llm_started_at = perf_counter()
+            completion = await self.llm_client.complete_chat(
+                llm_messages,
+                temperature=CHAT_TEMPERATURE,
+                max_tokens=CHAT_REPLY_MAX_TOKENS,
+            )
+            log_llm_completion_timing(
+                elapsed_ms=elapsed_ms(llm_started_at),
+                is_fallback=completion.is_fallback,
+            )
+            reply, suggested_action = parse_llm_reply(completion.content)
+            response_source = "fallback" if completion.is_fallback else "llm"
 
         timestamp = datetime.now(UTC)
         conversation.transcript = append_chat_turn(
@@ -213,7 +284,8 @@ class AIChatService:
             reply=reply,
             suggested_action=suggested_action,
             session_id=session_id,
-            is_fallback=completion.is_fallback,
+            is_fallback=completion.is_fallback if completion is not None else False,
+            response_source=response_source,
         )
 
     async def get_or_create_conversation(
@@ -349,6 +421,20 @@ def parse_llm_reply(raw_reply: str) -> tuple[str, SuggestedAction | None]:
         reply = LLM_FALLBACK_REPLY
 
     return reply, suggested_action
+
+
+def find_canned_chat_reply(message: str) -> CannedChatReply | None:
+    normalized = normalize_canned_match_text(message)
+    for _, triggers, reply in CANNED_CHAT_REPLIES:
+        if any(trigger in normalized for trigger in triggers):
+            return reply
+    return None
+
+
+def normalize_canned_match_text(message: str) -> str:
+    normalized = message.lower()
+    normalized = re.sub(r"[^a-z0-9\s]", " ", normalized)
+    return re.sub(r"\s+", " ", normalized).strip()
 
 
 def validate_suggested_action(candidate: str) -> SuggestedAction | None:
@@ -506,6 +592,20 @@ def log_prompt_injection_attempt(pattern_key: str) -> None:
         "Potential prompt injection attempt in chat message",
         extra={"pattern_key": pattern_key},
     )
+
+
+def log_llm_completion_timing(*, elapsed_ms: float, is_fallback: bool) -> None:
+    logger.info(
+        "Chat LLM completion finished",
+        extra={
+            "elapsed_ms": round(elapsed_ms, 2),
+            "is_fallback": is_fallback,
+        },
+    )
+
+
+def elapsed_ms(started_at: float) -> float:
+    return (perf_counter() - started_at) * 1000
 
 
 def scrub_optional_text(value: str | None) -> str | None:

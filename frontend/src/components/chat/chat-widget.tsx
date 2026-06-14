@@ -29,6 +29,13 @@ const INITIAL_MESSAGE: ChatMessage = {
 const NETWORK_FALLBACK_REPLY =
   "I cannot reach the assistant right now. The renter form is still available for agent follow-up.";
 
+const QUICK_QUESTIONS = [
+  "How does Proper Rent work?",
+  "Can I see live properties?",
+  "How can Deposit Share or a guarantor help?",
+  "Can I book a viewing?",
+] as const;
+
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -64,10 +71,14 @@ export function ChatWidget() {
     }
     return `${site.routes.renterRegister}?session_id=${encodeURIComponent(sessionId)}`;
   }, [sessionId]);
+  const showQuickQuestions = !messages.some((message) => message.role === "user");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const message = inputValue.trim();
+    await sendMessage(inputValue.trim());
+  }
+
+  async function sendMessage(message: string) {
     if (!message || isWaiting) {
       return;
     }
@@ -151,6 +162,29 @@ export function ChatWidget() {
                 message={message}
               />
             ))}
+            {showQuickQuestions ? (
+              <div
+                aria-label="Suggested chat questions"
+                className="grid gap-2 sm:grid-cols-2"
+              >
+                {QUICK_QUESTIONS.map((question) => (
+                  <button
+                    className={cn(
+                      "rounded-md border border-border bg-surface px-3 py-2 text-left text-sm",
+                      "font-medium leading-5 text-foreground transition hover:border-primary",
+                      "hover:bg-surface-subtle focus-visible:outline-none",
+                      "focus-visible:ring-2 focus-visible:ring-primary",
+                    )}
+                    disabled={isWaiting}
+                    key={question}
+                    onClick={() => void sendMessage(question)}
+                    type="button"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             {isWaiting ? (
               <div className="max-w-[85%] rounded-md border border-border bg-surface-subtle px-3 py-2 text-sm leading-6 text-muted motion-safe:animate-pulse motion-reduce:animate-none">
                 Thinking...
