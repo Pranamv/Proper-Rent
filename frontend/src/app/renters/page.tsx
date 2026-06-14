@@ -1,3 +1,13 @@
+import {
+  Briefcase,
+  Buildings,
+  GraduationCap,
+  Globe,
+  PiggyBank,
+  ShieldCheck,
+  Sparkle,
+  Wallet,
+} from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
 
 import { Container } from "@/components/layout/container";
@@ -7,10 +17,31 @@ import { FaqSection } from "@/components/marketing/faq-section";
 import { PageHero } from "@/components/marketing/page-hero";
 import { Section } from "@/components/marketing/section";
 import { StatList } from "@/components/marketing/stat-list";
+import { Reveal } from "@/components/motion/reveal";
+import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { pageMetadata } from "@/lib/metadata";
-import { renterFaqs, renterFintechItems } from "@/lib/public-content";
+import {
+  renterAudienceSegments,
+  renterFaqs,
+  renterFintechItems,
+} from "@/lib/public-content";
 import { site } from "@/lib/site";
+
+const fintechIcons = {
+  PiggyBank,
+  ShieldCheck,
+  Sparkle,
+} as const;
+
+const segmentIcons = {
+  GraduationCap,
+  Briefcase,
+  Wallet,
+  ShieldCheck,
+  Globe,
+  Buildings,
+} as const;
 
 export const metadata: Metadata = pageMetadata({
   title: "For Renters",
@@ -77,21 +108,56 @@ export default function RentersPage() {
         </Section>
 
         <Section
-          eyebrow="Fintech overview"
-          title="General product education only."
-          body="Exact per-listing figures are deferred until a later approved listing-data phase. Phase 1 keeps the information generic and agent-reviewed."
+          eyebrow="Fintech for renters"
+          title="Built to make renting affordable."
+          body="These are general product options. An agent confirms the figures that apply to your specific situation and property before anything is finalised."
         >
-          <div className="grid gap-4 md:grid-cols-3">
-            {renterFintechItems.map((item) => (
-              <Card key={item.title}>
-                <CardHeader>
-                  <CardTitle>{item.title}</CardTitle>
-                  <CardDescription>{item.body}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
+          <Stagger className="grid gap-4 md:grid-cols-3">
+            {renterFintechItems.map((item) => {
+              const Icon = fintechIcons[item.icon as keyof typeof fintechIcons];
+              return (
+                <StaggerItem key={item.title}>
+                  <Card className="h-full">
+                    <CardHeader>
+                      <span className="grid size-11 place-items-center rounded-full bg-accent-linen text-foreground">
+                        <Icon size={22} weight="bold" aria-hidden="true" />
+                      </span>
+                      <CardTitle>{item.title}</CardTitle>
+                      <CardDescription>{item.body}</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </StaggerItem>
+              );
+            })}
+          </Stagger>
         </Section>
+
+        <Reveal as="section">
+          <Section
+            eyebrow="Who it's for"
+            title="Built for renters who get overlooked elsewhere."
+            body="Whatever's making other landlords hesitate, our fintech options are designed to open doors instead of closing them."
+          >
+            <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {renterAudienceSegments.map((segment) => {
+                const Icon = segmentIcons[segment.icon as keyof typeof segmentIcons];
+                return (
+                  <StaggerItem key={segment.title}>
+                    <Card className="h-full shadow-none">
+                      <CardHeader>
+                        <span className="grid size-11 place-items-center rounded-full bg-accent-linen text-foreground">
+                          <Icon size={22} weight="bold" aria-hidden="true" />
+                        </span>
+                        <CardTitle>{segment.title}</CardTitle>
+                        <CardDescription>{segment.body}</CardDescription>
+                      </CardHeader>
+                    </Card>
+                  </StaggerItem>
+                );
+              })}
+            </Stagger>
+          </Section>
+        </Reveal>
 
         <FaqSection items={renterFaqs} pagePath={site.routes.renters} />
 

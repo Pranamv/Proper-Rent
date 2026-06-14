@@ -17,6 +17,25 @@ import { ApiError, publicApi } from "@/lib/api";
 import type { LandlordIntakeRequest, LandlordIntakeResponse } from "@/lib/api";
 import { CONSENT_VERSION, consentCopy } from "@/lib/consent";
 import { site } from "@/lib/site";
+import { cn } from "@/lib/utils";
+
+const steps = [
+  {
+    title: "Contact details",
+    description: "These details are saved under consent and used for agent follow-up.",
+    fields: ["fullName", "email", "phone"] as const,
+  },
+  {
+    title: "Property details",
+    description: "Share enough information for the agent to assess listing and Advanced Rent next steps.",
+    fields: ["propertyAddress", "bedrooms", "askingRent"] as const,
+  },
+  {
+    title: "Consent",
+    description: "Last step. Review your details, then send this to an agent.",
+    fields: ["consentGiven"] as const,
+  },
+] as const;
 
 type FormValues = {
   fullName: string;
@@ -50,11 +69,15 @@ const initialValues: FormValues = {
 };
 
 export function LandlordIntakeForm() {
+  const [activeStep, setActiveStep] = useState(0);
   const [values, setValues] = useState<FormValues>(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState<LandlordIntakeResponse | null>(null);
+
+  const progressLabel = `Step ${activeStep + 1} of ${steps.length}`;
+  const currentStep = steps[activeStep];
 
   function updateValue<FieldName extends FormField>(
     field: FieldName,
@@ -75,6 +98,22 @@ export function LandlordIntakeForm() {
     updateValue(field, event.target.value as FormValues[typeof field]);
   }
 
+  function goToNextStep() {
+    const nextErrors = validateStep(values, activeStep);
+    setErrors((current) => ({ ...current, ...nextErrors }));
+    if (Object.keys(nextErrors).length > 0) {
+      return;
+    }
+    setActiveStep((current) => Math.min(current + 1, steps.length - 1));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function goToPreviousStep() {
+    setActiveStep((current) => Math.max(current - 1, 0));
+    setSubmitError(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors = validateAll(values);
@@ -82,6 +121,7 @@ export function LandlordIntakeForm() {
     setSubmitError(null);
 
     if (Object.keys(nextErrors).length > 0) {
+      setActiveStep(firstStepWithError(nextErrors));
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -114,31 +154,39 @@ export function LandlordIntakeForm() {
         <Card>
           <CardHeader>
             <p className="text-sm font-bold uppercase tracking-[0.08em] text-primary">
-              Landlord enquiry
+              {progressLabel}
             </p>
-            <CardTitle>What this captures</CardTitle>
-            <CardDescription>
-              Property basics, Advanced Rent interest, listing interest, and consent.
-            </CardDescription>
+            <CardTitle>{currentStep.title}</CardTitle>
+            <CardDescription>{currentStep.description}</CardDescription>
           </CardHeader>
           <CardContent>
             <ol className="space-y-3">
-              {[
-                "Your contact details so an agent can follow up.",
-                "Property address, bedroom count, rent guide, and availability.",
-                "Whether you want to discuss listing support, Advanced Rent, or both.",
-              ].map((item, index) => (
+              {steps.map((step, index) => (
                 <li
-                  className="flex gap-3 rounded-md border border-border bg-surface p-3"
-                  key={item}
+                  className={cn(
+                    "flex gap-3 rounded-md border border-border bg-surface p-3",
+                    index === activeStep && "border-primary bg-accent/60",
+                  )}
+                  aria-current={index === activeStep ? "step" : undefined}
+                  key={step.title}
                 >
                   <span
-                    className="grid size-7 shrink-0 place-items-center rounded-full border border-primary bg-primary text-sm font-bold text-primary-foreground"
+                    className={cn(
+                      "grid size-7 shrink-0 place-items-center rounded-full border border-border text-sm font-bold",
+                      index <= activeStep && "border-primary bg-primary text-primary-foreground",
+                    )}
                     aria-hidden="true"
                   >
                     {index + 1}
                   </span>
-                  <span className="text-sm leading-6 text-muted">{item}</span>
+                  <span>
+                    <span className="block text-sm font-semibold text-foreground">
+                      {step.title}
+                    </span>
+                    <span className="block text-sm leading-5 text-muted">
+                      {step.description}
+                    </span>
+                  </span>
                 </li>
               ))}
             </ol>
@@ -148,28 +196,15 @@ export function LandlordIntakeForm() {
 
       <Card className="overflow-hidden">
         <CardHeader className="border-b border-border">
-          <CardTitle>Register landlord interest</CardTitle>
-          <CardDescription>
-            Every landlord submission reaches the agent. Landlord leads are not scored.
-          </CardDescription>
+          <CardTitle>{currentStep.title}</CardTitle>
+          <CardDescription>{currentStep.description}</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} noValidate>
             {submitError ? <FormAlert>{submitError}</FormAlert> : null}
 
-            <div className="grid gap-8">
-              <section aria-labelledby="landlord-contact-heading" className="grid gap-5">
-                <div>
-                  <h2
-                    className="text-lg font-semibold leading-6 text-foreground"
-                    id="landlord-contact-heading"
-                  >
-                    Contact details
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-muted">
-                    These details are saved under consent and used for agent follow-up.
-                  </p>
-                </div>
+            {activeStep === 0 ? (
+              <div className="grid gap-5">
                 <div className="grid gap-5 md:grid-cols-2">
                   <Field error={errors.fullName}>
                     <FieldLabel htmlFor="fullName">Full name</FieldLabel>
@@ -205,21 +240,11 @@ export function LandlordIntakeForm() {
                     value={values.phone}
                   />
                 </Field>
-              </section>
+              </div>
+            ) : null}
 
-              <section aria-labelledby="landlord-property-heading" className="grid gap-5">
-                <div>
-                  <h2
-                    className="text-lg font-semibold leading-6 text-foreground"
-                    id="landlord-property-heading"
-                  >
-                    Property details
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-muted">
-                    Share enough information for the agent to assess listing and Advanced Rent
-                    next steps.
-                  </p>
-                </div>
+            {activeStep === 1 ? (
+              <div className="grid gap-5">
                 <Field error={errors.propertyAddress}>
                   <FieldLabel htmlFor="propertyAddress">Property address</FieldLabel>
                   <TextArea
@@ -298,17 +323,34 @@ export function LandlordIntakeForm() {
                     value={values.notes}
                   />
                 </Field>
-              </section>
+              </div>
+            ) : null}
 
-              <section aria-labelledby="landlord-consent-heading" className="grid gap-5">
-                <div>
-                  <h2
-                    className="text-lg font-semibold leading-6 text-foreground"
-                    id="landlord-consent-heading"
-                  >
-                    Consent
-                  </h2>
-                </div>
+            {activeStep === 2 ? (
+              <div className="grid gap-5">
+                <details className="rounded-md border border-border bg-surface-subtle p-4">
+                  <summary className="cursor-pointer text-sm font-semibold text-foreground">
+                    Check your answers
+                  </summary>
+                  <dl className="mt-4 grid gap-3 text-sm md:grid-cols-2">
+                    <SummaryItem label="Name" value={values.fullName} />
+                    <SummaryItem label="Email" value={values.email} />
+                    <SummaryItem label="Phone" value={values.phone} />
+                    <SummaryItem label="Property address" value={values.propertyAddress} />
+                    <SummaryItem label="Bedrooms" value={formatBedrooms(values.bedrooms)} />
+                    <SummaryItem label="Asking rent" value={formatRent(values.askingRent)} />
+                    <SummaryItem label="Available from" value={values.availableFrom} />
+                    <SummaryItem
+                      label="Listing interest"
+                      value={values.listingInterest ? "Yes" : "No"}
+                    />
+                    <SummaryItem
+                      label="Advanced Rent interest"
+                      value={values.advancedRentInterest ? "Yes" : "No"}
+                    />
+                  </dl>
+                </details>
+
                 <Field error={errors.consentGiven}>
                   <div className="flex gap-3 rounded-md border border-border bg-surface p-4">
                     <CheckboxInput
@@ -317,35 +359,61 @@ export function LandlordIntakeForm() {
                       name="consentGiven"
                       onChange={(event) => updateValue("consentGiven", event.target.checked)}
                     />
-                    <span className="text-sm leading-6 text-muted">
+                    <div className="text-sm leading-6 text-muted">
                       <FieldLabel
                         className="inline font-semibold text-foreground"
                         htmlFor="consentGiven"
                       >
-                        I consent to Proper Rent
+                        I agree to be contacted about this property
                       </FieldLabel>{" "}
-                      {consentCopy.landlord} I agree to the{" "}
-                      <Link className="font-semibold underline" href={site.routes.privacy}>
-                        Privacy Policy
-                      </Link>{" "}
-                      and{" "}
-                      <Link className="font-semibold underline" href={site.routes.terms}>
-                        Terms
-                      </Link>
-                      . Consent version: {CONSENT_VERSION}.
-                    </span>
+                      and for it to be shared with the Proper Rent agent.{" "}
+                      <details className="mt-1">
+                        <summary className="cursor-pointer font-semibold text-foreground underline">
+                          Read full details
+                        </summary>
+                        <p className="mt-2">
+                          {consentCopy.landlord} I agree to the{" "}
+                          <Link className="font-semibold underline" href={site.routes.privacy}>
+                            Privacy Policy
+                          </Link>{" "}
+                          and{" "}
+                          <Link className="font-semibold underline" href={site.routes.terms}>
+                            Terms
+                          </Link>
+                          . Consent version: {CONSENT_VERSION}.
+                        </p>
+                      </details>
+                    </div>
                   </div>
                 </Field>
-              </section>
-            </div>
+                <p className="text-sm leading-6 text-muted">
+                  Your details go to one human agent. They are never sold or shared with
+                  third parties.
+                </p>
+              </div>
+            ) : null}
 
-            <div className="mt-8 flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm leading-6 text-muted">
-                No score is calculated or shown for landlord enquiries.
-              </p>
-              <button className={buttonClasses()} disabled={isSubmitting} type="submit">
-                {isSubmitting ? "Submitting..." : "Submit landlord enquiry"}
+            <div className="mt-8 flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <button
+                className={buttonClasses({ variant: "secondary" })}
+                disabled={activeStep === 0 || isSubmitting}
+                onClick={goToPreviousStep}
+                type="button"
+              >
+                Back
               </button>
+              {activeStep < steps.length - 1 ? (
+                <button className={buttonClasses()} onClick={goToNextStep} type="button">
+                  Continue
+                </button>
+              ) : (
+                <div className="flex flex-col items-start gap-2 sm:items-end">
+                  <button className={buttonClasses()} disabled={isSubmitting} type="submit">
+                    {isSubmitting ? "Sending..." : "Send to an agent"}
+                  </button>
+                  <p className="text-sm text-muted">An agent reviews within 24 hours.</p>
+                </div>
+              )}
             </div>
           </form>
         </CardContent>
@@ -431,6 +499,31 @@ function FormAlert({ children }: { children: string }) {
   );
 }
 
+function SummaryItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="font-semibold text-foreground">{label}</dt>
+      <dd className="mt-1 text-muted">{value || "Not provided"}</dd>
+    </div>
+  );
+}
+
+function validateStep(values: FormValues, stepIndex: number): FormErrors {
+  const allErrors = validateAll(values);
+  const stepFields = new Set<FormField>(steps[stepIndex].fields);
+  return Object.fromEntries(
+    Object.entries(allErrors).filter(([field]) => stepFields.has(field as FormField)),
+  );
+}
+
+function firstStepWithError(errors: FormErrors) {
+  const errorFields = new Set(Object.keys(errors));
+  const stepIndex = steps.findIndex((step) =>
+    step.fields.some((field) => errorFields.has(field)),
+  );
+  return stepIndex === -1 ? 0 : stepIndex;
+}
+
 function validateAll(values: FormValues): FormErrors {
   const nextErrors: FormErrors = {};
   const bedrooms = Number(values.bedrooms);
@@ -485,4 +578,25 @@ function emptyToNull(value: string) {
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function formatBedrooms(value: string) {
+  if (!value) {
+    return "";
+  }
+  if (value === "0") {
+    return "Studio";
+  }
+  if (value === "1") {
+    return "1 bedroom";
+  }
+  return `${value} bedrooms`;
+}
+
+function formatRent(value: string) {
+  const amount = Number(value);
+  if (!amount || Number.isNaN(amount)) {
+    return "";
+  }
+  return `£${amount.toLocaleString("en-GB")} pcm`;
 }

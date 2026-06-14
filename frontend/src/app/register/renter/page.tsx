@@ -16,7 +16,7 @@ export const metadata: Metadata = pageMetadata({
 
 export default function RenterRegisterPage() {
   return (
-    <SiteShell status="Renter intake">
+    <SiteShell>
       <Container className="pb-12">
         <PageHero
           eyebrow="Renter registration"

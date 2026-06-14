@@ -34,13 +34,14 @@ const steps = [
   },
   {
     title: "Readiness",
-    description: "These answers help prioritise follow-up and flag useful fintech options.",
-    fields: ["employmentStatus", "hasGuarantor", "depositAvailability", "currentHousing"] as const,
-  },
-  {
-    title: "Review and consent",
-    description: "Confirm consent so the enquiry can be saved and sent to the agent.",
-    fields: ["consentGiven"] as const,
+    description: "Last step. A couple of readiness questions, then send this to an agent.",
+    fields: [
+      "employmentStatus",
+      "hasGuarantor",
+      "depositAvailability",
+      "currentHousing",
+      "consentGiven",
+    ] as const,
   },
 ] as const;
 
@@ -569,13 +570,11 @@ export function RenterIntakeForm() {
                     value={values.notes}
                   />
                 </Field>
-              </div>
-            ) : null}
 
-            {activeStep === 3 ? (
-              <div className="grid gap-6">
-                <div className="rounded-md border border-border bg-surface-subtle p-5">
-                  <h2 className="text-lg font-semibold text-foreground">Review summary</h2>
+                <details className="rounded-md border border-border bg-surface-subtle p-4">
+                  <summary className="cursor-pointer text-sm font-semibold text-foreground">
+                    Check your answers
+                  </summary>
                   <dl className="mt-4 grid gap-3 text-sm md:grid-cols-2">
                     <SummaryItem label="Name" value={values.fullName} />
                     <SummaryItem label="Email" value={values.email} />
@@ -600,7 +599,7 @@ export function RenterIntakeForm() {
                       value={optionLabel(guarantorOptions, values.hasGuarantor)}
                     />
                   </dl>
-                </div>
+                </details>
 
                 <Field error={errors.consentGiven}>
                   <div className="flex gap-3 rounded-md border border-border bg-surface p-4">
@@ -610,25 +609,38 @@ export function RenterIntakeForm() {
                       name="consentGiven"
                       onChange={(event) => updateValue("consentGiven", event.target.checked)}
                     />
-                    <span className="text-sm leading-6 text-muted">
+                    <div className="text-sm leading-6 text-muted">
                       <FieldLabel
                         className="inline font-semibold text-foreground"
                         htmlFor="consentGiven"
                       >
-                        I consent to Proper Rent
+                        I agree to be contacted about my enquiry
                       </FieldLabel>{" "}
-                      {consentCopy.renter} I agree to the{" "}
-                      <Link className="font-semibold underline" href={site.routes.privacy}>
-                        Privacy Policy
-                      </Link>{" "}
-                      and{" "}
-                      <Link className="font-semibold underline" href={site.routes.terms}>
-                        Terms
-                      </Link>
-                      . Consent version: {CONSENT_VERSION}.
-                    </span>
+                      and for it to be shared with the Proper Rent agent.{" "}
+                      <details className="mt-1">
+                        <summary className="cursor-pointer font-semibold text-foreground underline">
+                          Read full details
+                        </summary>
+                        <p className="mt-2">
+                          {consentCopy.renter} I agree to the{" "}
+                          <Link className="font-semibold underline" href={site.routes.privacy}>
+                            Privacy Policy
+                          </Link>{" "}
+                          and{" "}
+                          <Link className="font-semibold underline" href={site.routes.terms}>
+                            Terms
+                          </Link>
+                          . Consent version: {CONSENT_VERSION}.
+                        </p>
+                      </details>
+                    </div>
                   </div>
                 </Field>
+
+                <p className="text-sm leading-6 text-muted">
+                  Your details go to one human agent. They are never sold or shared with
+                  third parties.
+                </p>
               </div>
             ) : null}
 
@@ -646,9 +658,12 @@ export function RenterIntakeForm() {
                   Continue
                 </button>
               ) : (
-                <button className={buttonClasses()} disabled={isSubmitting} type="submit">
-                  {isSubmitting ? "Submitting..." : "Submit renter enquiry"}
-                </button>
+                <div className="flex flex-col items-start gap-2 sm:items-end">
+                  <button className={buttonClasses()} disabled={isSubmitting} type="submit">
+                    {isSubmitting ? "Sending..." : "Send to an agent"}
+                  </button>
+                  <p className="text-sm text-muted">An agent reviews within 24 hours.</p>
+                </div>
               )}
             </div>
           </form>

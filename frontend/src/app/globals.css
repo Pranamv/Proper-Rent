@@ -3,20 +3,22 @@
 @tailwind utilities;
 
 :root {
-  --color-background: 246 250 248;
-  --color-foreground: 20 51 45;
-  --color-muted: 82 106 99;
-  --color-border: 217 232 226;
+  --color-background: 251 247 239;
+  --color-foreground: 42 46 41;
+  --color-muted: 94 90 79;
+  --color-border: 232 225 211;
   --color-surface: 255 255 255;
-  --color-surface-subtle: 239 247 243;
+  --color-surface-subtle: 241 244 236;
+  --color-surface-elevated: 241 244 236;
   --color-primary: 11 107 85;
-  --color-primary-foreground: 255 255 255;
+  --color-primary-foreground: 251 247 239;
   --color-accent: 216 242 231;
   --color-accent-foreground: 8 75 61;
+  --color-accent-linen: 243 230 216;
+  --color-accent-spark: 217 139 95;
   --color-success: 17 122 86;
   --color-warning: 148 94 14;
   --color-danger: 180 44 44;
-  --font-sans: Arial, Helvetica, sans-serif;
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 10px;

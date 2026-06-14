@@ -1,3 +1,4 @@
+import { Bank, CalendarCheck, UserCheck } from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
 
 import { Container } from "@/components/layout/container";
@@ -6,10 +7,18 @@ import { CtaBand } from "@/components/marketing/cta-band";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { PageHero } from "@/components/marketing/page-hero";
 import { Section } from "@/components/marketing/section";
+import { Reveal } from "@/components/motion/reveal";
+import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { pageMetadata } from "@/lib/metadata";
-import { landlordFaqs } from "@/lib/public-content";
+import { advancedRentHighlights, landlordFaqs } from "@/lib/public-content";
 import { site } from "@/lib/site";
+
+const advancedRentIcons = {
+  Bank,
+  CalendarCheck,
+  UserCheck,
+} as const;
 
 export const metadata: Metadata = pageMetadata({
   title: "For Landlords",
@@ -77,6 +86,31 @@ export default function LandlordsPage() {
             ))}
           </div>
         </Section>
+
+        <Reveal as="section">
+          <Section
+            eyebrow="Advanced Rent"
+            title="Get paid rent upfront."
+            body="Advanced Rent lets you receive a portion of future rent as a lump sum, while your tenants carry on paying as normal. An agent talks you through whether it fits your property."
+          >
+            <Stagger className="grid gap-6 sm:grid-cols-3">
+              {advancedRentHighlights.map((item) => {
+                const Icon = advancedRentIcons[item.icon as keyof typeof advancedRentIcons];
+                return (
+                  <StaggerItem className="flex gap-4 sm:flex-col sm:gap-3" key={item.title}>
+                    <span className="grid size-11 shrink-0 place-items-center rounded-full bg-accent-linen text-foreground">
+                      <Icon size={22} weight="bold" aria-hidden="true" />
+                    </span>
+                    <div>
+                      <h3 className="font-bold text-foreground">{item.title}</h3>
+                      <p className="mt-1 text-sm leading-6 text-muted">{item.body}</p>
+                    </div>
+                  </StaggerItem>
+                );
+              })}
+            </Stagger>
+          </Section>
+        </Reveal>
 
         <FaqSection items={landlordFaqs} pagePath={site.routes.landlords} />
 

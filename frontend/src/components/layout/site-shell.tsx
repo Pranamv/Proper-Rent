@@ -4,15 +4,13 @@ import type { ReactNode } from "react";
 import { CookielessAnalytics } from "@/components/analytics/cookieless-analytics";
 import { ChatWidget } from "@/components/chat/chat-widget";
 import { Container } from "@/components/layout/container";
-import { StatusPill } from "@/components/ui/status-pill";
 import { footerNavItems, publicNavItems, site } from "@/lib/site";
 
 type SiteShellProps = {
   children: ReactNode;
-  status?: string;
 };
 
-export function SiteShell({ children, status = "Phase 1 foundation" }: SiteShellProps) {
+export function SiteShell({ children }: SiteShellProps) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <a
@@ -36,23 +34,20 @@ export function SiteShell({ children, status = "Phase 1 foundation" }: SiteShell
             </span>
             <span>Proper Rent</span>
           </Link>
-          <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between lg:w-auto">
-            <nav aria-label="Primary navigation">
-              <ul className="flex flex-wrap gap-2 text-sm font-semibold text-muted">
-                {publicNavItems.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      className="rounded-md px-3 py-2 hover:bg-surface hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                      href={item.href}
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-            <StatusPill>{status}</StatusPill>
-          </div>
+          <nav aria-label="Primary navigation">
+            <ul className="flex flex-wrap gap-2 text-sm font-semibold text-muted">
+              {publicNavItems.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    className="rounded-md px-3 py-2 hover:bg-surface hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    href={item.href}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </Container>
       </header>
       <main id="main-content">{children}</main>
@@ -63,8 +58,8 @@ export function SiteShell({ children, status = "Phase 1 foundation" }: SiteShell
           <div>
             <p className="font-semibold text-foreground">Proper Rent</p>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-              Phase 1 website, chatbot, intake, and human follow-up. No live listings
-              or per-listing fintech quotes are shown on this site.
+              Renter and landlord enquiries are reviewed by a human agent. No live
+              listings or per-listing fintech quotes are shown on this site.
             </p>
           </div>
           <nav aria-label="Footer navigation">

@@ -49,17 +49,71 @@ export const landlordFaqs: FaqItem[] = [
 export const renterFintechItems = [
   {
     title: "Deposit Share",
-    body: "Helps reduce upfront deposit pressure for renters who are otherwise ready to move.",
+    body: "Covers up to 85% of your deposit on day one, so you can move in sooner and keep more cash in your pocket. Your share is returned at the end of the tenancy, and the landlord still receives the full deposit, protected as usual.",
+    icon: "PiggyBank",
   },
   {
-    title: "Guarantor and Guarantor Enhanced",
-    body: "Useful for students, international renters, self-employed renters, Universal Credit tenants, and renters with limited credit history.",
+    title: "Guarantor Solutions",
+    body: "Our guarantor partner can act as your UK guarantor, so you can rent the property you want, even if you're a student, new to the UK, self-employed, or on Universal Credit.",
+    icon: "ShieldCheck",
   },
   {
     title: "Rent Club / Ribbon Rewards",
     body: "A renter-facing rewards benefit that can support conversion and ongoing engagement.",
+    icon: "Sparkle",
   },
-];
+] as const;
+
+export const renterAudienceSegments = [
+  {
+    title: "Students",
+    body: "No UK guarantor? No problem. Tailored options for UK and international students.",
+    icon: "GraduationCap",
+  },
+  {
+    title: "Young Professionals",
+    body: "Move faster with flexible rent options built for early-career life.",
+    icon: "Briefcase",
+  },
+  {
+    title: "Self-Employed & Freelancers",
+    body: "Alternative affordability assessments, with no rigid payslip rules.",
+    icon: "Wallet",
+  },
+  {
+    title: "Universal Credit Recipients",
+    body: "More pathways to successful renting, with supportive landlords.",
+    icon: "ShieldCheck",
+  },
+  {
+    title: "International Relocators",
+    body: "Relocating to the UK? We help you secure a home before you land.",
+    icon: "Globe",
+  },
+  {
+    title: "Hard-to-Reference Renters",
+    body: "Failed traditional referencing? We open new doors with fintech solutions.",
+    icon: "Buildings",
+  },
+] as const;
+
+export const advancedRentHighlights = [
+  {
+    title: "A lump sum, upfront",
+    body: "Receive a lump sum of future rent in advance, rather than waiting for it to land month by month.",
+    icon: "Bank",
+  },
+  {
+    title: "Tenants pay as normal",
+    body: "Your tenants continue paying rent on the existing monthly schedule, so nothing changes for them.",
+    icon: "CalendarCheck",
+  },
+  {
+    title: "Agent-confirmed eligibility",
+    body: "An agent confirms whether Advanced Rent fits your property and works through the figures with you.",
+    icon: "UserCheck",
+  },
+] as const;
 
 export const howItWorksSteps = [
   {
