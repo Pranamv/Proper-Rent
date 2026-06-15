@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { buttonClasses } from "@/components/ui/button";
+import { LeadStatusFilterBar } from "@/components/admin/lead-status-filter-bar";
+import { LeadStatusUpdateForm } from "@/components/admin/lead-status-update-form";
 import { StatusPill } from "@/components/ui/status-pill";
 import { adminApi, ApiError } from "@/lib/api";
 import type {
@@ -10,7 +12,7 @@ import type {
   AdminLeadStatus,
   AdminLeadSummary,
 } from "@/lib/api";
-import { getAdminAuthState } from "@/lib/admin/auth";
+import { getAdminSessionState } from "@/lib/admin/auth";
 import { pageMetadata } from "@/lib/metadata";
 import { cn } from "@/lib/utils";
 
@@ -59,7 +61,7 @@ type AdminLeadsPageProps = {
 };
 
 export default async function AdminLeadsPage({ searchParams }: AdminLeadsPageProps) {
-  const authState = await getAdminAuthState();
+  const authState = await getAdminSessionState();
   if (authState.status !== "authenticated") {
     return null;
   }
@@ -84,20 +86,19 @@ export default async function AdminLeadsPage({ searchParams }: AdminLeadsPagePro
   const totalPages = Math.max(1, Math.ceil(leadResponse.total / leadResponse.limit));
 
   return (
-    <div className="space-y-6">
-      <header className="rounded-md border border-border bg-surface p-5 shadow-soft">
+    <div className="space-y-5">
+      <header className="rounded-md border border-border bg-surface p-4 shadow-soft">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.08em] text-primary">
               Leads
             </p>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground">
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
               Renter pipeline
             </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
-              Prioritise new renter enquiries by urgency, status, and required
-              follow-up. Open a lead to review conversation context and update
-              notes, assignment, or status.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
+              Prioritise renter enquiries, update stage changes quickly, and open
+              a lead only when you need the full context.
             </p>
           </div>
           <StatusPill tone={leadResponse.total > 0 ? "success" : "neutral"}>
@@ -107,19 +108,14 @@ export default async function AdminLeadsPage({ searchParams }: AdminLeadsPagePro
       </header>
 
       <LeadStatStrip summary={leadResponse.summary} totalVisible={leadResponse.total} />
-      <LeadStageStrip
-        assignedAgentId={assignedAgentId}
-        summary={leadResponse.summary}
-        selectedStatus={selectedStatus}
-      />
 
       <section className="rounded-md border border-border bg-surface">
-        <div className="border-b border-border p-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
+        <div className="border-b border-border p-3">
+          <div className="grid gap-3 2xl:grid-cols-[minmax(160px,260px)_1fr] 2xl:items-start">
+            <div className="min-w-0">
               <h2 className="text-base font-semibold text-foreground">Lead list</h2>
-              <p className="mt-1 text-sm text-muted">
-                Sorted by intent score first, then newest lead date.
+              <p className="mt-1 text-xs leading-5 text-muted">
+                Score first, then newest.
               </p>
             </div>
             <LeadStatusFilters
@@ -165,24 +161,28 @@ function LeadStatStrip({
       label: "New today",
       value: summary.new_leads_today,
       detail: "Fresh website registrations",
+      badge: "Today",
       tone: "success" as const,
     },
     {
       label: "Hot pending",
       value: summary.hot_leads_pending,
       detail: "Score 70+ still in new",
+      badge: "Needs action",
       tone: summary.hot_leads_pending > 0 ? ("warning" as const) : ("neutral" as const),
     },
     {
       label: "Pipeline total",
       value: pipelineTotal,
       detail: "All renter leads",
+      badge: "All stages",
       tone: "neutral" as const,
     },
     {
       label: "Visible rows",
       value: totalVisible,
       detail: "Current filter result",
+      badge: "Filtered",
       tone: "neutral" as const,
     },
   ];
@@ -190,7 +190,10 @@ function LeadStatStrip({
   return (
     <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="Lead stats">
       {stats.map((stat) => (
-        <div className="rounded-md border border-border bg-surface p-4" key={stat.label}>
+        <div
+          className="rounded-md border border-border bg-surface p-4 transition duration-200 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-soft motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+          key={stat.label}
+        >
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-muted">{stat.label}</p>
@@ -199,47 +202,11 @@ function LeadStatStrip({
               </p>
             </div>
             <StatusPill className="min-h-8 px-2 text-xs" tone={stat.tone}>
-              Live
+              {stat.badge}
             </StatusPill>
           </div>
           <p className="mt-2 text-sm leading-5 text-muted">{stat.detail}</p>
         </div>
-      ))}
-    </section>
-  );
-}
-
-function LeadStageStrip({
-  assignedAgentId,
-  selectedStatus,
-  summary,
-}: {
-  assignedAgentId?: string;
-  selectedStatus?: AdminLeadStatus;
-  summary: AdminLeadSummary;
-}) {
-  return (
-    <section
-      className="grid gap-2 rounded-md border border-border bg-surface p-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8"
-      aria-label="Pipeline by stage"
-    >
-      {leadStatusOptions.map((statusOption) => (
-        <Link
-          aria-current={selectedStatus === statusOption.value ? "page" : undefined}
-          className={cn(
-            "rounded-md border border-border bg-background p-3 text-sm",
-            "hover:border-primary hover:bg-accent/60 focus-visible:outline-none",
-            "focus-visible:ring-2 focus-visible:ring-primary",
-            selectedStatus === statusOption.value && "border-primary bg-accent",
-          )}
-          href={buildLeadsHref({ assignedAgentId, status: statusOption.value })}
-          key={statusOption.value}
-        >
-          <span className="block font-semibold text-foreground">{statusOption.label}</span>
-          <span className="mt-1 block text-2xl font-bold text-primary">
-            {numberFormatter.format(summary.pipeline_by_stage[statusOption.value])}
-          </span>
-        </Link>
       ))}
     </section>
   );
@@ -258,144 +225,135 @@ function LeadStatusFilters({
     (total, count) => total + count,
     0,
   );
+  const filters = [
+    {
+      count: numberFormatter.format(allCount),
+      href: buildLeadsHref({ assignedAgentId }),
+      isActive: !selectedStatus,
+      label: "All",
+    },
+    ...leadStatusOptions.map((statusOption) => ({
+      count: numberFormatter.format(summary.pipeline_by_stage[statusOption.value]),
+      href: buildLeadsHref({
+        assignedAgentId,
+        status: statusOption.value,
+      }),
+      isActive: selectedStatus === statusOption.value,
+      label: statusOption.label,
+    })),
+  ];
 
-  return (
-    <div className="flex flex-wrap gap-2" role="list" aria-label="Lead status filters">
-      <Link
-        aria-current={selectedStatus ? undefined : "page"}
-        className={buttonClasses({
-          className: "h-9 gap-2 px-3",
-          size: "sm",
-          variant: selectedStatus ? "secondary" : "primary",
-        })}
-        href={buildLeadsHref({ assignedAgentId })}
-        role="listitem"
-      >
-        All
-        <span className="text-xs opacity-80">{numberFormatter.format(allCount)}</span>
-      </Link>
-      {leadStatusOptions.map((statusOption) => (
-        <Link
-          aria-current={selectedStatus === statusOption.value ? "page" : undefined}
-          className={buttonClasses({
-            className: "h-9 gap-2 px-3",
-            size: "sm",
-            variant: selectedStatus === statusOption.value ? "primary" : "secondary",
-          })}
-          href={buildLeadsHref({
-            assignedAgentId,
-            status: statusOption.value,
-          })}
-          key={statusOption.value}
-          role="listitem"
-        >
-          {statusOption.label}
-          <span className="text-xs opacity-80">
-            {numberFormatter.format(summary.pipeline_by_stage[statusOption.value])}
-          </span>
-        </Link>
-      ))}
-    </div>
-  );
+  return <LeadStatusFilterBar filters={filters} />;
 }
 
 function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-[1100px] text-left text-sm">
-        <thead className="border-b border-border bg-surface-subtle text-xs uppercase tracking-[0.08em] text-muted">
+      <table className="min-w-[900px] text-left text-sm">
+        <thead className="border-b border-border bg-surface-subtle text-[11px] uppercase tracking-[0.08em] text-muted">
           <tr>
-            <th className="px-4 py-3 font-semibold" scope="col">
+            <th className="px-3 py-2.5 font-semibold" scope="col">
               Lead
             </th>
-            <th className="px-4 py-3 font-semibold" scope="col">
+            <th className="px-3 py-2.5 font-semibold" scope="col">
               Score
             </th>
-            <th className="px-4 py-3 font-semibold" scope="col">
+            <th className="px-3 py-2.5 font-semibold" scope="col">
               Status
             </th>
-            <th className="px-4 py-3 font-semibold" scope="col">
+            <th className="px-3 py-2.5 font-semibold" scope="col">
               Requirements
             </th>
-            <th className="px-4 py-3 font-semibold" scope="col">
+            <th className="px-3 py-2.5 font-semibold" scope="col">
               Readiness
             </th>
-            <th className="px-4 py-3 font-semibold" scope="col">
+            <th className="px-3 py-2.5 font-semibold" scope="col">
               Fintech
             </th>
-            <th className="px-4 py-3 font-semibold" scope="col">
+            <th className="hidden px-3 py-2.5 font-semibold 2xl:table-cell" scope="col">
               Created
             </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
           {leads.map((lead) => (
-            <tr className="align-top hover:bg-surface-subtle/70" key={lead.id}>
-              <td className="px-4 py-4">
+            <tr
+              className="align-top transition-colors hover:bg-surface-subtle/70"
+              key={lead.id}
+            >
+              <td className="px-3 py-3">
                 <Link
-                  className="font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="text-sm font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   href={`/admin/leads/${lead.id}`}
+                  prefetch={false}
                 >
                   {lead.full_name || "Unnamed renter"}
                 </Link>
-                <p className="mt-1 text-muted">{lead.email || "No email"}</p>
-                <p className="mt-1 text-muted">{lead.phone || "No phone"}</p>
-                <p className="mt-2 text-xs text-muted">
-                  Source: {formatLabel(lead.source_channel)}
+                <div className="mt-1 flex max-w-72 flex-wrap gap-x-3 gap-y-1 text-xs leading-5 text-muted">
+                  <span className="truncate">{lead.email || "No email"}</span>
+                  <span>{lead.phone || "No phone"}</span>
+                </div>
+                <p className="mt-1 text-[11px] leading-4 text-muted">
+                  {formatLabel(lead.source_channel)}
+                  <span className="mx-1.5 text-border">/</span>
+                  <time dateTime={lead.created_at}>{formatDateTime(lead.created_at)}</time>
                 </p>
               </td>
-              <td className="px-4 py-4">
+              <td className="px-3 py-3">
                 <span
                   className={cn(
-                    "inline-flex min-h-9 min-w-12 items-center justify-center rounded-full border px-3 font-bold",
+                    "inline-flex min-h-8 min-w-10 items-center justify-center rounded-full border px-2 text-sm font-bold",
                     scoreClasses(lead.intent_score),
                   )}
                 >
                   {lead.intent_score}
                 </span>
-                <p className="mt-2 text-xs font-semibold text-muted">
+                <p className="mt-1 text-[11px] font-semibold leading-4 text-muted">
                   {priorityLabel(lead.intent_score)}
                 </p>
               </td>
-              <td className="px-4 py-4">
-                <span
-                  className={cn(
-                    "rounded-full border px-3 py-1 font-semibold",
-                    statusClasses(lead.lead_status),
-                  )}
-                >
-                  {statusLabel(lead.lead_status)}
-                </span>
+              <td className="w-[205px] px-3 py-3">
+                <LeadStatusUpdateForm
+                  currentStatus={lead.lead_status}
+                  leadId={lead.id}
+                  leadName={lead.full_name || "Unnamed renter"}
+                />
                 {lead.assigned_agent_id ? (
-                  <p className="mt-2 max-w-40 truncate text-xs text-muted">
+                  <p className="mt-1.5 max-w-40 truncate text-[11px] leading-4 text-muted">
                     Agent {lead.assigned_agent_id}
                   </p>
                 ) : (
-                  <p className="mt-2 text-xs text-warning">Unassigned</p>
+                  <p className="mt-1.5 text-[11px] font-medium leading-4 text-warning">
+                    Unassigned
+                  </p>
                 )}
               </td>
-              <td className="px-4 py-4">
-                <p className="font-medium text-foreground">
+              <td className="px-3 py-3">
+                <p className="text-sm font-medium leading-5 text-foreground">
                   {lead.bedrooms_required ?? "-"} bed / {formatRent(lead.max_rent)}
                 </p>
-                <p className="mt-1 max-w-56 text-muted">
+                <p className="mt-1 max-w-52 text-xs leading-5 text-muted">
                   {formatAreas(lead.areas_preferred)}
                 </p>
-                <p className="mt-1 text-muted">Move by {formatDateOnly(lead.move_in_by)}</p>
+                <p className="mt-1 text-xs leading-5 text-muted">
+                  Move by {formatDateOnly(lead.move_in_by)}
+                </p>
               </td>
-              <td className="px-4 py-4">
-                <p className="font-medium text-foreground">
+              <td className="px-3 py-3">
+                <p className="text-sm font-medium leading-5 text-foreground">
                   {formatLabel(lead.employment_status)}
                 </p>
-                <p className="mt-1 text-muted">Guarantor: {formatLabel(lead.has_guarantor)}</p>
-                <p className="mt-1 text-muted">
+                <p className="mt-1 text-xs leading-5 text-muted">
+                  Guarantor: {formatLabel(lead.has_guarantor)}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-muted">
                   Deposit: {formatLabel(lead.deposit_availability)}
                 </p>
               </td>
-              <td className="px-4 py-4">
+              <td className="px-3 py-3">
                 <FintechFlags flags={lead.fintech_flags} />
               </td>
-              <td className="px-4 py-4 text-muted">
+              <td className="hidden px-3 py-3 text-xs leading-5 text-muted 2xl:table-cell">
                 <time dateTime={lead.created_at}>{formatDateTime(lead.created_at)}</time>
               </td>
             </tr>
@@ -526,10 +484,7 @@ function LeadPagination({
 }
 
 function LeadLoadError({ error }: { error: unknown }) {
-  const detail =
-    error instanceof ApiError && error.status === 422
-      ? "One of the lead filters could not be accepted by the API."
-      : "The admin leads API could not be reached. Confirm the backend is running and try again.";
+  const detail = leadLoadErrorMessage(error);
 
   return (
     <div className="rounded-md border border-danger/30 bg-danger/10 p-5 text-danger">
@@ -538,6 +493,22 @@ function LeadLoadError({ error }: { error: unknown }) {
       <p className="mt-2 text-sm leading-6">{detail}</p>
     </div>
   );
+}
+
+function leadLoadErrorMessage(error: unknown) {
+  if (error instanceof ApiError) {
+    if (error.status === 401) {
+      return "Your admin session expired. Sign in again to continue.";
+    }
+    if (error.status === 403) {
+      return "This signed-in account is not authorised for the admin lead list.";
+    }
+    if (error.status === 422) {
+      return "One of the lead filters could not be accepted by the API.";
+    }
+  }
+
+  return "The admin leads API could not be reached. Confirm the backend is running and try again.";
 }
 
 function buildLeadsHref({
@@ -582,19 +553,6 @@ function parsePositiveInteger(value: string | undefined, fallback: number) {
 
 function statusLabel(status: AdminLeadStatus) {
   return leadStatusOptions.find((option) => option.value === status)?.label ?? status;
-}
-
-function statusClasses(status: AdminLeadStatus) {
-  if (status === "new") {
-    return "border-warning/30 bg-warning/10 text-warning";
-  }
-  if (status === "lost") {
-    return "border-danger/30 bg-danger/10 text-danger";
-  }
-  if (status === "completed") {
-    return "border-success/30 bg-success/10 text-success";
-  }
-  return "border-border bg-surface-subtle text-muted";
 }
 
 function scoreClasses(score: number) {

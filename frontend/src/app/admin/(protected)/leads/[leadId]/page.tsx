@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { StatusPill } from "@/components/ui/status-pill";
 import { adminApi, ApiError } from "@/lib/api";
 import type { AdminConversation, AdminLeadDetail, AdminLeadStatus } from "@/lib/api";
-import { getAdminAuthState } from "@/lib/admin/auth";
+import { getAdminSessionState } from "@/lib/admin/auth";
 import { pageMetadata } from "@/lib/metadata";
 import { cn } from "@/lib/utils";
 
@@ -52,7 +52,7 @@ export default async function LeadDetailPage({
   params,
   searchParams,
 }: LeadDetailPageProps) {
-  const authState = await getAdminAuthState();
+  const authState = await getAdminSessionState();
   if (authState.status !== "authenticated") {
     return null;
   }
@@ -72,7 +72,7 @@ export default async function LeadDetailPage({
     if (error instanceof ApiError && error.status === 404) {
       notFound();
     }
-    return <LeadDetailLoadError />;
+    return <LeadDetailLoadError error={error} />;
   }
 
   return (
@@ -97,7 +97,7 @@ export default async function LeadDetailPage({
             <CardHeader>
               <CardTitle>Notes and status</CardTitle>
               <CardDescription>
-                Update the operational state used by the admin pipeline.
+                Record the latest action and keep the pipeline status current.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -108,7 +108,7 @@ export default async function LeadDetailPage({
           <Card>
             <CardHeader>
               <CardTitle>Admin metadata</CardTitle>
-              <CardDescription>Internal fields exposed only behind admin auth.</CardDescription>
+              <CardDescription>Reference fields for audit and support.</CardDescription>
             </CardHeader>
             <CardContent>
               <dl className="space-y-3 text-sm">
@@ -142,8 +142,8 @@ function LeadHeader({ lead }: { lead: AdminLeadDetail }) {
             {lead.full_name || "Unnamed renter"}
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
-            Agent briefing for contact, requirements, readiness, conversation context,
-            and follow-up notes.
+            Contact details, requirements, readiness, chat context, and follow-up
+            notes in one place.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -235,7 +235,7 @@ function ConversationPanel({ conversations }: { conversations: AdminConversation
           <div>
             <CardTitle>Conversation</CardTitle>
             <CardDescription>
-              Linked website chat sessions, ordered by conversation start time.
+              Linked website chat sessions, newest context first.
             </CardDescription>
           </div>
           <StatusPill>{numberFormatter.format(conversations.length)} sessions</StatusPill>
@@ -358,7 +358,7 @@ function FintechFlags({ flags }: { flags: Record<string, unknown> }) {
   );
 }
 
-function LeadDetailLoadError() {
+function LeadDetailLoadError({ error }: { error: unknown }) {
   return (
     <div className="rounded-md border border-danger/30 bg-danger/10 p-5 text-danger">
       <p className="text-sm font-bold uppercase tracking-[0.08em]">
@@ -366,10 +366,23 @@ function LeadDetailLoadError() {
       </p>
       <h1 className="mt-3 text-2xl font-bold">Could not load this lead.</h1>
       <p className="mt-2 text-sm leading-6">
-        Confirm the backend is running and that the admin leads API is reachable.
+        {adminLoadErrorMessage(error, "lead detail")}
       </p>
     </div>
   );
+}
+
+function adminLoadErrorMessage(error: unknown, resource: string) {
+  if (error instanceof ApiError) {
+    if (error.status === 401) {
+      return "Your admin session expired. Sign in again to continue.";
+    }
+    if (error.status === 403) {
+      return `This signed-in account is not authorised for this admin ${resource}.`;
+    }
+  }
+
+  return "Confirm the backend is running and that the admin leads API is reachable.";
 }
 
 function firstParam(value: string | string[] | undefined) {

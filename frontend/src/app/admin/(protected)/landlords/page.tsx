@@ -9,7 +9,7 @@ import type {
   AdminLandlordListResponse,
   AdminLandlordStatus,
 } from "@/lib/api";
-import { getAdminAuthState } from "@/lib/admin/auth";
+import { getAdminSessionState } from "@/lib/admin/auth";
 import { pageMetadata } from "@/lib/metadata";
 import { cn } from "@/lib/utils";
 
@@ -55,7 +55,7 @@ type AdminLandlordsPageProps = {
 export default async function AdminLandlordsPage({
   searchParams,
 }: AdminLandlordsPageProps) {
-  const authState = await getAdminAuthState();
+  const authState = await getAdminSessionState();
   if (authState.status !== "authenticated") {
     return null;
   }
@@ -152,24 +152,28 @@ function LandlordStatStrip({
       label: "Visible rows",
       value: totalVisible,
       detail: "Current filter result",
+      badge: "Filtered",
       tone: "neutral" as const,
     },
     {
       label: "New on page",
       value: newCount,
       detail: "Awaiting first contact",
+      badge: "Needs action",
       tone: newCount > 0 ? ("warning" as const) : ("neutral" as const),
     },
     {
       label: "Advanced Rent",
       value: advancedRentCount,
       detail: "Interest on this page",
+      badge: "Interest",
       tone: advancedRentCount > 0 ? ("success" as const) : ("neutral" as const),
     },
     {
       label: "Listing interest",
       value: listingInterestCount,
       detail: "Interest on this page",
+      badge: "Interest",
       tone: listingInterestCount > 0 ? ("success" as const) : ("neutral" as const),
     },
   ];
@@ -177,7 +181,10 @@ function LandlordStatStrip({
   return (
     <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="Landlord stats">
       {stats.map((stat) => (
-        <div className="rounded-md border border-border bg-surface p-4" key={stat.label}>
+        <div
+          className="rounded-md border border-border bg-surface p-4 transition duration-200 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-soft motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+          key={stat.label}
+        >
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-muted">{stat.label}</p>
@@ -186,7 +193,7 @@ function LandlordStatStrip({
               </p>
             </div>
             <StatusPill className="min-h-8 px-2 text-xs" tone={stat.tone}>
-              Live
+              {stat.badge}
             </StatusPill>
           </div>
           <p className="mt-2 text-sm leading-5 text-muted">{stat.detail}</p>
@@ -433,7 +440,7 @@ function LandlordPagination({
 }
 
 function LandlordLoadError({ error }: { error: unknown }) {
-  const apiStatus = error instanceof ApiError ? ` API returned ${error.status}.` : "";
+  const detail = landlordLoadErrorMessage(error);
 
   return (
     <div className="rounded-md border border-danger/30 bg-danger/10 p-5 text-danger">
@@ -441,12 +448,23 @@ function LandlordLoadError({ error }: { error: unknown }) {
         Landlords unavailable
       </p>
       <h1 className="mt-3 text-2xl font-bold">Could not load landlord leads.</h1>
-      <p className="mt-2 text-sm leading-6">
-        Confirm the backend is running and that the admin landlords API is reachable.
-        {apiStatus}
-      </p>
+      <p className="mt-2 text-sm leading-6">{detail}</p>
     </div>
   );
+}
+
+function landlordLoadErrorMessage(error: unknown) {
+  if (error instanceof ApiError) {
+    if (error.status === 401) {
+      return "Your admin session expired. Sign in again to continue.";
+    }
+    if (error.status === 403) {
+      return "This signed-in account is not authorised for the admin landlord list.";
+    }
+    return `The admin landlords API returned ${error.status}.`;
+  }
+
+  return "Confirm the backend is running and that the admin landlords API is reachable.";
 }
 
 function buildLandlordsHref({

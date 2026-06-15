@@ -57,16 +57,16 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
           <div className="my-12 max-w-xl">
             <StatusPill>Protected admin</StatusPill>
             <h1 className="mt-5 text-4xl font-bold leading-tight text-foreground sm:text-5xl">
-              Operations workspace for human follow-up.
+              Human follow-up starts here.
             </h1>
             <p className="mt-5 text-base leading-7 text-muted">
-              Phase 1 keeps lead handling private: Supabase authenticates the user,
-              then the backend verifies the matching agent has admin access.
+              Review renter and landlord enquiries, prioritise urgent follow-up,
+              and keep each conversation moving from one private workspace.
             </p>
           </div>
 
           <p className="text-sm leading-6 text-muted">
-            No public registration is available for admin accounts.
+            Admin access is restricted to authorised Proper Rent operators.
           </p>
         </section>
 

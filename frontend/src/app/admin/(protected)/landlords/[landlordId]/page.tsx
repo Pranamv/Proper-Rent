@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { StatusPill } from "@/components/ui/status-pill";
 import { adminApi, ApiError } from "@/lib/api";
 import type { AdminLandlordDetail, AdminLandlordStatus } from "@/lib/api";
-import { getAdminAuthState } from "@/lib/admin/auth";
+import { getAdminSessionState } from "@/lib/admin/auth";
 import { pageMetadata } from "@/lib/metadata";
 import { cn } from "@/lib/utils";
 
@@ -48,7 +48,7 @@ export default async function LandlordDetailPage({
   params,
   searchParams,
 }: LandlordDetailPageProps) {
-  const authState = await getAdminAuthState();
+  const authState = await getAdminSessionState();
   if (authState.status !== "authenticated") {
     return null;
   }
@@ -64,7 +64,7 @@ export default async function LandlordDetailPage({
     if (error instanceof ApiError && error.status === 404) {
       notFound();
     }
-    return <LandlordDetailLoadError />;
+    return <LandlordDetailLoadError error={error} />;
   }
 
   return (
@@ -91,7 +91,7 @@ export default async function LandlordDetailPage({
             <CardHeader>
               <CardTitle>Notes and status</CardTitle>
               <CardDescription>
-                Update the operational state used by the landlord pipeline.
+                Record the latest action and keep landlord follow-up current.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -102,7 +102,7 @@ export default async function LandlordDetailPage({
           <Card>
             <CardHeader>
               <CardTitle>Admin metadata</CardTitle>
-              <CardDescription>Internal fields exposed only behind admin auth.</CardDescription>
+              <CardDescription>Reference fields for audit and support.</CardDescription>
             </CardHeader>
             <CardContent>
               <dl className="space-y-3 text-sm">
@@ -133,7 +133,7 @@ function LandlordHeader({ landlord }: { landlord: AdminLandlordDetail }) {
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
             Agent briefing for contact, property details, product interest, and
-            follow-up notes. Landlord leads are not scored in Phase 1.
+            follow-up notes.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -146,7 +146,7 @@ function LandlordHeader({ landlord }: { landlord: AdminLandlordDetail }) {
             {statusLabel(landlord.status)}
           </span>
           <span className="inline-flex min-h-9 items-center rounded-full border border-border bg-surface-subtle px-3 text-sm font-semibold text-muted">
-            Not scored
+            Human reviewed
           </span>
         </div>
       </div>
@@ -259,7 +259,7 @@ function InterestPill({
   );
 }
 
-function LandlordDetailLoadError() {
+function LandlordDetailLoadError({ error }: { error: unknown }) {
   return (
     <div className="rounded-md border border-danger/30 bg-danger/10 p-5 text-danger">
       <p className="text-sm font-bold uppercase tracking-[0.08em]">
@@ -267,10 +267,23 @@ function LandlordDetailLoadError() {
       </p>
       <h1 className="mt-3 text-2xl font-bold">Could not load this landlord.</h1>
       <p className="mt-2 text-sm leading-6">
-        Confirm the backend is running and that the admin landlords API is reachable.
+        {adminLoadErrorMessage(error, "landlord detail")}
       </p>
     </div>
   );
+}
+
+function adminLoadErrorMessage(error: unknown, resource: string) {
+  if (error instanceof ApiError) {
+    if (error.status === 401) {
+      return "Your admin session expired. Sign in again to continue.";
+    }
+    if (error.status === 403) {
+      return `This signed-in account is not authorised for this admin ${resource}.`;
+    }
+  }
+
+  return "Confirm the backend is running and that the admin landlords API is reachable.";
 }
 
 function firstParam(value: string | string[] | undefined) {

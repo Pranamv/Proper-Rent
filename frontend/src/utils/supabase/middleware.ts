@@ -31,14 +31,14 @@ export const updateSession = async (request: NextRequest) => {
     },
   );
 
-  // IMPORTANT: do not run code between createServerClient and getUser(). This
-  // call is what refreshes the auth token and writes the rotated cookies onto
-  // supabaseResponse. Removing it can log users out at random.
+  // Keep middleware lightweight. The protected admin layout and backend API
+  // validate the access token; middleware only checks whether a session cookie
+  // exists so unauthenticated visitors can be redirected early.
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!user && request.nextUrl.pathname !== "/admin/login") {
+  if (!session?.access_token && request.nextUrl.pathname !== "/admin/login") {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/admin/login";
     redirectUrl.search = "";

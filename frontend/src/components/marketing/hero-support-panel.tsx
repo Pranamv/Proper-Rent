@@ -1,4 +1,4 @@
-import { PiggyBank, ShieldCheck, UserCheck } from "@phosphor-icons/react/dist/ssr";
+import { PiggyBank, ShieldCheck } from "@phosphor-icons/react/dist/ssr";
 import Image from "next/image";
 
 const supportHighlights = [
@@ -40,22 +40,6 @@ export function HeroSupportPanel() {
               <ShieldCheck size={16} weight="bold" aria-hidden="true" />
               Guarantor options
             </span>
-          </div>
-          <div className="absolute bottom-4 left-4 right-4 hidden rounded-md border border-primary-foreground/25 bg-surface/95 p-4 shadow-soft backdrop-blur sm:block">
-            <div className="flex items-start gap-3">
-              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
-                <UserCheck size={22} weight="bold" aria-hidden="true" />
-              </span>
-              <div>
-                <p className="text-sm font-bold text-foreground">
-                  Human follow-up after registration
-                </p>
-                <p className="mt-1 text-sm leading-6 text-muted">
-                  An agent confirms live availability and the route that fits your
-                  situation.
-                </p>
-              </div>
-            </div>
           </div>
         </div>
         <div className="grid gap-3 border-t border-border bg-surface p-4 sm:grid-cols-2">

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 import { adminApi, ApiError } from "@/lib/api";
 import type { AdminLandlordStatus, AdminLandlordUpdateRequest } from "@/lib/api";
-import { getAdminAuthState } from "@/lib/admin/auth";
+import { getAdminSessionState } from "@/lib/admin/auth";
 
 export type LandlordUpdateActionState = {
   message: string | null;
@@ -23,7 +23,7 @@ export async function updateLandlordAction(
   _previousState: LandlordUpdateActionState,
   formData: FormData,
 ): Promise<LandlordUpdateActionState> {
-  const authState = await getAdminAuthState();
+  const authState = await getAdminSessionState();
   if (authState.status !== "authenticated") {
     return {
       message: "Your admin session is no longer available. Sign in again.",

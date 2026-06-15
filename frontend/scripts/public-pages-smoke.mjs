@@ -166,8 +166,8 @@ assert.match(
 );
 assert.match(
   adminLandlordDetailSource,
-  /Not scored/,
-  "Admin landlord detail must make clear that landlord leads are not scored",
+  /Human reviewed/,
+  "Admin landlord detail must make clear that landlord leads are reviewed by an operator",
 );
 assert.match(
   adminLandlordActionSource,

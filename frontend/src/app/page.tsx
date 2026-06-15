@@ -52,12 +52,11 @@ export default function Home() {
               id="home-title"
               className="max-w-3xl text-4xl font-bold leading-[1.04] text-foreground sm:text-6xl sm:leading-[1.02]"
             >
-              Rent the home you love, even when referencing gets in the way.
+              Rent the home you love, even if traditional renting says no.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
-              Get help with Deposit Share, guarantor support, and a real Proper
-              Rent agent when upfront costs or referencing make renting harder
-              than it should be.
+              Fintech solutions for renters, built for students, professionals,
+              freelancers, and benefit recipients.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a className={buttonClasses({ size: "lg" })} href={site.routes.renterRegister}>
@@ -71,8 +70,7 @@ export default function Home() {
               </a>
             </div>
             <p className="mt-4 text-sm text-muted">
-              Takes 2 minutes. Contact details stay in the form. A real agent
-              follows up.
+              Takes 2 minutes. A real agent follows up.
             </p>
           </Reveal>
 
@@ -92,8 +90,8 @@ export default function Home() {
             Move in sooner, with less upfront.
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-7 text-muted">
-            Proper Rent focuses on the two barriers that stop good renters from
-            moving forward: upfront cash and traditional guarantor requirements.
+            Proper Rent tackles the two biggest barriers to moving in: upfront
+            cash and traditional guarantor requirements.
           </p>
           <Stagger className="mt-6 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
             <StaggerItem>
@@ -144,14 +142,6 @@ export default function Home() {
               </a>
             </p>
           </Reveal>
-          <p className="mt-4 text-sm leading-6 text-muted">
-            Built for students, young professionals, self-employed renters, Universal
-            Credit recipients, international movers, and renters who have struggled
-            with referencing elsewhere.{" "}
-            <a className="font-semibold text-foreground underline" href={site.routes.renters}>
-              See all renter options
-            </a>
-          </p>
         </Reveal>
 
         <Reveal as="section" className="py-10" aria-labelledby="who-we-help-title">
@@ -165,8 +155,9 @@ export default function Home() {
             Support for renters and landlords who need a clearer route.
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-7 text-muted">
-            The home page is renter-first, while still giving landlords a direct
-            route to register property and Advanced Rent interest.
+            Most of Proper Rent is built for renters, but landlords get a direct
+            route too, whether that is listing a property or asking about Advanced
+            Rent.
           </p>
           <Stagger className="mt-6 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
             <StaggerItem>
@@ -177,8 +168,9 @@ export default function Home() {
                   </span>
                   <CardTitle as="h3" className="text-lg">For renters</CardTitle>
                   <CardDescription>
-                    A more workable path for people blocked by upfront deposits,
-                    guarantor requirements, payslip rules, or traditional referencing.
+                    A more workable path if upfront deposits, guarantor
+                    requirements, payslip rules, or strict referencing have
+                    held you back before.
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -191,8 +183,8 @@ export default function Home() {
                   </span>
                   <CardTitle as="h3" className="text-lg">For landlords</CardTitle>
                   <CardDescription>
-                    A direct route to share property basics, listing interest, or
-                    Advanced Rent questions with a Proper Rent agent.
+                    Share your property details, list with us, or ask about
+                    Advanced Rent, and a Proper Rent agent follows up directly.
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -204,8 +196,8 @@ export default function Home() {
             </span>
             <p className="text-sm leading-6 text-muted">
               <span className="font-bold text-foreground">Human follow-up. </span>
-              The site can answer general questions, but a person handles live
-              availability, figures, viewings, and next steps.
+              The chatbot answers general questions, but a real person handles
+              live availability, figures, viewings, and next steps.
             </p>
           </Reveal>
         </Reveal>
@@ -240,8 +232,8 @@ export default function Home() {
                 },
                 {
                   icon: UserCheck,
-                  title: "Follow-up",
-                  body: "An agent reviews your enquiry and confirms current options directly.",
+                  title: "Agent follow-up",
+                  body: "A Proper Rent agent reviews your details and confirms your options directly.",
                 },
               ].map((step) => (
                 <StaggerItem as="li" className="flex gap-4 sm:flex-col sm:gap-3" key={step.title}>
@@ -273,17 +265,17 @@ export default function Home() {
               {
                 icon: UserCheck,
                 title: "Human-reviewed enquiries",
-                body: "Every registration is prepared for agent follow-up.",
+                body: "Every registration reaches a real agent, not just a database.",
               },
               {
                 icon: ShieldCheck,
                 title: "Contact details stay in forms",
-                body: "Chat answers general questions; personal details use consented forms.",
+                body: "The chatbot answers general questions; personal details only go through consented forms.",
               },
               {
                 icon: House,
-                title: "No fake live listings",
-                body: "Availability is confirmed by an agent, not guessed on the website.",
+                title: "Real, confirmed availability",
+                body: "No guessed listings. An agent confirms what's actually available.",
               },
               {
                 icon: Handshake,
@@ -306,8 +298,8 @@ export default function Home() {
 
         <Reveal>
           <CtaBand
-            title="Ready to speak to Proper Rent?"
-            body="Share your renter requirements or property details through the right form. A Proper Rent agent reviews the enquiry and follows up with next steps."
+            title="Ready to find your next home?"
+            body="Register your details and a Proper Rent agent will follow up personally, whether you're a renter looking for support or a landlord ready to list."
             primaryHref={site.routes.renterRegister}
             primaryLabel="Register as renter"
             secondaryHref={site.routes.landlordRegister}

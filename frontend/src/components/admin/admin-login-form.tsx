@@ -19,6 +19,7 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -73,9 +74,9 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
         <p className="text-sm font-bold uppercase tracking-[0.08em] text-primary">
           Admin login
         </p>
-        <CardTitle>Sign in to Proper Rent operations.</CardTitle>
+        <CardTitle>Sign in to the workspace.</CardTitle>
         <CardDescription>
-          Use the Supabase account linked to an admin row in the agents table.
+          Use the admin account assigned to Proper Rent operations.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -96,16 +97,29 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
 
           <Field>
             <FieldLabel htmlFor="admin-password">Password</FieldLabel>
-            <TextInput
-              autoComplete="current-password"
-              disabled={isSubmitting || !isSupabaseConfigured}
-              id="admin-password"
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              type="password"
-              value={password}
-            />
-            <FieldHint>Admin registration is managed outside the public website.</FieldHint>
+            <div className="flex gap-2">
+              <TextInput
+                autoComplete="current-password"
+                className="min-w-0"
+                disabled={isSubmitting || !isSupabaseConfigured}
+                id="admin-password"
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                type={showPassword ? "text" : "password"}
+                value={password}
+              />
+              <button
+                aria-controls="admin-password"
+                aria-pressed={showPassword}
+                className="h-11 shrink-0 rounded-md border border-border bg-surface px-3 text-sm font-semibold text-muted hover:bg-surface-subtle hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                disabled={isSubmitting || !isSupabaseConfigured}
+                onClick={() => setShowPassword((current) => !current)}
+                type="button"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+            <FieldHint>Admin access is invite-only.</FieldHint>
           </Field>
 
           {error ? (
