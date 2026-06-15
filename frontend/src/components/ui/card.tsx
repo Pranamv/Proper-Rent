@@ -18,9 +18,13 @@ export function CardHeader({ className, ...props }: ComponentPropsWithoutRef<"di
   return <div className={cn("space-y-2 p-5", className)} {...props} />;
 }
 
-export function CardTitle({ className, ...props }: ComponentPropsWithoutRef<"h2">) {
+type CardTitleProps = ComponentPropsWithoutRef<"h2"> & {
+  as?: "h2" | "h3" | "h4";
+};
+
+export function CardTitle({ as: Heading = "h2", className, ...props }: CardTitleProps) {
   return (
-    <h2
+    <Heading
       className={cn("text-base font-semibold leading-6 text-foreground", className)}
       {...props}
     />
