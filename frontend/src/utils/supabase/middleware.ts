@@ -1,44 +1,17 @@
-import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { isSupabaseConfigured, publicConfig } from "@/lib/config";
 
 export const updateSession = async (request: NextRequest) => {
-  let supabaseResponse = NextResponse.next({ request });
+  const response = NextResponse.next({ request });
 
   // If Supabase isn't configured (e.g. a build without .env.local), skip the
   // refresh rather than throwing and 500-ing the request.
   if (!isSupabaseConfigured) {
-    return supabaseResponse;
+    return response;
   }
 
-  const supabase = createServerClient(
-    publicConfig.supabase.url,
-    publicConfig.supabase.publishableKey,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
-          );
-        },
-      },
-    },
-  );
-
-  // Keep middleware lightweight. The protected admin layout and backend API
-  // validate the access token; middleware only checks whether a session cookie
-  // exists so unauthenticated visitors can be redirected early.
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session?.access_token && request.nextUrl.pathname !== "/admin/login") {
+  if (!hasSupabaseSessionCookie(request) && request.nextUrl.pathname !== "/admin/login") {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/admin/login";
     redirectUrl.search = "";
@@ -49,5 +22,26 @@ export const updateSession = async (request: NextRequest) => {
     return NextResponse.redirect(redirectUrl);
   }
 
-  return supabaseResponse;
+  return response;
 };
+
+function hasSupabaseSessionCookie(request: NextRequest) {
+  const projectRef = supabaseProjectRef(publicConfig.supabase.url);
+  const expectedPrefix = projectRef ? `sb-${projectRef}-auth-token` : "sb-";
+
+  return request.cookies.getAll().some(({ name }) => {
+    if (projectRef) {
+      return name === expectedPrefix || name.startsWith(`${expectedPrefix}.`);
+    }
+
+    return /^sb-.+-auth-token(?:\.\d+)?$/.test(name);
+  });
+}
+
+function supabaseProjectRef(url: string) {
+  try {
+    return new URL(url).hostname.split(".")[0] || null;
+  } catch {
+    return null;
+  }
+}
