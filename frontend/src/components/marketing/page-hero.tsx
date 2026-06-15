@@ -28,16 +28,19 @@ export function PageHero({
 }: PageHeroProps) {
   return (
     <section
-      className={cn("grid items-center gap-9 py-10 sm:py-14 lg:grid-cols-[1.06fr_0.94fr]", className)}
+      className={cn(
+        "grid items-center gap-9 py-10 sm:py-14 lg:grid-cols-[1.06fr_0.94fr]",
+        className,
+      )}
       aria-labelledby="page-title"
     >
-      <div>
+      <div className="min-w-0">
         <p className="mb-4 text-sm font-bold uppercase tracking-[0.08em] text-primary">
           {eyebrow}
         </p>
         <h1
           id="page-title"
-          className="max-w-4xl text-5xl font-bold leading-[0.98] text-foreground sm:text-6xl"
+          className="max-w-4xl text-4xl font-bold leading-[1.04] text-foreground sm:text-6xl sm:leading-[1.02]"
         >
           {title}
         </h1>
@@ -59,7 +62,7 @@ export function PageHero({
           </div>
         ) : null}
       </div>
-      {aside ? <div>{aside}</div> : null}
+      {aside ? <div className="min-w-0">{aside}</div> : null}
     </section>
   );
 }

@@ -25,24 +25,24 @@ export const renterFaqs: FaqItem[] = [
 
 export const landlordFaqs: FaqItem[] = [
   {
-    question: "Are landlord leads scored?",
+    question: "Will every landlord enquiry be reviewed?",
     answer:
-      "No. Every landlord submission notifies the agent because listing and Advanced Rent opportunities are inherently valuable.",
+      "Yes. A Proper Rent agent reviews landlord enquiries and follows up where the property or rent plan is a fit.",
   },
   {
     question: "What is Advanced Rent?",
     answer:
-      "Advanced Rent is a landlord-side proposition for receiving rent upfront while tenants continue paying monthly.",
+      "Advanced Rent lets eligible landlords receive future rent as an upfront lump sum while tenants continue paying monthly.",
   },
   {
     question: "Will Proper Rent list my property automatically?",
     answer:
-      "No. In Phase 1, an agent reviews the details and follows up manually to discuss listing and next steps.",
+      "No. An agent reviews the details first, then discusses whether listing support is the right next step.",
   },
   {
     question: "Do I need to be interested in Advanced Rent to enquire?",
     answer:
-      "No. You can register interest in listing, Advanced Rent, or both. The agent will discuss the right route with you.",
+      "No. You can ask about Advanced Rent, listing support, or both. The agent will discuss the right route with you.",
   },
 ];
 
@@ -100,17 +100,17 @@ export const renterAudienceSegments = [
 export const advancedRentHighlights = [
   {
     title: "A lump sum, upfront",
-    body: "Receive a lump sum of future rent in advance, rather than waiting for it to land month by month.",
+    body: "Access future rent earlier as a lump sum instead of waiting month by month.",
     icon: "Bank",
   },
   {
     title: "Tenants pay as normal",
-    body: "Your tenants continue paying rent on the existing monthly schedule, so nothing changes for them.",
+    body: "Tenants continue paying on their normal monthly schedule.",
     icon: "CalendarCheck",
   },
   {
     title: "Agent-confirmed eligibility",
-    body: "An agent confirms whether Advanced Rent fits your property and works through the figures with you.",
+    body: "An agent checks whether Advanced Rent fits your property and talks through the figures.",
     icon: "UserCheck",
   },
 ] as const;

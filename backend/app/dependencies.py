@@ -146,6 +146,7 @@ async def require_admin(
         payload = verify_supabase_access_token(
             credentials.credentials,
             jwt_secret=settings.supabase_jwt_secret,
+            supabase_url=settings.supabase_url,
         )
         email = extract_admin_email(payload)
     except AdminAuthError:

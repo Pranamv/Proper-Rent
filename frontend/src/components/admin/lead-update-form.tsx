@@ -70,8 +70,8 @@ export function LeadUpdateForm({ lead }: LeadUpdateFormProps) {
           placeholder="Leave blank to clear assignment"
         />
         <FieldHint>
-          Phase 1 does not expose an agent directory yet. Paste the target agent id
-          or leave blank to mark the lead unassigned.
+          Paste an agent id to assign ownership, or leave blank to keep this lead
+          unassigned.
         </FieldHint>
       </Field>
 

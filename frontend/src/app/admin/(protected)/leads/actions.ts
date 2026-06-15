@@ -1,15 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { adminApi, ApiError } from "@/lib/api";
-import type { AdminLeadStatus, AdminLeadUpdateRequest } from "@/lib/api";
+import type { AdminLeadStatus } from "@/lib/api";
 import { getAdminSessionState } from "@/lib/admin/auth";
 
-export type LeadUpdateActionState = {
+export type LeadStatusUpdateActionState = {
+  leadStatus?: AdminLeadStatus;
   message: string | null;
-  status: "idle" | "error";
+  status: "idle" | "success" | "error";
+  updatedAt?: number;
 };
 
 const leadStatuses: AdminLeadStatus[] = [
@@ -26,46 +27,33 @@ const leadStatuses: AdminLeadStatus[] = [
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export async function updateLeadAction(
-  _previousState: LeadUpdateActionState,
+export async function updateLeadStatusAction(
+  _previousState: LeadStatusUpdateActionState,
   formData: FormData,
-): Promise<LeadUpdateActionState> {
+): Promise<LeadStatusUpdateActionState> {
   const authState = await getAdminSessionState();
   if (authState.status !== "authenticated") {
     return {
-      message: "Your admin session is no longer available. Sign in again.",
+      message: "Your admin session expired. Sign in again.",
       status: "error",
     };
   }
 
   const leadId = stringValue(formData.get("lead_id"));
   const leadStatus = stringValue(formData.get("lead_status"));
-  const assignedAgentId = stringValue(formData.get("assigned_agent_id"));
-  const notes = stringValue(formData.get("notes"));
 
-  if (!leadId) {
-    return { message: "Missing lead id.", status: "error" };
+  if (!uuidPattern.test(leadId)) {
+    return { message: "Missing or invalid lead id.", status: "error" };
   }
 
   if (!isLeadStatus(leadStatus)) {
     return { message: "Choose a valid lead status.", status: "error" };
   }
 
-  if (assignedAgentId && !uuidPattern.test(assignedAgentId)) {
-    return {
-      message: "Assigned agent must be a valid UUID, or blank to clear.",
-      status: "error",
-    };
-  }
-
-  const payload: AdminLeadUpdateRequest = {
-    assigned_agent_id: assignedAgentId || null,
-    lead_status: leadStatus,
-    notes: notes || null,
-  };
-
   try {
-    await adminApi.updateLead(authState.accessToken, leadId, payload);
+    await adminApi.updateLead(authState.accessToken, leadId, {
+      lead_status: leadStatus,
+    });
   } catch (error) {
     return {
       message: updateErrorMessage(error),
@@ -73,9 +61,15 @@ export async function updateLeadAction(
     };
   }
 
-  revalidatePath(`/admin/leads/${leadId}`);
   revalidatePath("/admin/leads");
-  redirect(`/admin/leads/${leadId}?updated=1`);
+  revalidatePath(`/admin/leads/${leadId}`);
+
+  return {
+    leadStatus,
+    message: "Saved",
+    status: "success",
+    updatedAt: Date.now(),
+  };
 }
 
 function stringValue(value: FormDataEntryValue | null) {
@@ -92,9 +86,9 @@ function updateErrorMessage(error: unknown) {
       return "This lead no longer exists.";
     }
     if (error.status === 422) {
-      return "The assigned agent id does not reference an agent.";
+      return "Choose one of the supported lead statuses.";
     }
   }
 
-  return "The lead could not be updated. Check the backend and try again.";
+  return "Status could not be updated. Check the backend and try again.";
 }

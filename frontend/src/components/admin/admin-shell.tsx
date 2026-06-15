@@ -4,12 +4,12 @@ import type { ReactNode } from "react";
 import { AdminNav } from "@/components/admin/admin-nav";
 import { AdminSignOutButton } from "@/components/admin/admin-sign-out-button";
 import { StatusPill } from "@/components/ui/status-pill";
-import type { AdminAuthCheckResponse } from "@/lib/api";
+import type { AdminSessionUser } from "@/lib/admin/auth";
 import { getAdminNavItems } from "@/lib/admin/navigation";
 import { site } from "@/lib/site";
 
 type AdminShellProps = {
-  admin: AdminAuthCheckResponse;
+  admin: AdminSessionUser;
   children: ReactNode;
 };
 
@@ -49,15 +49,15 @@ export function AdminShell({ admin, children }: AdminShellProps) {
               <AdminNav items={navItems} />
             </div>
             <div className="hidden border-t border-border pt-4 text-sm leading-6 text-muted lg:block">
-              <p className="font-semibold text-foreground">Phase 1 operations</p>
+              <p className="font-semibold text-foreground">Operations</p>
               <p className="mt-1">
-                Leads, landlord enquiries, and human follow-up stay inside this
-                protected workspace.
+                Review renter and landlord enquiries, update status, and keep
+                follow-up moving.
               </p>
             </div>
           </div>
           <div className="border-t border-border px-4 pb-4 lg:hidden">
-            <AdminNav items={navItems} />
+            <AdminNav compact items={navItems} />
           </div>
         </aside>
 
@@ -69,7 +69,7 @@ export function AdminShell({ admin, children }: AdminShellProps) {
                   Admin workspace
                 </p>
                 <p className="mt-1 truncate text-sm text-muted">
-                  Signed in as <span className="font-semibold text-foreground">{admin.email}</span>
+                  <span className="font-semibold text-foreground">{admin.email}</span>
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">

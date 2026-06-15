@@ -26,7 +26,7 @@ export function FaqSection({
         {items.map((item) => (
           <Card className="shadow-none" key={item.question}>
             <CardHeader>
-              <CardTitle>{item.question}</CardTitle>
+              <CardTitle as="h3">{item.question}</CardTitle>
               <CardDescription>{item.answer}</CardDescription>
             </CardHeader>
           </Card>

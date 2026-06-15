@@ -14,9 +14,8 @@ import type { Metadata } from "next";
 import { Container } from "@/components/layout/container";
 import { SiteShell } from "@/components/layout/site-shell";
 import { CtaBand } from "@/components/marketing/cta-band";
-import { JourneyPath } from "@/components/marketing/journey-path";
+import { HeroSupportPanel } from "@/components/marketing/hero-support-panel";
 import { JsonLd } from "@/components/marketing/json-ld";
-import { Testimonials } from "@/components/marketing/testimonials";
 import { Reveal } from "@/components/motion/reveal";
 import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { buttonClasses } from "@/components/ui/button";
@@ -27,10 +26,9 @@ import { absoluteUrl, site } from "@/lib/site";
 export const metadata: Metadata = pageMetadata({
   title: "Home",
   description:
-    "Proper Rent helps renters and landlords understand the letting process, register interest, and reach a human agent.",
+    "Proper Rent helps renters move forward with Deposit Share, guarantor support, and human agent follow-up.",
   path: site.routes.home,
 });
-
 
 export default function Home() {
   return (
@@ -46,19 +44,19 @@ export default function Home() {
       />
       <Container className="py-10 sm:py-14">
         <section
-          className="grid items-center gap-9 lg:grid-cols-[1.08fr_0.92fr]"
+          className="grid items-center gap-10 lg:grid-cols-[1.04fr_0.96fr]"
           aria-labelledby="home-title"
         >
-          <Reveal className="flex min-h-[360px] flex-col justify-center">
+          <Reveal className="flex min-h-[360px] min-w-0 flex-col justify-center">
             <h1
               id="home-title"
-              className="max-w-3xl text-5xl font-bold leading-[0.98] text-foreground sm:text-6xl"
+              className="max-w-3xl text-4xl font-bold leading-[1.04] text-foreground sm:text-6xl sm:leading-[1.02]"
             >
-              Rent the home you love — even if traditional renting says no
+              Rent the home you love, even if traditional renting says no.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
-              Ask our chatbot about the process, register your details, and a
-              Proper Rent agent will follow up personally.
+              Fintech solutions for renters, built for students, professionals,
+              freelancers, and benefit recipients.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a className={buttonClasses({ size: "lg" })} href={site.routes.renterRegister}>
@@ -76,61 +74,12 @@ export default function Home() {
             </p>
           </Reveal>
 
-          <Reveal className="flex items-center justify-center">
-            <JourneyPath />
+          <Reveal className="flex min-w-0 items-center justify-center">
+            <HeroSupportPanel />
           </Reveal>
         </section>
 
-        <Reveal as="section" className="py-10" aria-labelledby="who-we-help-title">
-          <h2
-            id="who-we-help-title"
-            className="text-2xl font-bold text-foreground sm:text-3xl"
-          >
-            Who Proper Rent helps
-          </h2>
-          <Stagger className="mt-6 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
-            <StaggerItem>
-              <Card>
-                <CardHeader>
-                  <span className="grid size-11 place-items-center rounded-full bg-accent-linen text-foreground">
-                    <House size={22} weight="bold" aria-hidden="true" />
-                  </span>
-                  <CardTitle className="text-lg">For renters</CardTitle>
-                  <CardDescription>
-                    Ask general questions, understand Deposit Share and guarantor options,
-                    then register so an agent can follow up.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </StaggerItem>
-            <StaggerItem>
-              <Card>
-                <CardHeader>
-                  <span className="grid size-11 place-items-center rounded-full bg-accent-linen text-foreground">
-                    <Buildings size={22} weight="bold" aria-hidden="true" />
-                  </span>
-                  <CardTitle className="text-lg">For landlords</CardTitle>
-                  <CardDescription>
-                    Share property basics and Advanced Rent interest. Every landlord
-                    submission notifies the agent.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </StaggerItem>
-          </Stagger>
-          <Reveal className="mt-4 flex flex-col gap-4 rounded-md bg-surface-elevated p-6 sm:flex-row sm:items-center sm:gap-5 sm:p-8">
-            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
-              <Handshake size={22} weight="bold" aria-hidden="true" />
-            </span>
-            <p className="text-sm leading-6 text-muted">
-              <span className="font-bold text-foreground">Human follow-up. </span>
-              The chatbot helps with general process questions, but a human agent handles
-              live availability and closing.
-            </p>
-          </Reveal>
-        </Reveal>
-
-        <Reveal as="section" className="py-10" aria-labelledby="fintech-title">
+        <Reveal as="section" className="py-10 sm:py-12" aria-labelledby="fintech-title">
           <p className="mb-3 text-sm font-bold uppercase tracking-[0.08em] text-primary">
             Fintech for renters
           </p>
@@ -140,14 +89,18 @@ export default function Home() {
           >
             Move in sooner, with less upfront.
           </h2>
+          <p className="mt-3 max-w-2xl text-base leading-7 text-muted">
+            Proper Rent tackles the two biggest barriers to moving in: upfront
+            cash and traditional guarantor requirements.
+          </p>
           <Stagger className="mt-6 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
             <StaggerItem>
-              <Card>
+              <Card className="h-full shadow-none">
                 <CardHeader>
                   <span className="grid size-11 place-items-center rounded-full bg-accent-linen text-foreground">
                     <PiggyBank size={22} weight="bold" aria-hidden="true" />
                   </span>
-                  <CardTitle className="text-lg">Deposit Share</CardTitle>
+                  <CardTitle as="h3" className="text-lg">Deposit Share</CardTitle>
                   <div className="flex flex-wrap items-baseline gap-2 pt-1">
                     <span className="text-4xl font-bold text-primary">Up to 85%</span>
                     <span className="text-sm text-muted">
@@ -162,12 +115,12 @@ export default function Home() {
               </Card>
             </StaggerItem>
             <StaggerItem>
-              <Card>
+              <Card className="h-full shadow-none">
                 <CardHeader>
                   <span className="grid size-11 place-items-center rounded-full bg-accent-linen text-foreground">
                     <ShieldCheck size={22} weight="bold" aria-hidden="true" />
                   </span>
-                  <CardTitle className="text-lg">Guarantor Solutions</CardTitle>
+                  <CardTitle as="h3" className="text-lg">Guarantor Solutions</CardTitle>
                   <CardDescription>
                     Our guarantor partner can act as your UK guarantor, so you can rent
                     the property you want, even as a student, someone new to the UK,
@@ -189,14 +142,64 @@ export default function Home() {
               </a>
             </p>
           </Reveal>
-          <p className="mt-4 text-sm leading-6 text-muted">
-            Built for students, young professionals, self-employed renters, Universal
-            Credit recipients, international movers, and renters who have struggled
-            with referencing elsewhere.{" "}
-            <a className="font-semibold text-foreground underline" href={site.routes.renters}>
-              See all renter options
-            </a>
+        </Reveal>
+
+        <Reveal as="section" className="py-10" aria-labelledby="who-we-help-title">
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.08em] text-primary">
+            Who it helps
           </p>
+          <h2
+            id="who-we-help-title"
+            className="text-2xl font-bold text-foreground sm:text-3xl"
+          >
+            Support for renters and landlords who need a clearer route.
+          </h2>
+          <p className="mt-3 max-w-2xl text-base leading-7 text-muted">
+            Most of Proper Rent is built for renters, but landlords get a direct
+            route too, whether that is listing a property or asking about Advanced
+            Rent.
+          </p>
+          <Stagger className="mt-6 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+            <StaggerItem>
+              <Card className="h-full shadow-none">
+                <CardHeader>
+                  <span className="grid size-11 place-items-center rounded-full bg-accent-linen text-foreground">
+                    <House size={22} weight="bold" aria-hidden="true" />
+                  </span>
+                  <CardTitle as="h3" className="text-lg">For renters</CardTitle>
+                  <CardDescription>
+                    A more workable path if upfront deposits, guarantor
+                    requirements, payslip rules, or strict referencing have
+                    held you back before.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </StaggerItem>
+            <StaggerItem>
+              <Card className="h-full shadow-none">
+                <CardHeader>
+                  <span className="grid size-11 place-items-center rounded-full bg-accent-linen text-foreground">
+                    <Buildings size={22} weight="bold" aria-hidden="true" />
+                  </span>
+                  <CardTitle as="h3" className="text-lg">For landlords</CardTitle>
+                  <CardDescription>
+                    Share your property details, list with us, or ask about
+                    Advanced Rent, and a Proper Rent agent follows up directly.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </StaggerItem>
+          </Stagger>
+          <Reveal className="mt-4 flex flex-col gap-4 rounded-md bg-surface-elevated p-6 sm:flex-row sm:items-center sm:gap-5 sm:p-8">
+            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
+              <Handshake size={22} weight="bold" aria-hidden="true" />
+            </span>
+            <p className="text-sm leading-6 text-muted">
+              <span className="font-bold text-foreground">Human follow-up. </span>
+              The chatbot answers general questions, but a real person handles
+              live availability, figures, viewings, and next steps.
+            </p>
+          </Reveal>
         </Reveal>
 
         <Reveal
@@ -220,7 +223,7 @@ export default function Home() {
                 {
                   icon: ChatCircleDots,
                   title: "Ask",
-                  body: "Use the chatbot for Proper Rent, letting-process, and generic fintech questions.",
+                  body: "Use the chatbot for general Proper Rent, deposit, guarantor, and landlord questions.",
                 },
                 {
                   icon: ClipboardText,
@@ -229,8 +232,8 @@ export default function Home() {
                 },
                 {
                   icon: UserCheck,
-                  title: "Follow-up",
-                  body: "An agent reviews the briefing and confirms current options manually.",
+                  title: "Agent follow-up",
+                  body: "A Proper Rent agent reviews your details and confirms your options directly.",
                 },
               ].map((step) => (
                 <StaggerItem as="li" className="flex gap-4 sm:flex-col sm:gap-3" key={step.title}>
@@ -247,16 +250,60 @@ export default function Home() {
           </div>
         </Reveal>
 
-        <Testimonials />
+        <Reveal as="section" className="py-10" aria-labelledby="trust-title">
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.08em] text-primary">
+            Trust signals
+          </p>
+          <h2
+            id="trust-title"
+            className="max-w-3xl text-2xl font-bold text-foreground sm:text-3xl"
+          >
+            Built for trust from the first click.
+          </h2>
+          <Stagger className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                icon: UserCheck,
+                title: "Human-reviewed enquiries",
+                body: "Every registration reaches a real agent, not just a database.",
+              },
+              {
+                icon: ShieldCheck,
+                title: "Contact details stay in forms",
+                body: "The chatbot answers general questions; personal details only go through consented forms.",
+              },
+              {
+                icon: House,
+                title: "Real, confirmed availability",
+                body: "No guessed listings. An agent confirms what's actually available.",
+              },
+              {
+                icon: Handshake,
+                title: "Clear next steps",
+                body: "Renters and landlords start from separate, focused routes.",
+              },
+            ].map((item) => (
+              <StaggerItem key={item.title}>
+                <div className="h-full rounded-md border border-border bg-surface p-5">
+                  <span className="grid size-10 place-items-center rounded-full bg-accent-linen text-foreground">
+                    <item.icon size={20} weight="bold" aria-hidden="true" />
+                  </span>
+                  <h3 className="mt-4 font-bold text-foreground">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted">{item.body}</p>
+                </div>
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </Reveal>
 
         <Reveal>
           <CtaBand
-            title="Ready to speak to Proper Rent?"
-            body="Register your requirements or property details. The forms submit to the live backend with consent and human follow-up."
+            title="Ready to find your next home?"
+            body="Register your details and a Proper Rent agent will follow up personally, whether you're a renter looking for support or a landlord ready to list."
             primaryHref={site.routes.renterRegister}
-            primaryLabel="Renter registration"
+            primaryLabel="Register as renter"
             secondaryHref={site.routes.landlordRegister}
-            secondaryLabel="Landlord registration"
+            secondaryLabel="Register as landlord"
           />
         </Reveal>
       </Container>

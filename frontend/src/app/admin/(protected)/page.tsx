@@ -20,13 +20,13 @@ export const metadata: Metadata = {
 const workspaceCards = [
   {
     title: "Renter leads",
-    body: "P1.5.2 adds the operational stat strip and lead pipeline powered by the admin leads API.",
+    body: "Prioritise renter enquiries by score, stage, move timing, and follow-up status.",
     href: "/admin/leads",
     label: "Open leads",
   },
   {
     title: "Landlords",
-    body: "Review landlord submissions, product interest, notes, and status using the admin landlords API.",
+    body: "Review property-owner enquiries, Advanced Rent interest, listing intent, and notes.",
     href: "/admin/landlords",
     label: "Open landlords",
   },
@@ -36,7 +36,7 @@ const dailyChecks = [
   "Review hot renter leads first and follow up within the two-hour target.",
   "Move contacted leads through qualified, viewing, offer, and completion stages.",
   "Review every landlord submission for listing or Advanced Rent follow-up.",
-  "Keep Scraye shortlisting and commission handoff manual during Phase 1.",
+  "Keep notes current so the next agent can understand the last action quickly.",
 ];
 
 export default function AdminOverviewPage() {
@@ -44,27 +44,36 @@ export default function AdminOverviewPage() {
     <div className="space-y-6">
       <section className="rounded-md border border-border bg-surface p-5 shadow-soft">
         <p className="text-sm font-bold uppercase tracking-[0.08em] text-primary">
-          P1.5.1 foundation
+          Daily operations
         </p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground">
-          Admin shell and auth flow are active.
+          Review enquiries and move follow-up forward.
         </h1>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
-          This protected workspace is ready for the lead and landlord operational views.
-          Supabase handles sign-in, while the backend confirms the signed-in user is an
-          admin agent before any admin route renders.
+          Use the queues below to prioritise renter leads, review landlord
+          opportunities, and keep status notes current across the team.
         </p>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2" aria-label="Admin workspaces">
         {workspaceCards.map((item) => (
-          <Card className="shadow-none" key={item.href}>
+          <Card
+            className="group shadow-none transition duration-200 hover:-translate-y-1 hover:border-primary/45 hover:shadow-soft motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            key={item.href}
+          >
             <CardHeader>
-              <CardTitle>{item.title}</CardTitle>
+              <CardTitle as="h2">{item.title}</CardTitle>
               <CardDescription>{item.body}</CardDescription>
             </CardHeader>
             <CardContent>
-              <Link className={buttonClasses({ variant: "secondary", size: "sm" })} href={item.href}>
+              <Link
+                className={buttonClasses({
+                  className: "group-hover:border-primary/45",
+                  variant: "secondary",
+                  size: "sm",
+                })}
+                href={item.href}
+              >
                 {item.label}
               </Link>
             </CardContent>
