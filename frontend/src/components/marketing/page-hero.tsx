@@ -4,6 +4,7 @@ import { buttonClasses } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type HeroAction = {
+  className?: string;
   href: string;
   label: string;
   variant?: "primary" | "secondary";
@@ -16,6 +17,7 @@ type PageHeroProps = {
   actions?: HeroAction[];
   aside?: ReactNode;
   className?: string;
+  eyebrowClassName?: string;
 };
 
 export function PageHero({
@@ -24,6 +26,7 @@ export function PageHero({
   body,
   className,
   eyebrow,
+  eyebrowClassName,
   title,
 }: PageHeroProps) {
   return (
@@ -35,7 +38,12 @@ export function PageHero({
       aria-labelledby="page-title"
     >
       <div className="min-w-0">
-        <p className="mb-4 text-sm font-bold uppercase tracking-[0.08em] text-primary">
+        <p
+          className={cn(
+            "mb-4 text-sm font-bold uppercase tracking-[0.08em] text-primary",
+            eyebrowClassName,
+          )}
+        >
           {eyebrow}
         </p>
         <h1
@@ -50,11 +58,15 @@ export function PageHero({
             {actions.map((action) => (
               <a
                 className={buttonClasses({
+                  className: cn(
+                    "max-[420px]:h-11 max-[420px]:px-4 max-[420px]:text-sm",
+                    action.className,
+                  ),
                   variant: action.variant ?? "primary",
                   size: "lg",
                 })}
                 href={action.href}
-                key={action.href}
+                key={action.label}
               >
                 {action.label}
               </a>

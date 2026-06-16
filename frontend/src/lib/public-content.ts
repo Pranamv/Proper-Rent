@@ -4,7 +4,7 @@ export const renterFaqs: FaqItem[] = [
   {
     question: "Can Proper Rent show me live available listings?",
     answer:
-      "Not in Phase 1. The site and chatbot answer general process and fintech questions, then a human agent confirms current availability directly.",
+      "Not directly on the website. A Proper Rent agent confirms current availability and viewing options after registration.",
   },
   {
     question: "Does everyone who registers reach an agent?",
@@ -14,7 +14,7 @@ export const renterFaqs: FaqItem[] = [
   {
     question: "Can I ask about Deposit Share or a guarantor before registering?",
     answer:
-      "Yes. The chatbot and renter page explain those products in general terms, without quoting figures for a specific property.",
+      "Yes. The renter page and assistant explain those options in general terms. A Proper Rent agent confirms what applies to your situation.",
   },
   {
     question: "Should I share my phone or email in chat?",
@@ -49,18 +49,13 @@ export const landlordFaqs: FaqItem[] = [
 export const renterFintechItems = [
   {
     title: "Deposit Share",
-    body: "Covers up to 85% of your deposit on day one, so you can move in sooner and keep more cash in your pocket. Your share is returned at the end of the tenancy, and the landlord still receives the full deposit, protected as usual.",
+    body: "Can reduce the deposit you need upfront while the landlord still receives the full protected deposit.",
     icon: "PiggyBank",
   },
   {
     title: "Guarantor Solutions",
-    body: "Our guarantor partner can act as your UK guarantor, so you can rent the property you want, even if you're a student, new to the UK, self-employed, or on Universal Credit.",
+    body: "Useful if you are a student, new to the UK, self-employed, on Universal Credit, or without a traditional guarantor.",
     icon: "ShieldCheck",
-  },
-  {
-    title: "Rent Club / Ribbon Rewards",
-    body: "A renter-facing rewards benefit that can support conversion and ongoing engagement.",
-    icon: "Sparkle",
   },
 ] as const;
 

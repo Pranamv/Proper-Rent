@@ -2,7 +2,6 @@ import {
   Bank,
   Buildings,
   CalendarCheck,
-  Handshake,
   HouseLine,
   UserCheck,
 } from "@phosphor-icons/react/dist/ssr";
@@ -12,7 +11,7 @@ import { Container } from "@/components/layout/container";
 import { SiteShell } from "@/components/layout/site-shell";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { FaqSection } from "@/components/marketing/faq-section";
-import { LandlordHeroPanel } from "@/components/marketing/landlord-hero-panel";
+import { LandlordJourneyPath } from "@/components/marketing/landlord-journey-path";
 import { PageHero } from "@/components/marketing/page-hero";
 import { Section } from "@/components/marketing/section";
 import { Reveal } from "@/components/motion/reveal";
@@ -35,8 +34,18 @@ export const metadata: Metadata = pageMetadata({
   path: site.routes.landlords,
 });
 
-const interactiveCardClass =
-  "group h-full shadow-none transition duration-200 hover:-translate-y-1 hover:border-primary/45 hover:shadow-soft motion-reduce:transition-none motion-reduce:hover:translate-y-0";
+const infoCardClass = "h-full shadow-none";
+const clickableCardClass =
+  "group block h-full rounded-md border border-border bg-surface p-5 text-foreground shadow-none transition duration-200 hover:-translate-y-1 hover:border-[#7B5C3A]/55 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B5C3A] motion-reduce:transition-none motion-reduce:hover:translate-y-0";
+const landlordPrimaryButtonClass =
+  "bg-[#7B5C3A] text-[#FBF7EF] hover:bg-[#6B4F32] active:bg-[#6B4F32] focus-visible:ring-[#7B5C3A]";
+const landlordSecondaryButtonClass =
+  "border-[#7B5C3A]/35 bg-[#F3E6D8]/60 text-foreground hover:border-[#7B5C3A]/60 hover:bg-[#F3E6D8] focus-visible:ring-[#7B5C3A]";
+const landlordIconClass =
+  "grid size-11 place-items-center rounded-full bg-accent-linen text-[#7B5C3A]";
+const landlordRouteIconClass =
+  "grid size-11 place-items-center rounded-full bg-accent-linen text-[#7B5C3A] transition-colors group-hover:bg-[#7B5C3A] group-hover:text-[#FBF7EF]";
+const landlordEyebrowClass = "text-[#7B5C3A]";
 
 export default function LandlordsPage() {
   return (
@@ -44,21 +53,29 @@ export default function LandlordsPage() {
       <Container>
         <PageHero
           eyebrow="For landlords"
-          title="Get rent upfront while tenants keep paying monthly."
-          body="Advanced Rent helps landlords unlock future rent as a lump sum. Share your property details and a Proper Rent agent will confirm whether it fits."
+          eyebrowClassName={landlordEyebrowClass}
+          title="Register your property. Choose the right landlord route."
+          body="Share the basics once. A Proper Rent agent reviews whether listing support, Advanced Rent, or both make sense."
           actions={[
-            { href: site.routes.landlordRegister, label: "Advanced Rent" },
             {
+              className: landlordPrimaryButtonClass,
               href: site.routes.landlordRegister,
-              label: "List property",
+              label: "Register property",
+            },
+            {
+              className: landlordSecondaryButtonClass,
+              href: site.routes.landlordRegister,
+              label: "Advanced Rent",
               variant: "secondary",
             },
           ]}
-          aside={<LandlordHeroPanel />}
+          aside={<LandlordJourneyPath />}
+          className="lg:grid-cols-[0.98fr_1.02fr] lg:gap-12"
         />
 
         <Section
           eyebrow="Advanced Rent"
+          eyebrowClassName={landlordEyebrowClass}
           title="Cash flow now. Tenant payments stay familiar."
           body="Advanced Rent is designed for landlords who want earlier access to rent without changing the tenant's monthly payment routine."
         >
@@ -67,9 +84,9 @@ export default function LandlordsPage() {
               const Icon = advancedRentIcons[item.icon as keyof typeof advancedRentIcons];
               return (
                 <StaggerItem key={item.title}>
-                  <Card className={interactiveCardClass}>
+                  <Card className={infoCardClass}>
                     <CardHeader>
-                      <span className="grid size-11 place-items-center rounded-full bg-accent-linen text-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                      <span className={landlordIconClass}>
                         <Icon size={22} weight="bold" aria-hidden="true" />
                       </span>
                       <CardTitle as="h3">{item.title}</CardTitle>
@@ -83,7 +100,7 @@ export default function LandlordsPage() {
         </Section>
 
         <Reveal as="section" className="py-10" aria-labelledby="landlord-routes-title">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.08em] text-primary">
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.08em] text-[#7B5C3A]">
             Choose your route
           </p>
           <h2
@@ -109,15 +126,15 @@ export default function LandlordsPage() {
             ].map((route) => (
               <StaggerItem key={route.title}>
                 <a
-                  className="group block h-full rounded-md border border-border bg-surface p-5 text-foreground shadow-none transition duration-200 hover:-translate-y-1 hover:border-primary/45 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                  className={clickableCardClass}
                   href={route.href}
                 >
-                  <span className="grid size-11 place-items-center rounded-full bg-accent-linen text-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                  <span className={landlordRouteIconClass}>
                     <route.icon size={22} weight="bold" aria-hidden="true" />
                   </span>
                   <h3 className="mt-4 font-bold text-foreground">{route.title}</h3>
                   <p className="mt-2 text-sm leading-6 text-muted">{route.body}</p>
-                  <span className="mt-4 inline-flex text-sm font-bold text-primary">
+                  <span className="mt-4 inline-flex text-sm font-bold text-[#7B5C3A]">
                     Start here
                   </span>
                 </a>
@@ -128,30 +145,36 @@ export default function LandlordsPage() {
 
         <Section
           eyebrow="How it works"
-          title="A short review, then a human conversation."
-          body="The form gives the agent enough context to discuss the right route without turning the website into a long qualification process."
+          eyebrowClassName={landlordEyebrowClass}
+          title="From property details to the next move."
+          body="Register once, then a Proper Rent agent reviews the right route for listing support, Advanced Rent, or both."
         >
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
-                icon: HouseLine,
-                title: "Share the property",
-                body: "Address, bedroom count, rent guide, availability, and what you want to discuss.",
+                icon: Buildings,
+                title: "Register property",
+                body: "Share the property details, rent guide, availability, and what you want help with.",
               },
               {
                 icon: UserCheck,
-                title: "Agent reviews fit",
-                body: "A Proper Rent agent checks the details before recommending next steps.",
+                title: "Agent review",
+                body: "A Proper Rent agent checks whether listing support, Advanced Rent, or both make sense.",
               },
               {
-                icon: Handshake,
-                title: "Agree the next move",
-                body: "Continue with Advanced Rent, listing support, or a direct follow-up conversation.",
+                icon: Bank,
+                title: "List or rent upfront",
+                body: "Choose the next step with an agent: list the property, discuss upfront rent, or both.",
+              },
+              {
+                icon: HouseLine,
+                title: "Move toward a let",
+                body: "Work toward a tenant, listing outcome, or rent plan with human follow-up.",
               },
             ].map((item) => (
-              <Card className={interactiveCardClass} key={item.title}>
+              <Card className={infoCardClass} key={item.title}>
                 <CardHeader>
-                  <span className="grid size-11 shrink-0 place-items-center rounded-full bg-accent-linen text-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                  <span className={landlordIconClass}>
                     <item.icon size={22} weight="bold" aria-hidden="true" />
                   </span>
                   <CardTitle as="h3">{item.title}</CardTitle>

@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   },
   description:
     "Proper Rent helps renters and landlords move from website interest to a human letting agent.",
+  icons: {
+    icon: "/favicon.svg",
+  },
   openGraph: {
     title: "Proper Rent",
     description:

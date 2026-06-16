@@ -5,7 +5,6 @@ import {
   Globe,
   PiggyBank,
   ShieldCheck,
-  Sparkle,
   Wallet,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
@@ -15,8 +14,8 @@ import { SiteShell } from "@/components/layout/site-shell";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { PageHero } from "@/components/marketing/page-hero";
+import { RenterJourneyPath } from "@/components/marketing/renter-journey-path";
 import { Section } from "@/components/marketing/section";
-import { StatList } from "@/components/marketing/stat-list";
 import { Reveal } from "@/components/motion/reveal";
 import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +30,6 @@ import { site } from "@/lib/site";
 const fintechIcons = {
   PiggyBank,
   ShieldCheck,
-  Sparkle,
 } as const;
 
 const segmentIcons = {
@@ -46,7 +44,7 @@ const segmentIcons = {
 export const metadata: Metadata = pageMetadata({
   title: "For Renters",
   description:
-    "Learn how Proper Rent helps renters ask general letting questions, understand fintech options, and register for human agent follow-up.",
+    "Register your rental requirements with Proper Rent, understand deposit and guarantor support, and move toward agent-led viewings.",
   path: site.routes.renters,
 });
 
@@ -56,8 +54,8 @@ export default function RentersPage() {
       <Container>
         <PageHero
           eyebrow="For renters"
-          title="Ask the right questions before you register."
-          body="Proper Rent gives renters a simple path: get general guidance, understand Deposit Share and guarantor options, then submit requirements for a human agent to follow up."
+          title="Register your requirements. Move toward real viewings."
+          body="Share what you need once. A Proper Rent agent reviews your details, checks suitable next steps, and helps you move forward."
           actions={[
             { href: site.routes.renterRegister, label: "Register as renter" },
             {
@@ -66,35 +64,28 @@ export default function RentersPage() {
               variant: "secondary",
             },
           ]}
-          aside={
-            <StatList
-              items={[
-                { value: "100%", label: "Website registrations reach the agent pipeline." },
-                { value: "0", label: "Live listings shown in Phase 1." },
-                { value: "24h", label: "Target follow-up for warm renter leads." },
-              ]}
-            />
-          }
+          aside={<RenterJourneyPath />}
+          className="lg:grid-cols-[0.98fr_1.02fr] lg:gap-12"
         />
 
         <Section
           eyebrow="How we help"
-          title="A useful first step before agent follow-up."
-          body="The chatbot and public pages answer generic questions. Structured personal details belong in the intake form, not chat."
+          title="A clearer route from interest to viewing."
+          body="The renter form gives the agent the details they need to understand your move, your budget, and where extra support may help."
         >
           <div className="grid gap-4 md:grid-cols-3">
             {[
               {
-                title: "Letting-process guidance",
-                body: "Ask about renting steps, common documents, deposits, guarantors, and what happens after registering.",
+                title: "Share your situation",
+                body: "Tell us your budget, areas, move timing, bedrooms, and current rental position.",
               },
               {
-                title: "Agent-ready requirements",
-                body: "The form captures bedrooms, areas, budget, move-in timing, employment, deposit, guarantor, and consent.",
+                title: "Check support options",
+                body: "Deposit Share and guarantor options can be discussed where they fit your circumstances.",
               },
               {
-                title: "No listing claims",
-                body: "Specific availability is confirmed by a human agent because Phase 1 has no public listing data.",
+                title: "Move to viewings",
+                body: "A Proper Rent agent confirms current options and helps you move toward suitable viewings.",
               },
             ].map((item) => (
               <Card className="shadow-none" key={item.title}>
@@ -109,10 +100,10 @@ export default function RentersPage() {
 
         <Section
           eyebrow="Fintech for renters"
-          title="Built to make renting affordable."
-          body="These are general product options. An agent confirms the figures that apply to your specific situation and property before anything is finalised."
+          title="Reduce the blockers that slow renters down."
+          body="These are general support options. A Proper Rent agent confirms what applies to your situation before anything is finalised."
         >
-          <Stagger className="grid gap-4 md:grid-cols-3">
+          <Stagger className="grid gap-4 md:grid-cols-2">
             {renterFintechItems.map((item) => {
               const Icon = fintechIcons[item.icon as keyof typeof fintechIcons];
               return (
@@ -136,7 +127,7 @@ export default function RentersPage() {
           <Section
             eyebrow="Who it's for"
             title="Built for renters who get overlooked elsewhere."
-            body="Whatever's making other landlords hesitate, our fintech options are designed to open doors instead of closing them."
+            body="If deposits, guarantors, payslip rules, or referencing have slowed you down, Proper Rent helps you find a clearer next step."
           >
             <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {renterAudienceSegments.map((segment) => {
@@ -163,7 +154,7 @@ export default function RentersPage() {
 
         <CtaBand
           title="Ready to register your requirements?"
-          body="Submit the renter form when you are ready to share contact details and move requirements under consent."
+          body="Submit your details once. A Proper Rent agent will review your requirements and follow up with the right next step."
           primaryHref={site.routes.renterRegister}
           primaryLabel="Start renter registration"
           secondaryHref={site.routes.privacy}

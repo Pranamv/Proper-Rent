@@ -4,6 +4,11 @@ export const site = {
   name: "Proper Rent",
   description:
     "Proper Rent helps renters and landlords move from website interest to a human letting agent.",
+  contactEmail: "hello@properrent.co.uk",
+  social: {
+    whatsapp: "",
+    facebook: "",
+  },
   routes: {
     home: "/",
     renters: "/renters",

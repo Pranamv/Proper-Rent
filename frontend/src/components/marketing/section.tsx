@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 
 type SectionProps = ComponentPropsWithoutRef<"section"> & {
   eyebrow?: string;
+  eyebrowClassName?: string;
   title: string;
   body?: string;
   children: ReactNode;
@@ -14,6 +15,7 @@ export function Section({
   children,
   className,
   eyebrow,
+  eyebrowClassName,
   title,
   ...props
 }: SectionProps) {
@@ -21,7 +23,12 @@ export function Section({
     <section className={cn("py-10 sm:py-12", className)} {...props}>
       <div className="mb-8 max-w-3xl">
         {eyebrow ? (
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.08em] text-primary">
+          <p
+            className={cn(
+              "mb-3 text-sm font-bold uppercase tracking-[0.08em] text-primary",
+              eyebrowClassName,
+            )}
+          >
             {eyebrow}
           </p>
         ) : null}
