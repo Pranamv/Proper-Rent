@@ -30,9 +30,9 @@ export function LeadStatusFilterBar({ filters }: LeadStatusFilterBarProps) {
 
   return (
     <div className="min-w-0" aria-label="Lead status filters">
-      <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1" role="list">
+      <div className="flex flex-wrap gap-1.5" role="list">
         {filters.map((filter) => (
-          <div className="shrink-0" key={filter.href} role="listitem">
+          <div key={filter.href} role="listitem">
             <Link
               aria-current={filter.isActive ? "page" : undefined}
               aria-label={`${filter.label}: ${filter.count} leads`}

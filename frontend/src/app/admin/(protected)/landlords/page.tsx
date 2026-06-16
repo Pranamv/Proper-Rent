@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AdminQuickActions } from "@/components/admin/admin-quick-actions";
 import { buttonClasses } from "@/components/ui/button";
 import { StatusPill } from "@/components/ui/status-pill";
 import { adminApi, ApiError } from "@/lib/api";
@@ -37,11 +38,6 @@ const landlordStatusOptions: { label: string; value: AdminLandlordStatus }[] = [
 const landlordStatuses = landlordStatusOptions.map((option) => option.value);
 
 const numberFormatter = new Intl.NumberFormat("en-GB");
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Europe/London",
-});
 
 type AdminLandlordsSearchParams = {
   page?: string | string[];
@@ -101,7 +97,7 @@ export default async function AdminLandlordsPage({
 
       <LandlordStatStrip landlords={landlordResponse.results} totalVisible={landlordResponse.total} />
 
-      <section className="rounded-md border border-border bg-surface">
+      <section className="overflow-hidden rounded-md border border-border bg-surface">
         <div className="border-b border-border p-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -243,31 +239,80 @@ function LandlordStatusFilters({
 
 function LandlordTable({ landlords }: { landlords: AdminLandlordListItem[] }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-[1000px] text-left text-sm">
-        <thead className="border-b border-border bg-surface-subtle text-xs uppercase tracking-[0.08em] text-muted">
+    <>
+      <div className="grid gap-3 p-3 lg:hidden">
+        {landlords.map((landlord) => (
+          <article
+            className="rounded-md border border-border bg-background p-3"
+            key={landlord.id}
+          >
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <Link
+                  className="block break-words text-sm font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  href={`/admin/landlords/${landlord.id}`}
+                >
+                  {landlord.full_name || "Unnamed landlord"}
+                </Link>
+                <p className="mt-1 break-all text-xs leading-5 text-muted">
+                  {landlord.email || "No email"}
+                </p>
+              </div>
+              <span
+                className={cn(
+                  "inline-flex min-h-8 w-fit rounded-full border px-3 py-1 text-xs font-semibold",
+                  statusClasses(landlord.status),
+                )}
+              >
+                {statusLabel(landlord.status)}
+              </span>
+            </div>
+
+            <div className="mt-3 border-t border-border pt-3 text-xs leading-5 text-muted">
+              <p className="break-words font-semibold text-foreground">
+                {landlord.property_address || "No address captured"}
+              </p>
+              <p className="mt-1">
+                {formatBedrooms(landlord.bedrooms)} / {formatRent(landlord.asking_rent)}
+              </p>
+              <div className="mt-2">
+                <InterestFlags landlord={landlord} />
+              </div>
+              <p className="mt-2">Available {formatDateOnly(landlord.available_from)}</p>
+            </div>
+
+            <div className="mt-3 border-t border-border pt-3">
+              <AdminQuickActions openHref={`/admin/landlords/${landlord.id}`} />
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="hidden lg:block">
+        <table className="w-full table-fixed text-left text-sm">
+          <thead className="sticky top-16 z-10 border-b border-border bg-surface-subtle text-xs uppercase tracking-[0.08em] text-muted">
           <tr>
-            <th className="px-4 py-3 font-semibold" scope="col">
+            <th className="w-[24%] px-4 py-3 font-semibold" scope="col">
               Landlord
             </th>
-            <th className="px-4 py-3 font-semibold" scope="col">
+            <th className="w-[34%] px-4 py-3 font-semibold" scope="col">
               Property
             </th>
-            <th className="px-4 py-3 font-semibold" scope="col">
+            <th className="w-[15%] px-4 py-3 font-semibold" scope="col">
               Interest
             </th>
-            <th className="px-4 py-3 font-semibold" scope="col">
+            <th className="w-[11%] px-4 py-3 font-semibold" scope="col">
               Status
             </th>
-            <th className="px-4 py-3 font-semibold" scope="col">
+            <th className="w-[9%] px-4 py-3 font-semibold" scope="col">
               Availability
             </th>
-            <th className="px-4 py-3 font-semibold" scope="col">
-              Created
+            <th className="w-[7%] px-4 py-3 font-semibold" scope="col">
+              Actions
             </th>
           </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
+          </thead>
+          <tbody className="divide-y divide-border">
           {landlords.map((landlord) => (
             <tr className="align-top hover:bg-surface-subtle/70" key={landlord.id}>
               <td className="px-4 py-4">
@@ -277,11 +322,10 @@ function LandlordTable({ landlords }: { landlords: AdminLandlordListItem[] }) {
                 >
                   {landlord.full_name || "Unnamed landlord"}
                 </Link>
-                <p className="mt-1 text-muted">{landlord.email || "No email"}</p>
-                <p className="mt-1 text-muted">{landlord.phone || "No phone"}</p>
+                <p className="mt-1 truncate text-muted">{landlord.email || "No email"}</p>
               </td>
               <td className="px-4 py-4">
-                <p className="max-w-72 font-medium text-foreground">
+                <p className="break-words font-medium text-foreground">
                   {landlord.property_address || "No address captured"}
                 </p>
                 <p className="mt-1 text-muted">
@@ -304,16 +348,15 @@ function LandlordTable({ landlords }: { landlords: AdminLandlordListItem[] }) {
               <td className="px-4 py-4 text-muted">
                 {formatDateOnly(landlord.available_from)}
               </td>
-              <td className="px-4 py-4 text-muted">
-                <time dateTime={landlord.created_at}>
-                  {formatDateTime(landlord.created_at)}
-                </time>
+              <td className="px-4 py-4">
+                <AdminQuickActions openHref={`/admin/landlords/${landlord.id}`} />
               </td>
             </tr>
           ))}
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -542,11 +585,6 @@ function formatDateOnly(value: string | null | undefined) {
         dateStyle: "medium",
         timeZone: "Europe/London",
       }).format(date);
-}
-
-function formatDateTime(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : dateFormatter.format(date);
 }
 
 function formatRent(value: number | string | null | undefined) {

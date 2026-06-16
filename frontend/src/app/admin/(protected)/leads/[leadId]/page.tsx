@@ -3,6 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { AdminMetaItem } from "@/components/admin/admin-meta-item";
+import { AdminQuickActions } from "@/components/admin/admin-quick-actions";
+import { AdminSaveNotice } from "@/components/admin/admin-save-notice";
 import { LeadUpdateForm } from "@/components/admin/lead-update-form";
 import { buttonClasses } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +51,13 @@ type LeadDetailPageProps = {
   searchParams?: Promise<{ updated?: string | string[] }>;
 };
 
+type TranscriptMessage = {
+  content: string;
+  role: string;
+  timestamp?: string;
+  unsupported: boolean;
+};
+
 export default async function LeadDetailPage({
   params,
   searchParams,
@@ -77,11 +87,11 @@ export default async function LeadDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="space-y-3">
         <Link className={buttonClasses({ size: "sm", variant: "secondary" })} href="/admin/leads">
           Back to leads
         </Link>
-        {wasUpdated ? <StatusPill tone="success">Lead updated</StatusPill> : null}
+        {wasUpdated ? <AdminSaveNotice message="Lead updates saved." /> : null}
       </div>
 
       <LeadHeader lead={lead} />
@@ -112,15 +122,42 @@ export default async function LeadDetailPage({
             </CardHeader>
             <CardContent>
               <dl className="space-y-3 text-sm">
-                <MetaItem label="Lead id" value={lead.id} />
-                <MetaItem label="Session id" value={lead.session_id ?? "Not linked"} />
-                <MetaItem label="Assigned agent" value={lead.assigned_agent_id ?? "Unassigned"} />
-                <MetaItem
+                <AdminMetaItem
+                  actions={<AdminQuickActions copyLabel="Copy id" copyValue={lead.id} />}
+                  label="Lead id"
+                  value={lead.id}
+                  valueKind="identifier"
+                />
+                <AdminMetaItem
+                  actions={
+                    lead.session_id ? (
+                      <AdminQuickActions copyLabel="Copy session" copyValue={lead.session_id} />
+                    ) : null
+                  }
+                  label="Session id"
+                  value={lead.session_id ?? "Not linked"}
+                  valueKind={lead.session_id ? "identifier" : "default"}
+                />
+                <AdminMetaItem
+                  actions={
+                    lead.assigned_agent_id ? (
+                      <AdminQuickActions
+                        copyLabel="Copy agent"
+                        copyValue={lead.assigned_agent_id}
+                      />
+                    ) : null
+                  }
+                  label="Assigned agent"
+                  value={lead.assigned_agent_id ?? "Unassigned"}
+                  valueKind={lead.assigned_agent_id ? "identifier" : "default"}
+                />
+                <AdminMetaItem
                   label="Scraye intro"
                   value={lead.scraye_introduction_id ?? "Not recorded"}
+                  valueKind={lead.scraye_introduction_id ? "identifier" : "default"}
                 />
-                <MetaItem label="Consent version" value={lead.consent_version} />
-                <MetaItem label="Consent at" value={formatDateTime(lead.consent_at)} />
+                <AdminMetaItem label="Consent version" value={lead.consent_version} />
+                <AdminMetaItem label="Consent at" value={formatDateTime(lead.consent_at)} />
               </dl>
             </CardContent>
           </Card>
@@ -171,29 +208,47 @@ function LeadHeader({ lead }: { lead: AdminLeadDetail }) {
 
 function LeadOverview({ lead }: { lead: AdminLeadDetail }) {
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-4 2xl:grid-cols-2">
       <InfoCard title="Contact">
         <dl className="space-y-3 text-sm">
-          <MetaItem label="Email" value={lead.email ?? "No email"} />
-          <MetaItem label="Phone" value={lead.phone ?? "No phone"} />
-          <MetaItem label="Source" value={formatLabel(lead.source_channel)} />
-          <MetaItem label="Created" value={formatDateTime(lead.created_at)} />
+          <AdminMetaItem
+            actions={
+              lead.email ? (
+                <AdminQuickActions copyValue={lead.email} email={lead.email} />
+              ) : null
+            }
+            label="Email"
+            value={lead.email ?? "No email"}
+            valueKind={lead.email ? "contact" : "default"}
+          />
+          <AdminMetaItem
+            actions={
+              lead.phone ? (
+                <AdminQuickActions copyValue={lead.phone} phone={lead.phone} />
+              ) : null
+            }
+            label="Phone"
+            value={lead.phone ?? "No phone"}
+            valueKind={lead.phone ? "contact" : "default"}
+          />
+          <AdminMetaItem label="Source" value={formatLabel(lead.source_channel)} />
+          <AdminMetaItem label="Created" value={formatDateTime(lead.created_at)} />
         </dl>
       </InfoCard>
 
       <InfoCard title="Requirements">
         <dl className="space-y-3 text-sm">
-          <MetaItem label="Bedrooms" value={formatValue(lead.bedrooms_required)} />
-          <MetaItem label="Areas" value={formatAreas(lead.areas_preferred)} />
-          <MetaItem label="Max rent" value={formatRent(lead.max_rent)} />
-          <MetaItem label="Move from" value={lead.move_in_from ?? "Not set"} />
-          <MetaItem label="Move by" value={lead.move_in_by ?? "Not set"} />
-          <MetaItem
+          <AdminMetaItem label="Bedrooms" value={formatValue(lead.bedrooms_required)} />
+          <AdminMetaItem label="Areas" value={formatAreas(lead.areas_preferred)} />
+          <AdminMetaItem label="Max rent" value={formatRent(lead.max_rent)} />
+          <AdminMetaItem label="Move from" value={lead.move_in_from ?? "Not set"} />
+          <AdminMetaItem label="Move by" value={lead.move_in_by ?? "Not set"} />
+          <AdminMetaItem
             label="Furnished"
             value={formatLabel(lead.furnished_preference)}
           />
-          <MetaItem label="Pets" value={lead.pets ?? "Not set"} />
-          <MetaItem
+          <AdminMetaItem label="Pets" value={lead.pets ?? "Not set"} />
+          <AdminMetaItem
             label="Accessibility"
             value={lead.accessibility_needs ?? "Not set"}
           />
@@ -202,12 +257,12 @@ function LeadOverview({ lead }: { lead: AdminLeadDetail }) {
 
       <InfoCard title="Readiness">
         <dl className="space-y-3 text-sm">
-          <MetaItem label="Employment" value={formatLabel(lead.employment_status)} />
-          <MetaItem label="Income band" value={formatLabel(lead.annual_income_range)} />
-          <MetaItem label="Guarantor" value={formatLabel(lead.has_guarantor)} />
-          <MetaItem label="Deposit" value={formatLabel(lead.deposit_availability)} />
-          <MetaItem label="Housing" value={formatLabel(lead.current_housing)} />
-          <MetaItem
+          <AdminMetaItem label="Employment" value={formatLabel(lead.employment_status)} />
+          <AdminMetaItem label="Income band" value={formatLabel(lead.annual_income_range)} />
+          <AdminMetaItem label="Guarantor" value={formatLabel(lead.has_guarantor)} />
+          <AdminMetaItem label="Deposit" value={formatLabel(lead.deposit_availability)} />
+          <AdminMetaItem label="Housing" value={formatLabel(lead.current_housing)} />
+          <AdminMetaItem
             label="Rented before"
             value={
               lead.has_rented_before == null
@@ -260,6 +315,10 @@ function ConversationPanel({ conversations }: { conversations: AdminConversation
 }
 
 function ConversationCard({ conversation }: { conversation: AdminConversation }) {
+  const transcript = conversation.transcript.map(normaliseTranscriptMessage);
+  const previewMessages = transcript.slice(-2);
+  const hasMoreMessages = transcript.length > previewMessages.length;
+
   return (
     <article className="rounded-md border border-border bg-background p-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -281,33 +340,61 @@ function ConversationCard({ conversation }: { conversation: AdminConversation })
           <p className="font-semibold">AI summary</p>
           <p className="mt-1">{conversation.ai_summary}</p>
         </div>
-      ) : null}
+      ) : (
+        <div className="mt-4 rounded-md border border-border bg-surface p-3 text-sm leading-6 text-muted">
+          No AI summary recorded for this session.
+        </div>
+      )}
 
-      <ol className="mt-4 space-y-3">
-        {conversation.transcript.length > 0 ? (
-          conversation.transcript.map((message, index) => (
-            <li
-              className="rounded-md border border-border bg-surface p-3 text-sm leading-6"
-              key={`${conversation.id}-${index}`}
-            >
-              <p className="font-semibold text-foreground">
-                {formatTranscriptRole(message.role)}{" "}
-                <span className="font-normal text-muted">
-                  {formatTranscriptTime(message.ts ?? message.timestamp)}
-                </span>
-              </p>
-              <p className="mt-1 whitespace-pre-wrap text-muted">
-                {formatTranscriptContent(message)}
-              </p>
-            </li>
-          ))
+      <div className="mt-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+          Latest messages
+        </p>
+        {previewMessages.length > 0 ? (
+          <TranscriptList messages={previewMessages} />
         ) : (
-          <li className="rounded-md border border-border bg-surface p-3 text-sm text-muted">
+          <div className="mt-2 rounded-md border border-border bg-surface p-3 text-sm text-muted">
             Transcript is empty.
-          </li>
+          </div>
         )}
-      </ol>
+      </div>
+
+      {hasMoreMessages ? (
+        <details className="mt-4 rounded-md border border-border bg-surface">
+          <summary className="cursor-pointer px-3 py-2 text-sm font-semibold text-foreground marker:text-muted">
+            Show full transcript ({numberFormatter.format(transcript.length)} messages)
+          </summary>
+          <div className="border-t border-border p-3">
+            <TranscriptList messages={transcript} />
+          </div>
+        </details>
+      ) : null}
     </article>
+  );
+}
+
+function TranscriptList({ messages }: { messages: TranscriptMessage[] }) {
+  return (
+    <ol className="mt-2 space-y-2">
+      {messages.map((message, index) => (
+        <li
+          className={cn(
+            "rounded-md border p-3 text-sm leading-6",
+            transcriptRoleClasses(message.role),
+            message.unsupported && "border-warning/30 bg-warning/10 text-warning",
+          )}
+          key={`${message.role}-${index}-${message.timestamp ?? "no-time"}`}
+        >
+          <p className="font-semibold">
+            {formatTranscriptRole(message.role)}{" "}
+            <span className="font-normal opacity-75">
+              {formatTranscriptTime(message.timestamp)}
+            </span>
+          </p>
+          <p className="mt-1 whitespace-pre-wrap break-words">{message.content}</p>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -325,15 +412,6 @@ function InfoCard({
       </CardHeader>
       <CardContent>{children}</CardContent>
     </Card>
-  );
-}
-
-function MetaItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="grid gap-1 sm:grid-cols-[140px_1fr]">
-      <dt className="text-muted">{label}</dt>
-      <dd className="break-words font-medium text-foreground">{value}</dd>
-    </div>
   );
 }
 
@@ -470,16 +548,59 @@ function formatTranscriptRole(value: unknown) {
   return typeof value === "string" ? formatLabel(value) : "Message";
 }
 
-function formatTranscriptTime(value: unknown) {
-  return typeof value === "string" && value ? `- ${value}` : "";
+function formatTranscriptTime(value: string | undefined) {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? `- ${value}` : `- ${formatDateTime(value)}`;
 }
 
-function formatTranscriptContent(message: Record<string, unknown>) {
+function normaliseTranscriptMessage(message: Record<string, unknown>): TranscriptMessage {
+  const role = typeof message.role === "string" ? message.role : "message";
+  const timestamp =
+    typeof message.ts === "string"
+      ? message.ts
+      : typeof message.timestamp === "string"
+        ? message.timestamp
+        : undefined;
+
   if (typeof message.content === "string") {
-    return message.content;
+    return {
+      content: message.content,
+      role,
+      timestamp,
+      unsupported: false,
+    };
   }
   if (typeof message.text === "string") {
-    return message.text;
+    return {
+      content: message.text,
+      role,
+      timestamp,
+      unsupported: false,
+    };
   }
-  return JSON.stringify(message);
+
+  return {
+    content: "Unsupported message format",
+    role,
+    timestamp,
+    unsupported: true,
+  };
+}
+
+function transcriptRoleClasses(role: string) {
+  const normalisedRole = role.toLowerCase();
+  if (normalisedRole.includes("user") || normalisedRole.includes("renter")) {
+    return "border-primary/20 bg-accent text-accent-foreground";
+  }
+  if (normalisedRole.includes("assistant") || normalisedRole.includes("agent")) {
+    return "border-border bg-surface text-foreground";
+  }
+  if (normalisedRole.includes("system")) {
+    return "border-warning/20 bg-warning/10 text-warning";
+  }
+  return "border-border bg-surface text-muted";
 }

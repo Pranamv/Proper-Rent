@@ -24,9 +24,9 @@ export function AdminShell({ admin, children }: AdminShellProps) {
       >
         Skip to admin content
       </a>
-      <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
+      <div className="grid min-h-screen min-w-0 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="border-b border-border bg-surface lg:border-b-0 lg:border-r">
-          <div className="sticky top-0 flex gap-5 p-4 lg:min-h-screen lg:flex-col lg:p-5">
+          <div className="sticky top-0 flex min-w-0 gap-5 p-4 lg:min-h-screen lg:flex-col lg:p-5">
             <div className="min-w-0 flex-1 lg:flex-none">
               <Link
                 className="inline-flex items-center gap-3 rounded-md font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -56,14 +56,14 @@ export function AdminShell({ admin, children }: AdminShellProps) {
               </p>
             </div>
           </div>
-          <div className="border-t border-border px-4 pb-4 lg:hidden">
+          <div className="border-t border-border px-3 pb-3 pt-3 lg:hidden">
             <AdminNav compact items={navItems} />
           </div>
         </aside>
 
-        <div className="min-w-0">
+        <div className="min-w-0 overflow-hidden">
           <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
-            <div className="flex min-h-16 flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between lg:px-6">
+            <div className="flex min-h-16 min-w-0 flex-col gap-3 px-3 py-3 sm:flex-row sm:items-center sm:justify-between lg:px-6">
               <div className="min-w-0">
                 <p className="text-xs font-bold uppercase tracking-[0.08em] text-primary">
                   Admin workspace
@@ -72,10 +72,10 @@ export function AdminShell({ admin, children }: AdminShellProps) {
                   <span className="font-semibold text-foreground">{admin.email}</span>
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <StatusPill>Role: {admin.role}</StatusPill>
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <StatusPill className="min-h-8 px-2.5 text-xs">Role: {admin.role}</StatusPill>
                 <Link
-                  className="rounded-md px-3 py-2 text-sm font-semibold text-muted hover:bg-surface-subtle hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="rounded-md px-2.5 py-2 text-sm font-semibold text-muted hover:bg-surface-subtle hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   href={site.routes.home}
                 >
                   Public site
@@ -84,7 +84,7 @@ export function AdminShell({ admin, children }: AdminShellProps) {
               </div>
             </div>
           </header>
-          <main className="px-4 py-6 lg:px-6 lg:py-8" id="admin-content">
+          <main className="min-w-0 px-3 py-5 sm:px-4 lg:px-6 lg:py-8" id="admin-content">
             {children}
           </main>
         </div>

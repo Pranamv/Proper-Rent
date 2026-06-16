@@ -1,13 +1,13 @@
-const statusSkeletons = Array.from({ length: 9 }, (_, index) => index);
+const statusSkeletons = Array.from({ length: 5 }, (_, index) => index);
 const rowSkeletons = Array.from({ length: 5 }, (_, index) => index);
 
-export default function AdminLeadsLoading() {
+export default function AdminLandlordsLoading() {
   return (
-    <div className="space-y-5" aria-label="Loading leads" aria-busy="true">
-      <div className="rounded-md border border-border bg-surface p-4 shadow-soft">
-        <div className="h-4 w-16 rounded-full bg-surface-subtle" />
-        <div className="mt-3 h-7 w-56 rounded-full bg-surface-subtle" />
-        <div className="mt-3 h-4 max-w-xl rounded-full bg-surface-subtle" />
+    <div className="space-y-6" aria-label="Loading landlords" aria-busy="true">
+      <div className="rounded-md border border-border bg-surface p-5 shadow-soft">
+        <div className="h-4 w-24 rounded-full bg-surface-subtle" />
+        <div className="mt-3 h-8 w-64 rounded-full bg-surface-subtle" />
+        <div className="mt-3 h-4 max-w-2xl rounded-full bg-surface-subtle" />
       </div>
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -20,19 +20,16 @@ export default function AdminLeadsLoading() {
         ))}
       </div>
 
-      <section className="rounded-md border border-border bg-surface">
-        <div className="border-b border-border p-3">
-          <div className="grid gap-3 2xl:grid-cols-[minmax(160px,260px)_1fr]">
+      <section className="overflow-hidden rounded-md border border-border bg-surface">
+        <div className="border-b border-border p-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div className="h-5 w-20 rounded-full bg-surface-subtle" />
-              <div className="mt-2 h-3 w-32 rounded-full bg-surface-subtle" />
+              <div className="h-5 w-28 rounded-full bg-surface-subtle" />
+              <div className="mt-2 h-4 w-52 rounded-full bg-surface-subtle" />
             </div>
-            <div className="flex gap-1.5 overflow-hidden">
+            <div className="flex flex-wrap gap-2">
               {statusSkeletons.map((index) => (
-                <div
-                  className="h-8 w-20 shrink-0 rounded-md bg-surface-subtle"
-                  key={index}
-                />
+                <div className="h-9 w-20 rounded-md bg-surface-subtle" key={index} />
               ))}
             </div>
           </div>
@@ -41,12 +38,9 @@ export default function AdminLeadsLoading() {
         <div className="grid gap-3 p-3 lg:hidden">
           {rowSkeletons.map((index) => (
             <div className="rounded-md border border-border bg-background p-3" key={index}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="h-4 w-2/3 rounded-full bg-surface-subtle" />
-                  <div className="h-3 rounded-full bg-surface-subtle" />
-                </div>
-                <div className="size-9 rounded-full bg-surface-subtle" />
+              <div className="space-y-2">
+                <div className="h-4 w-2/3 rounded-full bg-surface-subtle" />
+                <div className="h-3 rounded-full bg-surface-subtle" />
               </div>
               <div className="mt-3 h-20 rounded-md bg-surface-subtle" />
               <div className="mt-3 h-8 w-20 rounded-md bg-surface-subtle" />
@@ -58,7 +52,7 @@ export default function AdminLeadsLoading() {
           <div className="divide-y divide-border">
             {rowSkeletons.map((index) => (
               <div
-                className="grid grid-cols-[1.4fr_0.55fr_0.85fr_1.7fr_0.6fr_0.45fr] gap-4 px-3 py-3"
+                className="grid grid-cols-[1.2fr_1.5fr_0.8fr_0.7fr_0.7fr_0.9fr] gap-4 px-4 py-4"
                 key={index}
               >
                 {Array.from({ length: 6 }, (_, cellIndex) => (

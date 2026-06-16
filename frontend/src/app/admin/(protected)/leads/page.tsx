@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AdminQuickActions } from "@/components/admin/admin-quick-actions";
 import { buttonClasses } from "@/components/ui/button";
 import { LeadStatusFilterBar } from "@/components/admin/lead-status-filter-bar";
-import { LeadStatusUpdateForm } from "@/components/admin/lead-status-update-form";
 import { StatusPill } from "@/components/ui/status-pill";
 import { adminApi, ApiError } from "@/lib/api";
 import type {
@@ -109,7 +109,7 @@ export default async function AdminLeadsPage({ searchParams }: AdminLeadsPagePro
 
       <LeadStatStrip summary={leadResponse.summary} totalVisible={leadResponse.total} />
 
-      <section className="rounded-md border border-border bg-surface">
+      <section className="overflow-hidden rounded-md border border-border bg-surface">
         <div className="border-b border-border p-3">
           <div className="grid gap-3 2xl:grid-cols-[minmax(160px,260px)_1fr] 2xl:items-start">
             <div className="min-w-0">
@@ -248,34 +248,81 @@ function LeadStatusFilters({
 
 function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-[900px] text-left text-sm">
-        <thead className="border-b border-border bg-surface-subtle text-[11px] uppercase tracking-[0.08em] text-muted">
+    <>
+      <div className="grid gap-3 p-3 lg:hidden">
+        {leads.map((lead) => (
+          <article
+            className="rounded-md border border-border bg-background p-3"
+            key={lead.id}
+          >
+            <div className="flex min-w-0 items-start justify-between gap-3">
+              <div className="min-w-0">
+                <Link
+                  className="block break-words text-sm font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  href={`/admin/leads/${lead.id}`}
+                  prefetch={false}
+                >
+                  {lead.full_name || "Unnamed renter"}
+                </Link>
+                <p className="mt-1 break-all text-xs leading-5 text-muted">
+                  {lead.email || "No email"}
+                </p>
+              </div>
+              <span
+                className={cn(
+                  "inline-flex min-h-8 min-w-10 shrink-0 items-center justify-center rounded-full border px-2 text-sm font-bold",
+                  scoreClasses(lead.intent_score),
+                )}
+              >
+                {lead.intent_score}
+              </span>
+            </div>
+
+            <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
+              <div className="grid gap-2 text-xs leading-5 text-muted">
+                <p>
+                  <span className="font-semibold text-foreground">
+                    {lead.bedrooms_required ?? "-"} bed / {formatRent(lead.max_rent)}
+                  </span>
+                </p>
+                <p className="break-words">{formatAreas(lead.areas_preferred)}</p>
+                <p>
+                  {statusLabel(lead.lead_status)}
+                  <span className="mx-1.5 text-border">/</span>
+                  Move by {formatDateOnly(lead.move_in_by)}
+                </p>
+              </div>
+              <AdminQuickActions openHref={`/admin/leads/${lead.id}`} />
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="hidden lg:block">
+        <table className="w-full table-fixed text-left text-sm">
+          <thead className="sticky top-16 z-10 border-b border-border bg-surface-subtle text-[11px] uppercase tracking-[0.08em] text-muted">
           <tr>
-            <th className="px-3 py-2.5 font-semibold" scope="col">
+            <th className="w-[24%] px-3 py-2.5 font-semibold" scope="col">
               Lead
             </th>
-            <th className="px-3 py-2.5 font-semibold" scope="col">
+            <th className="w-[11%] px-3 py-2.5 font-semibold" scope="col">
               Score
             </th>
-            <th className="px-3 py-2.5 font-semibold" scope="col">
+            <th className="w-[15%] px-3 py-2.5 font-semibold" scope="col">
               Status
             </th>
-            <th className="px-3 py-2.5 font-semibold" scope="col">
-              Requirements
+            <th className="w-[31%] px-3 py-2.5 font-semibold" scope="col">
+              Need
             </th>
-            <th className="px-3 py-2.5 font-semibold" scope="col">
-              Readiness
+            <th className="w-[11%] px-3 py-2.5 font-semibold" scope="col">
+              Timing
             </th>
-            <th className="px-3 py-2.5 font-semibold" scope="col">
-              Fintech
-            </th>
-            <th className="hidden px-3 py-2.5 font-semibold 2xl:table-cell" scope="col">
-              Created
+            <th className="w-[8%] px-3 py-2.5 font-semibold" scope="col">
+              Actions
             </th>
           </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
+          </thead>
+          <tbody className="divide-y divide-border">
           {leads.map((lead) => (
             <tr
               className="align-top transition-colors hover:bg-surface-subtle/70"
@@ -289,10 +336,9 @@ function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
                 >
                   {lead.full_name || "Unnamed renter"}
                 </Link>
-                <div className="mt-1 flex max-w-72 flex-wrap gap-x-3 gap-y-1 text-xs leading-5 text-muted">
-                  <span className="truncate">{lead.email || "No email"}</span>
-                  <span>{lead.phone || "No phone"}</span>
-                </div>
+                <p className="mt-1 truncate text-xs leading-5 text-muted">
+                  {lead.email || "No email"}
+                </p>
                 <p className="mt-1 text-[11px] leading-4 text-muted">
                   {formatLabel(lead.source_channel)}
                   <span className="mx-1.5 text-border">/</span>
@@ -312,15 +358,18 @@ function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
                   {priorityLabel(lead.intent_score)}
                 </p>
               </td>
-              <td className="w-[205px] px-3 py-3">
-                <LeadStatusUpdateForm
-                  currentStatus={lead.lead_status}
-                  leadId={lead.id}
-                  leadName={lead.full_name || "Unnamed renter"}
-                />
+              <td className="px-3 py-3">
+                <span
+                  className={cn(
+                    "inline-flex min-h-8 items-center rounded-full border px-3 text-xs font-semibold",
+                    leadStatusClasses(lead.lead_status),
+                  )}
+                >
+                  {statusLabel(lead.lead_status)}
+                </span>
                 {lead.assigned_agent_id ? (
-                  <p className="mt-1.5 max-w-40 truncate text-[11px] leading-4 text-muted">
-                    Agent {lead.assigned_agent_id}
+                  <p className="mt-1.5 truncate text-[11px] leading-4 text-muted">
+                    Assigned
                   </p>
                 ) : (
                   <p className="mt-1.5 text-[11px] font-medium leading-4 text-warning">
@@ -332,56 +381,22 @@ function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
                 <p className="text-sm font-medium leading-5 text-foreground">
                   {lead.bedrooms_required ?? "-"} bed / {formatRent(lead.max_rent)}
                 </p>
-                <p className="mt-1 max-w-52 text-xs leading-5 text-muted">
+                <p className="mt-1 truncate text-xs leading-5 text-muted">
                   {formatAreas(lead.areas_preferred)}
                 </p>
-                <p className="mt-1 text-xs leading-5 text-muted">
-                  Move by {formatDateOnly(lead.move_in_by)}
-                </p>
+              </td>
+              <td className="px-3 py-3 text-xs leading-5 text-muted">
+                {formatDateOnly(lead.move_in_by)}
               </td>
               <td className="px-3 py-3">
-                <p className="text-sm font-medium leading-5 text-foreground">
-                  {formatLabel(lead.employment_status)}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-muted">
-                  Guarantor: {formatLabel(lead.has_guarantor)}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-muted">
-                  Deposit: {formatLabel(lead.deposit_availability)}
-                </p>
-              </td>
-              <td className="px-3 py-3">
-                <FintechFlags flags={lead.fintech_flags} />
-              </td>
-              <td className="hidden px-3 py-3 text-xs leading-5 text-muted 2xl:table-cell">
-                <time dateTime={lead.created_at}>{formatDateTime(lead.created_at)}</time>
+                <AdminQuickActions openHref={`/admin/leads/${lead.id}`} />
               </td>
             </tr>
           ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function FintechFlags({ flags }: { flags: Record<string, unknown> }) {
-  const activeFlags = Object.entries(flags).filter(([, value]) => value === true);
-
-  if (activeFlags.length === 0) {
-    return <span className="text-muted">None flagged</span>;
-  }
-
-  return (
-    <div className="flex max-w-48 flex-wrap gap-2">
-      {activeFlags.map(([key]) => (
-        <span
-          className="rounded-full border border-primary/30 bg-accent px-2 py-1 text-xs font-semibold text-accent-foreground"
-          key={key}
-        >
-          {formatLabel(key)}
-        </span>
-      ))}
-    </div>
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -553,6 +568,19 @@ function parsePositiveInteger(value: string | undefined, fallback: number) {
 
 function statusLabel(status: AdminLeadStatus) {
   return leadStatusOptions.find((option) => option.value === status)?.label ?? status;
+}
+
+function leadStatusClasses(status: AdminLeadStatus) {
+  if (status === "new") {
+    return "border-warning/30 bg-warning/10 text-warning";
+  }
+  if (status === "lost") {
+    return "border-danger/30 bg-danger/10 text-danger";
+  }
+  if (status === "completed") {
+    return "border-success/30 bg-success/10 text-success";
+  }
+  return "border-border bg-surface-subtle text-muted";
 }
 
 function scoreClasses(score: number) {

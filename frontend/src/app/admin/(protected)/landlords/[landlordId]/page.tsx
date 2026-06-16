@@ -3,10 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { AdminMetaItem } from "@/components/admin/admin-meta-item";
+import { AdminQuickActions } from "@/components/admin/admin-quick-actions";
+import { AdminSaveNotice } from "@/components/admin/admin-save-notice";
 import { LandlordUpdateForm } from "@/components/admin/landlord-update-form";
 import { buttonClasses } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatusPill } from "@/components/ui/status-pill";
 import { adminApi, ApiError } from "@/lib/api";
 import type { AdminLandlordDetail, AdminLandlordStatus } from "@/lib/api";
 import { getAdminSessionState } from "@/lib/admin/auth";
@@ -69,14 +71,14 @@ export default async function LandlordDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="space-y-3">
         <Link
           className={buttonClasses({ size: "sm", variant: "secondary" })}
           href="/admin/landlords"
         >
           Back to landlords
         </Link>
-        {wasUpdated ? <StatusPill tone="success">Landlord updated</StatusPill> : null}
+        {wasUpdated ? <AdminSaveNotice message="Landlord updates saved." /> : null}
       </div>
 
       <LandlordHeader landlord={landlord} />
@@ -106,11 +108,22 @@ export default async function LandlordDetailPage({
             </CardHeader>
             <CardContent>
               <dl className="space-y-3 text-sm">
-                <MetaItem label="Landlord id" value={landlord.id} />
-                <MetaItem label="Consent given" value={formatBoolean(landlord.consent_given)} />
-                <MetaItem label="Consent version" value={landlord.consent_version} />
-                <MetaItem label="Consent at" value={formatDateTime(landlord.consent_at)} />
-                <MetaItem label="Updated" value={formatDateTimeOptional(landlord.updated_at)} />
+                <AdminMetaItem
+                  actions={<AdminQuickActions copyLabel="Copy id" copyValue={landlord.id} />}
+                  label="Landlord id"
+                  value={landlord.id}
+                  valueKind="identifier"
+                />
+                <AdminMetaItem
+                  label="Consent given"
+                  value={formatBoolean(landlord.consent_given)}
+                />
+                <AdminMetaItem label="Consent version" value={landlord.consent_version} />
+                <AdminMetaItem label="Consent at" value={formatDateTime(landlord.consent_at)} />
+                <AdminMetaItem
+                  label="Updated"
+                  value={formatDateTimeOptional(landlord.updated_at)}
+                />
               </dl>
             </CardContent>
           </Card>
@@ -156,24 +169,45 @@ function LandlordHeader({ landlord }: { landlord: AdminLandlordDetail }) {
 
 function LandlordOverview({ landlord }: { landlord: AdminLandlordDetail }) {
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-4 2xl:grid-cols-2">
       <InfoCard title="Contact">
         <dl className="space-y-3 text-sm">
-          <MetaItem label="Email" value={landlord.email ?? "No email"} />
-          <MetaItem label="Phone" value={landlord.phone ?? "No phone"} />
-          <MetaItem label="Created" value={formatDateTime(landlord.created_at)} />
+          <AdminMetaItem
+            actions={
+              landlord.email ? (
+                <AdminQuickActions copyValue={landlord.email} email={landlord.email} />
+              ) : null
+            }
+            label="Email"
+            value={landlord.email ?? "No email"}
+            valueKind={landlord.email ? "contact" : "default"}
+          />
+          <AdminMetaItem
+            actions={
+              landlord.phone ? (
+                <AdminQuickActions copyValue={landlord.phone} phone={landlord.phone} />
+              ) : null
+            }
+            label="Phone"
+            value={landlord.phone ?? "No phone"}
+            valueKind={landlord.phone ? "contact" : "default"}
+          />
+          <AdminMetaItem label="Created" value={formatDateTime(landlord.created_at)} />
         </dl>
       </InfoCard>
 
       <InfoCard title="Property">
         <dl className="space-y-3 text-sm">
-          <MetaItem
+          <AdminMetaItem
             label="Address"
             value={landlord.property_address ?? "No address captured"}
           />
-          <MetaItem label="Bedrooms" value={formatValue(landlord.bedrooms)} />
-          <MetaItem label="Asking rent" value={formatRent(landlord.asking_rent)} />
-          <MetaItem label="Available from" value={formatDateOnly(landlord.available_from)} />
+          <AdminMetaItem label="Bedrooms" value={formatValue(landlord.bedrooms)} />
+          <AdminMetaItem label="Asking rent" value={formatRent(landlord.asking_rent)} />
+          <AdminMetaItem
+            label="Available from"
+            value={formatDateOnly(landlord.available_from)}
+          />
         </dl>
       </InfoCard>
 
@@ -186,15 +220,15 @@ function LandlordOverview({ landlord }: { landlord: AdminLandlordDetail }) {
             <InterestPill active={landlord.listing_interest}>Listing</InterestPill>
           </div>
           <dl className="space-y-3 text-sm">
-            <MetaItem
+            <AdminMetaItem
               label="Advanced Rent"
               value={formatBoolean(landlord.advanced_rent_interest)}
             />
-            <MetaItem
+            <AdminMetaItem
               label="Listing interest"
               value={formatBoolean(landlord.listing_interest)}
             />
-            <MetaItem label="Priority" value={interestSummary(landlord)} />
+            <AdminMetaItem label="Priority" value={interestSummary(landlord)} />
           </dl>
         </div>
       </InfoCard>
@@ -226,15 +260,6 @@ function InfoCard({
       </CardHeader>
       <CardContent>{children}</CardContent>
     </Card>
-  );
-}
-
-function MetaItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="grid gap-1 sm:grid-cols-[140px_1fr]">
-      <dt className="text-muted">{label}</dt>
-      <dd className="break-words font-medium text-foreground">{value}</dd>
-    </div>
   );
 }
 
