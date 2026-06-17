@@ -13,7 +13,21 @@ plugins = ["pydantic.mypy"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "-q"
+addopts = "-q --cov=app --cov-branch --cov-report=term-missing --cov-fail-under=90"
 markers = [
     "postgres: requires POSTGRES_TEST_DATABASE_URL and a reachable PostgreSQL database",
 ]
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "pragma: no cover",
+]
+fail_under = 90
+show_missing = true
+skip_covered = false

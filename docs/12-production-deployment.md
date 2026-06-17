@@ -556,7 +556,7 @@ railway logs --lines 50
 | Variable | Required | Description |
 |---|---|---|
 | `NEXT_PUBLIC_API_BASE_URL` | Yes | Full URL to the backend API. Must be `https://api.properrent.co.uk/api/v1`. Baked into the build. |
-| `NEXT_PUBLIC_SITE_URL` | Yes | Canonical site URL. Used for metadata and og:url tags. |
+| `NEXT_PUBLIC_SITE_URL` | Yes | Canonical site URL. Use `https://www.properrent.co.uk` because the apex domain redirects to `www`. Used for metadata and og:url tags. |
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL. Used by the browser Supabase client for admin auth. |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes | Public anon key. Safe to expose in browser code. |
 | `NEXT_PUBLIC_CONSENT_VERSION` | No | Must match `CONSENT_VERSION` on the backend. |

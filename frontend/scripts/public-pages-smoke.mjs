@@ -1,6 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 
+const canonicalOrigin = stripTrailingSlash(
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.properrent.co.uk",
+).replace("https://properrent.co.uk", "https://www.properrent.co.uk");
+
 const routes = [
   { path: "/", source: "src/app/page.tsx", output: ".next/server/app/index.html" },
   {
@@ -189,6 +193,11 @@ for (const route of routes) {
   const canonicalHref = output.match(/rel="canonical" href="([^"]+)"/)?.[1] ?? "";
   assert.ok(canonicalHref, `${route.path} canonical URL is missing href`);
   assert.equal(
+    stripTrailingSlash(canonicalHref),
+    stripTrailingSlash(`${canonicalOrigin}${route.path}`),
+    `${route.path} canonical URL must use the canonical production host`,
+  );
+  assert.equal(
     canonicalHref.includes("?"),
     false,
     `${route.path} canonical URL must not include query parameters`,
@@ -206,6 +215,11 @@ for (const route of routes) {
       `${route.path} should not include analytics when NEXT_PUBLIC_ANALYTICS_DOMAIN is empty`,
     );
   }
+  assert.doesNotMatch(
+    output,
+    /localhost:8000|127\.0\.0\.1:8000/,
+    `${route.path} must not embed the local API URL`,
+  );
 }
 
 for (const forbiddenRoute of ["src/app/listings", "src/app/properties"]) {
@@ -213,3 +227,7 @@ for (const forbiddenRoute of ["src/app/listings", "src/app/properties"]) {
 }
 
 console.log(`Checked ${routes.length} public routes.`);
+
+function stripTrailingSlash(value) {
+  return value.replace(/\/+$/, "");
+}
