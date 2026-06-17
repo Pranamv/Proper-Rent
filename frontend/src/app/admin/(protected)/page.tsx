@@ -97,13 +97,10 @@ export default async function AdminOverviewPage() {
         <>
           <MetricGrid dashboard={dashboard} />
 
-          <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-            <PriorityQueue
-              leads={dashboard.leads.results}
-              landlords={dashboard.landlords.results}
-            />
-            <WorkflowPanel />
-          </section>
+          <PriorityQueue
+            leads={dashboard.leads.results}
+            landlords={dashboard.landlords.results}
+          />
 
           <section className="grid gap-4 xl:grid-cols-2">
             <WorkspaceCard
@@ -284,14 +281,14 @@ function PriorityQueue({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-base font-semibold text-foreground">Priority queue</h2>
-          <p className="mt-1 text-sm leading-6 text-muted">
-            Open a record for full context, contact actions, and status updates.
+          <p className="mt-1 text-sm leading-5 text-muted">
+            Compact view of the records most likely to need follow-up.
           </p>
         </div>
         <StatusPill className="min-h-8 px-2 text-xs">Live queues</StatusPill>
       </div>
 
-      <div className="mt-4 grid min-w-0 gap-4 lg:grid-cols-2">
+      <div className="mt-3 grid min-w-0 gap-3 lg:grid-cols-2">
         <QueueColumn
           emptyText="No renter leads in the current queue."
           href="/admin/leads"
@@ -307,7 +304,7 @@ function PriorityQueue({
           emptyText="No landlord submissions in the current queue."
           href="/admin/landlords"
           items={landlords.map((landlord) => ({
-            detail: landlord.property_address || "No address captured",
+            detail: landlordPropertySummary(landlord),
             href: `/admin/landlords/${landlord.id}`,
             meta: landlordInterestLabel(landlord),
             title: landlord.full_name || "Unnamed landlord",
@@ -338,22 +335,20 @@ function QueueColumn({
           View all
         </Link>
       </div>
-      <div className="mt-3 divide-y divide-border">
+      <div className="mt-2 divide-y divide-border">
         {items.length > 0 ? (
           items.slice(0, 3).map((item) => (
             <Link
-              className="block rounded-md px-2 py-3 transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 rounded-md px-2 py-2 transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               href={item.href}
               key={item.href}
             >
-              <span className="block truncate text-sm font-semibold text-foreground">
+              <span className="truncate text-sm font-semibold text-foreground">
                 {item.title}
               </span>
-              <span className="mt-1 block truncate text-xs leading-5 text-muted">
+              <span className="text-xs font-semibold text-primary">{item.meta}</span>
+              <span className="col-span-2 mt-0.5 truncate text-xs leading-5 text-muted">
                 {item.detail}
-              </span>
-              <span className="mt-1 block text-xs font-semibold text-primary">
-                {item.meta}
               </span>
             </Link>
           ))
@@ -362,36 +357,6 @@ function QueueColumn({
         )}
       </div>
     </div>
-  );
-}
-
-function WorkflowPanel() {
-  const checks = [
-    "Open hot renter leads and confirm the next step.",
-    "Review new landlord enquiries for listing or Advanced Rent interest.",
-    "Update notes after every contact attempt.",
-  ];
-
-  return (
-    <section className="min-w-0 rounded-md border border-border bg-surface p-4">
-      <h2 className="text-base font-semibold text-foreground">Operator workflow</h2>
-      <p className="mt-1 text-sm leading-6 text-muted">
-        Keep the dashboard light: scan here, decide in the detail page, then update status.
-      </p>
-      <ol className="mt-4 space-y-3">
-        {checks.map((check, index) => (
-          <li
-            className="flex gap-3 rounded-md border border-border bg-background p-3 text-sm leading-6"
-            key={check}
-          >
-            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-              {index + 1}
-            </span>
-            <span className="text-muted">{check}</span>
-          </li>
-        ))}
-      </ol>
-    </section>
   );
 }
 
@@ -477,6 +442,17 @@ function landlordInterestLabel(landlord: AdminLandlordListItem) {
     return "Listing";
   }
   return landlordStatusLabels[landlord.status];
+}
+
+function landlordPropertySummary(landlord: AdminLandlordListItem) {
+  return `${formatBedrooms(landlord.bedrooms)} / ${formatRent(landlord.asking_rent)}`;
+}
+
+function formatBedrooms(value: number | null | undefined) {
+  if (value === null || value === undefined) {
+    return "Bedrooms not set";
+  }
+  return `${numberFormatter.format(value)} bed`;
 }
 
 function formatRent(value: number | string | null | undefined) {

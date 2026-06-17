@@ -292,22 +292,22 @@ function LandlordTable({ landlords }: { landlords: AdminLandlordListItem[] }) {
         <table className="w-full table-fixed text-left text-sm">
           <thead className="sticky top-16 z-10 border-b border-border bg-surface-subtle text-xs uppercase tracking-[0.08em] text-muted">
           <tr>
-            <th className="w-[24%] px-4 py-3 font-semibold" scope="col">
+            <th className="w-[24%] px-3 py-3 font-semibold" scope="col">
               Landlord
             </th>
-            <th className="w-[34%] px-4 py-3 font-semibold" scope="col">
+            <th className="w-[27%] px-3 py-3 font-semibold" scope="col">
               Property
             </th>
-            <th className="w-[15%] px-4 py-3 font-semibold" scope="col">
+            <th className="w-[18%] px-3 py-3 font-semibold" scope="col">
               Interest
             </th>
-            <th className="w-[11%] px-4 py-3 font-semibold" scope="col">
+            <th className="w-[11%] px-3 py-3 font-semibold" scope="col">
               Status
             </th>
-            <th className="w-[9%] px-4 py-3 font-semibold" scope="col">
+            <th className="w-[9%] px-3 py-3 font-semibold" scope="col">
               Availability
             </th>
-            <th className="w-[7%] px-4 py-3 font-semibold" scope="col">
+            <th className="w-[11%] px-3 py-3 font-semibold" scope="col">
               Actions
             </th>
           </tr>
@@ -315,7 +315,7 @@ function LandlordTable({ landlords }: { landlords: AdminLandlordListItem[] }) {
           <tbody className="divide-y divide-border">
           {landlords.map((landlord) => (
             <tr className="align-top hover:bg-surface-subtle/70" key={landlord.id}>
-              <td className="px-4 py-4">
+              <td className="px-3 py-3">
                 <Link
                   className="font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   href={`/admin/landlords/${landlord.id}`}
@@ -324,18 +324,15 @@ function LandlordTable({ landlords }: { landlords: AdminLandlordListItem[] }) {
                 </Link>
                 <p className="mt-1 truncate text-muted">{landlord.email || "No email"}</p>
               </td>
-              <td className="px-4 py-4">
-                <p className="break-words font-medium text-foreground">
-                  {landlord.property_address || "No address captured"}
-                </p>
-                <p className="mt-1 text-muted">
+              <td className="px-3 py-3">
+                <p className="font-medium text-foreground">
                   {formatBedrooms(landlord.bedrooms)} / {formatRent(landlord.asking_rent)}
                 </p>
               </td>
-              <td className="px-4 py-4">
+              <td className="px-3 py-3">
                 <InterestFlags landlord={landlord} />
               </td>
-              <td className="px-4 py-4">
+              <td className="px-3 py-3">
                 <span
                   className={cn(
                     "rounded-full border px-3 py-1 font-semibold",
@@ -345,10 +342,10 @@ function LandlordTable({ landlords }: { landlords: AdminLandlordListItem[] }) {
                   {statusLabel(landlord.status)}
                 </span>
               </td>
-              <td className="px-4 py-4 text-muted">
+              <td className="px-3 py-3 text-muted">
                 {formatDateOnly(landlord.available_from)}
               </td>
-              <td className="px-4 py-4">
+              <td className="whitespace-nowrap px-3 py-3">
                 <AdminQuickActions openHref={`/admin/landlords/${landlord.id}`} />
               </td>
             </tr>
@@ -371,7 +368,7 @@ function InterestFlags({ landlord }: { landlord: AdminLandlordListItem }) {
   }
 
   return (
-    <div className="flex max-w-48 flex-wrap gap-2">
+    <div className="flex max-w-full flex-wrap gap-1.5">
       {flags.map((flag) => (
         <span
           className="rounded-full border border-primary/30 bg-accent px-2 py-1 text-xs font-semibold text-accent-foreground"

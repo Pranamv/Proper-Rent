@@ -44,11 +44,6 @@ const leadStatusOptions: { label: string; value: AdminLeadStatus }[] = [
 const leadStatuses = leadStatusOptions.map((option) => option.value);
 
 const numberFormatter = new Intl.NumberFormat("en-GB");
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Europe/London",
-});
 
 type AdminLeadsSearchParams = {
   assigned_agent_id?: string | string[];
@@ -281,16 +276,11 @@ function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
             <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
               <div className="grid gap-2 text-xs leading-5 text-muted">
                 <p>
-                  <span className="font-semibold text-foreground">
-                    {lead.bedrooms_required ?? "-"} bed / {formatRent(lead.max_rent)}
-                  </span>
-                </p>
-                <p className="break-words">{formatAreas(lead.areas_preferred)}</p>
-                <p>
                   {statusLabel(lead.lead_status)}
                   <span className="mx-1.5 text-border">/</span>
                   Move by {formatDateOnly(lead.move_in_by)}
                 </p>
+                <FintechFlags flags={lead.fintech_flags} />
               </div>
               <AdminQuickActions openHref={`/admin/leads/${lead.id}`} />
             </div>
@@ -311,13 +301,13 @@ function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
             <th className="w-[15%] px-3 py-2.5 font-semibold" scope="col">
               Status
             </th>
-            <th className="w-[31%] px-3 py-2.5 font-semibold" scope="col">
-              Need
+            <th className="w-[28%] px-3 py-2.5 font-semibold" scope="col">
+              Fintechs
             </th>
             <th className="w-[11%] px-3 py-2.5 font-semibold" scope="col">
               Timing
             </th>
-            <th className="w-[8%] px-3 py-2.5 font-semibold" scope="col">
+            <th className="w-[11%] px-3 py-2.5 font-semibold" scope="col">
               Actions
             </th>
           </tr>
@@ -339,11 +329,6 @@ function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
                 <p className="mt-1 truncate text-xs leading-5 text-muted">
                   {lead.email || "No email"}
                 </p>
-                <p className="mt-1 text-[11px] leading-4 text-muted">
-                  {formatLabel(lead.source_channel)}
-                  <span className="mx-1.5 text-border">/</span>
-                  <time dateTime={lead.created_at}>{formatDateTime(lead.created_at)}</time>
-                </p>
               </td>
               <td className="px-3 py-3">
                 <span
@@ -354,9 +339,6 @@ function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
                 >
                   {lead.intent_score}
                 </span>
-                <p className="mt-1 text-[11px] font-semibold leading-4 text-muted">
-                  {priorityLabel(lead.intent_score)}
-                </p>
               </td>
               <td className="px-3 py-3">
                 <span
@@ -367,28 +349,14 @@ function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
                 >
                   {statusLabel(lead.lead_status)}
                 </span>
-                {lead.assigned_agent_id ? (
-                  <p className="mt-1.5 truncate text-[11px] leading-4 text-muted">
-                    Assigned
-                  </p>
-                ) : (
-                  <p className="mt-1.5 text-[11px] font-medium leading-4 text-warning">
-                    Unassigned
-                  </p>
-                )}
               </td>
               <td className="px-3 py-3">
-                <p className="text-sm font-medium leading-5 text-foreground">
-                  {lead.bedrooms_required ?? "-"} bed / {formatRent(lead.max_rent)}
-                </p>
-                <p className="mt-1 truncate text-xs leading-5 text-muted">
-                  {formatAreas(lead.areas_preferred)}
-                </p>
+                <FintechFlags flags={lead.fintech_flags} />
               </td>
               <td className="px-3 py-3 text-xs leading-5 text-muted">
                 {formatDateOnly(lead.move_in_by)}
               </td>
-              <td className="px-3 py-3">
+              <td className="whitespace-nowrap px-3 py-3">
                 <AdminQuickActions openHref={`/admin/leads/${lead.id}`} />
               </td>
             </tr>
@@ -397,6 +365,32 @@ function LeadTable({ leads }: { leads: AdminLeadListItem[] }) {
         </table>
       </div>
     </>
+  );
+}
+
+function FintechFlags({ flags }: { flags: Record<string, unknown> }) {
+  const activeFlags = Object.entries(flags).filter(([, value]) => value === true);
+
+  if (activeFlags.length === 0) {
+    return <span className="text-xs leading-5 text-muted">None flagged</span>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {activeFlags.slice(0, 3).map(([key]) => (
+        <span
+          className="rounded-full border border-primary/30 bg-accent px-2 py-0.5 text-xs font-semibold text-accent-foreground"
+          key={key}
+        >
+          {formatLabel(key)}
+        </span>
+      ))}
+      {activeFlags.length > 3 ? (
+        <span className="rounded-full border border-border bg-surface-subtle px-2 py-0.5 text-xs font-semibold text-muted">
+          +{activeFlags.length - 3}
+        </span>
+      ) : null}
+    </div>
   );
 }
 
@@ -593,33 +587,11 @@ function scoreClasses(score: number) {
   return "border-border bg-surface-subtle text-muted";
 }
 
-function priorityLabel(score: number) {
-  if (score >= 70) {
-    return "Hot";
-  }
-  if (score >= 45) {
-    return "Warm";
-  }
-  if (score >= 25) {
-    return "Standard";
-  }
-  return "Low";
-}
-
-function formatAreas(areas: string[] | null | undefined) {
-  return areas && areas.length > 0 ? areas.join(", ") : "No areas captured";
-}
-
 function formatDateOnly(value: string | null | undefined) {
   if (!value) {
     return "not set";
   }
   return value;
-}
-
-function formatDateTime(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : dateFormatter.format(date);
 }
 
 function formatLabel(value: string | null | undefined) {
@@ -630,15 +602,4 @@ function formatLabel(value: string | null | undefined) {
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
-}
-
-function formatRent(value: number | string | null | undefined) {
-  if (value === null || value === undefined || value === "") {
-    return "Budget not set";
-  }
-
-  const numericValue = Number(value);
-  return Number.isFinite(numericValue)
-    ? `GBP ${numberFormatter.format(numericValue)}`
-    : String(value);
 }
