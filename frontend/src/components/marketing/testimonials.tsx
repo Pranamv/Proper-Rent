@@ -4,7 +4,6 @@ type Testimonial = {
   role: "Renter" | "Landlord";
 };
 
-// TODO: add real quotes once available
 const TESTIMONIALS: Testimonial[] = [];
 
 function initials(name: string) {

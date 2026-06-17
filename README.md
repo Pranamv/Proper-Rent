@@ -33,10 +33,12 @@ Backend verification:
 
 ```bash
 cd backend
-ruff check app tests
-ruff format --check app tests
+ruff check .
+ruff format --check .
 mypy app
 pytest
+python scripts/export_openapi.py --check ../contracts/openapi.json
+pip-audit -r requirements.txt
 ```
 
 ### Frontend
@@ -55,7 +57,19 @@ Frontend verification:
 cd frontend
 npm run lint
 npm run typecheck
+npm run test
+npm run contract:check
+npm run test:e2e
 npm run build
+npm run smoke:public
+npm audit --audit-level=high
+```
+
+Read-only production smoke:
+
+```bash
+cd frontend
+npm run smoke:prod
 ```
 
 ## Phase 1 Boundaries
@@ -64,4 +78,3 @@ npm run build
 - Frontend is presentation-only and calls the backend API.
 - `properties` and `transactions` remain schema-only future placeholders and are not exposed by Phase 1 routes.
 - Public APIs must not expose internal fields such as intent scores, fintech flags, assignment data, or system prompts.
-
