@@ -2,7 +2,7 @@
 
 **Project:** Proper Rent
 **Version:** 1.0
-**Status:** Pre-development
+**Status:** Phase 1 implemented; pending deep integration assessment and launch gates
 **Partner platform:** Scraye.com
 **Business type:** UK lettings lead generation & tenant fintech facilitation
 
@@ -14,7 +14,7 @@ This document is the orientation layer for Proper Rent: what the business is, wh
 
 Proper Rent is a UK lettings lead-generation and tenant-fintech facilitation business. The product goal is simple: capture renter and landlord intent, help visitors understand the process and Scraye's fintech products, and move opportunities to a human agent who can close through Scraye.
 
-Phase 1 is intentionally narrow:
+Phase 1 is intentionally narrow and the current codebase implements this surface:
 
 - A public website with renter and landlord intake forms.
 - A chatbot that answers general Proper Rent, letting-process, and fintech questions from a default system prompt.
@@ -208,7 +208,7 @@ Optional listing-data risks are deferred with the sync worker.
 
 ## 15. How To Use The Docs
 
-For now, use these docs to refine scope, phases, and product decisions. Use `11-phase-1-implementation-plan.md` when turning the Phase 1 roadmap into implementation branches, PRs, or agent tasks.
+Use these docs as the current Phase 1 source of truth before starting the deep assessment/refactor pass. Use `11-phase-1-implementation-plan.md` for implemented scope, remaining launch gates, and exit-review framing.
 
 Use the deeper docs only when the task touches that area:
 

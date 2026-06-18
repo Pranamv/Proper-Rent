@@ -29,8 +29,8 @@ Run against a local/test Postgres with a seeded schema. Cover endpoints end-to-e
 - Admin routes — 401 unauthenticated, 403 non-admin, 200 admin; detail routes return one lead/landlord; PATCH updates status (leads and landlords).
 - `GET /admin/leads/{id}/conversation` — returns all linked conversations when more than one exists.
 
-### 2.3 Frontend / e2e tests (`frontend/tests/`)
-Playwright (or equivalent) covering the critical golden paths against a mocked backend:
+### 2.3 Frontend unit/component and e2e tests
+Vitest tests live next to frontend code under `frontend/src/**/*.test.ts(x)`. Playwright tests live under `frontend/e2e/` and cover the critical golden paths against a mocked backend:
 - Renter intake: multi-step form completes → confirmation state shown (REQ-027).
 - Landlord intake: form completes → confirmation state shown (REQ-033).
 - Chatbot widget: opens, sends a message, shows reply and (when present) the "open intake form" suggestion; respects `prefers-reduced-motion`.
@@ -69,11 +69,23 @@ Playwright (or equivalent) covering the critical golden paths against a mocked b
 
 Run before every PR; CI runs the same:
 ```bash
+cd backend
 ruff check app tests
 ruff format --check app tests
 mypy app
-pytest tests/unit
-pytest tests/integration
+pytest
+python scripts/export_openapi.py --check ../contracts/openapi.json
+pip-audit -r requirements.txt
+
+cd ../frontend
+npm run lint
+npm run typecheck
+npm run test
+npm run contract:check
+npm run test:e2e
+npm run build
+npm run smoke:public
+npm audit --audit-level=high
 ```
 
 Optional later sync worker checks (not run in Phase 1 CI):
@@ -88,11 +100,11 @@ pytest tests/integration/test_scraye_sync.py
 On every PR:
 1. `ruff` lint + format check
 2. `mypy` type check
-3. `pytest` unit
-4. `pytest` integration (against ephemeral Postgres)
+3. `pytest` with the configured backend coverage gate
+4. OpenAPI contract drift check
 5. dependency vulnerability scan
 6. secret scan
-7. frontend build (Next.js) + typecheck
+7. frontend lint, typecheck, unit/component tests, OpenAPI type drift check, build, and public smoke
 8. frontend e2e smoke tests (Playwright, golden paths from §2.3) against a mocked backend
 
 Before production:

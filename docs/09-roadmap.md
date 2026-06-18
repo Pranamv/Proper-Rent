@@ -1,10 +1,10 @@
 # 09 — Roadmap
 
-**Status:** Revised for Phase 1 execution
+**Status:** Phase 1 implementation baseline documented; Phase 2 and optional listing work remain deferred
 **Reference:** MVP scope in `01-mvp-prd.md`; architecture in `02-architecture.md`; phase rationale in `adr/ADR-004-channel-sequencing.md`.
 **Detailed Phase 1 plan:** `11-phase-1-implementation-plan.md`
 
-This roadmap is the phase-boundary document. It explains what is built now, what is deliberately delayed, and what conditions must be true before later phases start. The task-by-task Phase 1 execution plan lives separately in `11-phase-1-implementation-plan.md`.
+This roadmap is the phase-boundary document. It explains what is implemented for Phase 1, what is deliberately delayed, and what conditions must be true before later phases start. The task-by-task Phase 1 implementation status lives separately in `11-phase-1-implementation-plan.md`.
 
 ---
 
@@ -23,7 +23,7 @@ This roadmap is the phase-boundary document. It explains what is built now, what
 
 | Phase | Goal | Primary users | Start condition | Done condition |
 |---|---|---|---|---|
-| Phase 1 — Website + Chatbot MVP | Launch the owned lead funnel: public pages, chatbot, renter/landlord intake, notifications, basic admin. | Renters, landlords, human agent | Docs stable; legal consent text ready for review; env/service accounts identified | A visitor can ask questions, submit intake, score hot, and the agent receives a usable briefing within minutes. |
+| Phase 1 — Website + Chatbot MVP | Launch the owned lead funnel: public pages, chatbot, renter/landlord intake, notifications, basic admin. | Renters, landlords, human agent | Implemented in the current repo; deep integration assessment and launch gates remain. | A visitor can ask questions, submit intake, score hot, and the agent receives a usable briefing within minutes. |
 | Phase 2 — Social Channels + Operational Tools | Extend the proven funnel to WhatsApp/Messenger and add follow-up tooling. | Social leads, renters, agent | Phase 1 live; lead handling process proven; Meta setup approved | A social-channel visitor can move to the website with context intact, complete intake, and be routed by channel-specific scoring rules. |
 | Optional Phase 3+ — Data & Intelligence Expansion | Add listing data, per-listing quoting, property matching, and commission workflows only if permission and ROI justify it. | Renters, agent, landlords | Funnel traction plus written listing-data permission/licensing decision | Approved listing data is synced and exposed legally; per-listing claims follow freshness rules. |
 
@@ -64,13 +64,13 @@ Phase 1 has **no** Scraye listing sync, public listings, per-listing quotes, soc
 
 | Milestone | Outcome | Gate |
 |---|---|---|
-| P1.0 Build readiness | Repos/apps scaffolded, env variables documented, CI baseline running. | Local backend health check and frontend shell work. |
-| P1.1 Data foundation | Migration, models, schemas, DB session, admin auth dependencies in place. | Migration up/down succeeds; schema includes placeholders but no Phase 1 route reads/writes `properties` or `transactions`. |
-| P1.2 Intake and notifications | Renter and landlord endpoints enforce consent, persist records, send mocked/tested emails, and link conversations. | Integration tests pass for consent rejection, duplicate renter email, hot alert, landlord notification. |
-| P1.3 Chatbot | Chat endpoint returns safe replies, stores PII-free transcript, updates server-side score, and degrades on LLM failure. | Tests prove no internal fields, no properties data, PII scrubbing, timeout fallback, and action allowlist. |
-| P1.4 Public website | SSR public pages, forms, confirmation states, chatbot widget, SEO metadata, accessibility baseline. | Playwright golden paths pass against mocked backend. |
-| P1.5 Admin operations | Admin can review lead and landlord pipelines, read conversation briefings, and update status/notes. | AuthN/AuthZ tests pass; admin e2e smoke path passes. |
-| P1.6 Launch hardening | Privacy/Terms live, rate limiting, monitoring, staging smoke, production envs, operational runbook. | Production smoke test passes and first-lead checklist is complete. |
+| P1.0 Build readiness | Implemented: repo structure, env example, local run commands, CI workflow, health route. | Keep backend/frontend install and health checks green. |
+| P1.1 Data foundation | Implemented: migration, models, schemas, DB session, admin auth dependencies. | Migration up/down succeeds; schema includes placeholders but no Phase 1 route reads/writes `properties` or `transactions`. |
+| P1.2 Intake and notifications | Implemented: renter and landlord endpoints enforce consent, persist records, send mocked/tested emails, and link conversations. | Integration tests pass for consent rejection, duplicate renter email, hot alert, landlord notification. |
+| P1.3 Chatbot | Implemented: chat endpoint returns safe replies, stores PII-free transcript, maintains server-side context, and degrades on LLM failure. | Tests prove no internal fields, no properties data, PII scrubbing, timeout fallback, and action allowlist. |
+| P1.4 Public website | Implemented: SSR public pages, forms, confirmation states, chatbot widget, SEO metadata, accessibility-minded components. | Playwright golden paths pass against mocked backend. |
+| P1.5 Admin operations | Implemented: admin can review lead and landlord pipelines, read conversation briefings, and update status/notes. | AuthN/AuthZ tests pass; admin protected-route smoke path passes. |
+| P1.6 Launch hardening | Partially implemented: Privacy/Terms, rate limiting, CI gates, contract checks, smoke scripts, deployment docs. | Deep integration assessment, launch checklist, staging/production smoke, and agent dry run remain before real lead capture. |
 
 ### 3.4 Phase 1 definition of done
 
@@ -106,7 +106,7 @@ Phase 2 extends the proven Phase 1 AI service and lead funnel into social channe
 
 ### 4.1 Start conditions
 
-- Phase 1 has handled real leads end-to-end.
+- Phase 1 has handled real or launch-rehearsal leads end-to-end.
 - The agent process for first contact, Scraye shortlisting, and commission reconciliation is documented.
 - The default chatbot prompt and scoring threshold have been tuned from initial lead outcomes.
 - Meta app/business setup, webhook URLs, template requirements, and privacy wording are ready.

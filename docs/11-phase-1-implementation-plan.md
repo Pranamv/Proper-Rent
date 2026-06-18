@@ -4,8 +4,9 @@
 **Roadmap reference:** `09-roadmap.md`
 **Primary requirements:** `01-mvp-prd.md`
 **Supporting docs:** `02-architecture.md`, `03-data-model.md`, `04-api-contracts.md`, `05-user-flows.md`, `06-security-gdpr.md`, `07-development-standards.md`, `08-test-plan.md`, `10-design-system.md`
+**Current repo status:** Phase 1 implementation baseline is present; this document now serves as the implementation record, launch checklist, and review map for the deep assessment/refactor pass.
 
-This is the execution plan for Phase 1. It breaks the MVP into implementation slices that can become branches, PRs, or agent tasks. The plan is intentionally scoped to the website funnel only: public pages, chatbot, renter/landlord intake, notifications, and basic admin.
+This document records the Phase 1 implementation slices and their verification gates. It is intentionally scoped to the website funnel only: public pages, chatbot, renter/landlord intake, notifications, and basic admin.
 
 ---
 
@@ -53,21 +54,36 @@ Do not build in Phase 1:
 
 ## 3. Implementation Order
 
+The current codebase has completed the planned P1.0-P1.6 implementation baseline. Treat the table below as the historical sequencing and the review structure for defects, integration gaps, and scoped refactors.
+
 | Milestone | Workstreams | Why this order |
 |---|---|---|
-| P1.0 Build readiness | Repo/app scaffold, env, CI skeleton | Gives every later task a stable place to land. |
-| P1.1 Data foundation | Migration, models, schemas, auth deps | Endpoints need stable contracts and persistence. |
-| P1.2 Intake and notifications | Scoring, leads, landlords, Resend templates | Lead capture is the revenue-critical core and can be tested without AI. |
-| P1.3 Chatbot | LLM client, AI service, chat route, PII scrub | Adds the assistant once persistence/scoring rules exist. |
-| P1.4 Public frontend | Pages, forms, chat widget, SEO, analytics | Connects the backend to the user-facing funnel. |
-| P1.5 Admin operations | Admin shell, lead/landlord views, status updates | Enables the human handoff and daily operations. |
-| P1.6 Launch hardening | Security, legal pages, monitoring, staging/prod smoke | Prevents collecting real leads before compliance and reliability gates are met. |
+| P1.0 Build readiness | Implemented: repo/app scaffold, env, CI skeleton | Keep install, local run, health, and CI foundation green. |
+| P1.1 Data foundation | Implemented: migration, models, schemas, auth deps | Endpoints have stable contracts and persistence. |
+| P1.2 Intake and notifications | Implemented: scoring, leads, landlords, Resend templates | Lead capture is test-covered without real external email calls. |
+| P1.3 Chatbot | Implemented: LLM client, AI service, chat route, PII scrub | Assistant is behind persistence/scoring/session-safety rules. |
+| P1.4 Public frontend | Implemented: pages, forms, chat widget, SEO, analytics hooks | Connects the backend contract to the user-facing funnel. |
+| P1.5 Admin operations | Implemented: admin shell, lead/landlord views, status updates | Enables the human handoff and daily operations. |
+| P1.6 Launch hardening | Partially implemented: security controls, legal pages, CI gates, smoke scripts, deployment docs | Remaining gates are deep integration assessment, staging/production confirmation, and agent dry run before real leads. |
 
 ---
 
 ## 4. Task Cards
 
-Each task should be small enough to review. If a task starts touching unrelated files or crossing more than one workstream, split it.
+These task cards are retained as the review checklist for the current implementation. If the deep assessment finds a defect or integration gap, patch it in the smallest relevant slice and add or update the matching regression test.
+
+### Current Implementation Snapshot
+
+| Area | Current state |
+|---|---|
+| Backend API | FastAPI exposes health, chat, renter leads, landlord intake, and protected admin routes under `/api/v1`. |
+| Data/migrations | Alembic migrations and SQLAlchemy models cover Phase 1 tables; `properties` and `transactions` remain schema-only. |
+| Chat/AI | OpenRouter client is isolated; chat service validates suggested actions, scrubs PII before transcript persistence, and falls back on provider failure. |
+| Notifications | Resend is wrapped by `NotificationService`; tests mock delivery and assert recipient/routing behavior. |
+| Frontend | Next.js public pages, forms, chatbot widget, legal pages, and admin screens are implemented. |
+| Contracts | `contracts/openapi.json` and generated frontend API types are checked for drift. |
+| Verification | Backend coverage gate, frontend unit/component tests, Playwright e2e with API mocks, dependency audits, secret scan, public smoke, and production smoke script are present. |
+| Remaining launch gates | Deep integration assessment, staging/production smoke confirmation, legal/copy confirmation, admin provisioning, and agent workflow dry run. |
 
 ### P1.0 — Build Readiness
 
@@ -77,7 +93,7 @@ Each task should be small enough to review. If a task starts touching unrelated 
 - `backend/` FastAPI project structure matching `02-architecture.md` §5.
 - `frontend/` Next.js TypeScript project structure.
 - Basic local run commands documented in a README or existing setup doc.
-- Backend health route placeholder and frontend shell page.
+- Backend health route and implemented frontend application shell.
 
 **Acceptance**
 - Backend starts locally and returns `GET /api/v1/health`.
@@ -107,12 +123,12 @@ Each task should be small enough to review. If a task starts touching unrelated 
 #### P1.0.3 CI baseline
 
 **Output**
-- CI workflow with lint/type/test placeholders for backend and frontend.
+- CI workflow with lint, format, typecheck, test, contract, e2e, build, audit, and secret-scan jobs for backend and frontend.
 - Dependency scan and secret scan configured.
 
 **Acceptance**
 - CI runs on pull request.
-- Checks are allowed to be minimal at first, but every later task must strengthen them rather than bypass them.
+- Checks must be strengthened when behavior changes and must not be bypassed.
 
 **Tests**
 - CI proves the scaffold can install dependencies and run the current verification bundle.
@@ -553,19 +569,23 @@ Each task should be small enough to review. If a task starts touching unrelated 
 
 **Required commands**
 ```bash
+cd backend
 ruff check app tests
 ruff format --check app tests
 mypy app
-pytest tests/unit
-pytest tests/integration
-```
+pytest
+python scripts/export_openapi.py --check ../contracts/openapi.json
+pip-audit -r requirements.txt
 
-Frontend commands depend on the selected package manager, but must include:
-
-```bash
-typecheck
-build
-e2e smoke
+cd ../frontend
+npm run lint
+npm run typecheck
+npm run test
+npm run contract:check
+npm run test:e2e
+npm run build
+npm run smoke:public
+npm audit --audit-level=high
 ```
 
 #### P1.6.3 Deployment setup
@@ -623,7 +643,9 @@ e2e smoke
 
 ---
 
-## 6. Suggested PR Sequence
+## 6. Historical PR Sequence And Refactor Guidance
+
+The sequence below records the intended Phase 1 build order. For the upcoming deep assessment, use it to localise findings and keep refactors scoped to one behavioral area at a time:
 
 1. `chore/scaffold-phase-1-apps` — backend/frontend scaffold, env example, CI baseline.
 2. `feat/schema-core-tables` — DB setup, Alembic migration, ORM models, schemas.
@@ -640,7 +662,7 @@ e2e smoke
 13. `feat/admin-landlords` — landlords list/detail/status updates.
 14. `chore/phase-1-hardening` — rate limiting, audits, e2e, staging smoke, deployment docs/runbook.
 
-Some adjacent PRs can be combined if the diff stays small and tests stay clear. Security-sensitive work, migrations, and AI prompt changes should stay isolated for review.
+Refactor or fix work should preserve the same boundaries. Security-sensitive work, migrations, AI prompt changes, API-shape changes, and admin-auth changes should stay isolated for review and must include regression coverage.
 
 ---
 
@@ -648,6 +670,7 @@ Some adjacent PRs can be combined if the diff stays small and tests stay clear. 
 
 Before first real lead capture:
 
+- [ ] Deep Phase 1 integration assessment completed and findings triaged.
 - [ ] Consent text legally reviewed and version string set.
 - [ ] Privacy Policy and Terms live.
 - [ ] `.env.example` complete and production env vars set.
@@ -668,16 +691,16 @@ Before first real lead capture:
 
 ---
 
-## 8. Open Decisions Before Relevant Milestones
+## 8. Remaining Launch Decisions
 
-These should be resolved before the milestone listed, but they do not block starting P1.0 implementation and they do not expand Phase 1 scope:
+These should be resolved before real lead capture. They do not expand Phase 1 scope:
 
 | Decision | Owner | Needed by | Notes |
 |---|---|---|---|
-| Final consent wording and privacy/terms text | Founder/legal reviewer | P1.4/P1.6 | Use placeholder copy only in non-production until reviewed. |
-| Exact visual identity tokens | Founder/design | P1.4 | Placeholder token structure is acceptable; avoid blocking backend work. |
-| Hosting choice for backend | Founder/engineering | P1.6 | Railway or Render both fit the docs; pick before deployment work. |
-| Analytics provider | Founder/engineering | P1.4/P1.6 | Must be cookieless. Plausible is the default assumption. |
+| Final consent wording and privacy/terms text | Founder/legal reviewer | Before real lead capture | Confirm the implemented copy and `CONSENT_VERSION` before production submissions. |
+| Exact visual identity tokens | Founder/design | Before public launch polish | Token structure exists; final visual identity can be refined without changing backend scope. |
+| Hosting choice for backend | Founder/engineering | Before production smoke | Railway or Render both fit the docs; production envs must match `12-production-deployment.md`. |
+| Analytics provider | Founder/engineering | Before production analytics | Must be cookieless. Plausible remains the default assumption. |
 
 ---
 
