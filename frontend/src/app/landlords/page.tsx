@@ -107,20 +107,20 @@ export default function LandlordsPage() {
             id="landlord-routes-title"
             className="max-w-3xl text-2xl font-bold text-foreground sm:text-3xl"
           >
-            Start with the conversation that matches your property.
+            Two distinct services. Choose one or both.
           </h2>
           <Stagger className="mt-6 grid gap-4 md:grid-cols-2">
             {[
               {
                 icon: Bank,
-                title: "Discuss Advanced Rent",
-                body: "Explore whether upfront rent could work for your property and tenancy.",
+                title: "Advanced Rent",
+                body: "A financial service: receive future rent payments as an upfront lump sum. Your tenant continues paying monthly as normal. These two routes are independent — you can use one without the other.",
                 href: site.routes.landlordRegister,
               },
               {
                 icon: Buildings,
-                title: "List a property",
-                body: "Share the basics so an agent can review the right next step with you.",
+                title: "Listing Support",
+                body: "Agent-led help finding and securing the right tenant for your property. Separate from Advanced Rent — you can use listing support alone, Advanced Rent alone, or combine both.",
                 href: site.routes.landlordRegister,
               },
             ].map((route) => (

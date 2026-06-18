@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
 import { CookielessAnalytics } from "@/components/analytics/cookieless-analytics";
 import { ChatWidget } from "@/components/chat/chat-widget";
 import { Container } from "@/components/layout/container";
-import { footerNavItems, publicNavItems, site } from "@/lib/site";
+import { footerCompanyItems, footerNavItems, publicNavItems, site } from "@/lib/site";
 
 type SiteShellProps = {
   children: ReactNode;
@@ -78,13 +78,28 @@ export function SiteShell({ children }: SiteShellProps) {
       <ChatWidget />
       <footer className="border-t border-border bg-surface/70">
         <Container className="grid gap-8 py-9">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.2fr_auto_auto] lg:items-start">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.2fr_auto_auto_auto] lg:items-start">
             <div>
               <p className="font-semibold text-foreground">Proper Rent</p>
               <p className="mt-2 max-w-md text-sm leading-6 text-muted">
-                Human-reviewed support for renters and landlords.
+                Support for tenants and landlords.
               </p>
             </div>
+            <nav aria-label="Company navigation">
+              <p className="text-sm font-semibold text-foreground">Company</p>
+              <ul className="mt-3 grid gap-2 text-sm font-semibold text-muted">
+                {footerCompanyItems.map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      className="rounded-md hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      href={item.href}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
             <nav aria-label="Footer navigation">
               <p className="text-sm font-semibold text-foreground">Links</p>
               <ul className="mt-3 grid gap-2 text-sm font-semibold text-muted">

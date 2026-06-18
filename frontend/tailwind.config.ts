@@ -29,6 +29,7 @@ const config: Config = {
         "accent-foreground": "rgb(var(--color-accent-foreground) / <alpha-value>)",
         "accent-linen": "rgb(var(--color-accent-linen) / <alpha-value>)",
         "accent-spark": "rgb(var(--color-accent-spark) / <alpha-value>)",
+        sage: "rgb(var(--color-sage) / <alpha-value>)",
         success: "rgb(var(--color-success) / <alpha-value>)",
         warning: "rgb(var(--color-warning) / <alpha-value>)",
         danger: "rgb(var(--color-danger) / <alpha-value>)",

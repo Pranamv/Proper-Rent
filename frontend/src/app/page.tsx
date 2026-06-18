@@ -25,7 +25,7 @@ import { absoluteUrl, site } from "@/lib/site";
 export const metadata: Metadata = pageMetadata({
   title: "Renting Support",
   description:
-    "Proper Rent helps renters and landlords move forward with clear registrations, agent follow-up, and Scraye-backed support.",
+    "Proper Rent helps tenants and landlords move forward with clear registrations, agent follow-up, and fintech-backed support.",
   path: site.routes.home,
 });
 
@@ -75,28 +75,6 @@ const landlordSteps = [
   },
 ] as const;
 
-const trustItems = [
-  {
-    icon: UserCheck,
-    title: "Every enquiry is reviewed",
-    body: "Your registration goes to a real Proper Rent agent.",
-  },
-  {
-    icon: House,
-    title: "No guessed availability",
-    body: "A human confirms current rental options before viewings.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Consent-led contact",
-    body: "Personal details are collected through the form, not casual chat.",
-  },
-  {
-    icon: CalendarCheck,
-    title: "Clear next steps",
-    body: "Renters and landlords each get a focused route from the start.",
-  },
-] as const;
 
 export default function Home() {
   return (
@@ -120,7 +98,10 @@ export default function Home() {
               id="home-title"
               className="max-w-3xl text-4xl font-bold leading-[1.04] text-foreground sm:text-6xl sm:leading-[1.02]"
             >
-              Rent the home you want with a clearer path.
+              Rent the home you love,{" "}
+              <span className="text-sage">
+                even if traditional renting says no
+              </span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
               Get help with deposits, guarantor options, and agent-led next
@@ -128,7 +109,7 @@ export default function Home() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a className={buttonClasses({ size: "lg" })} href={site.routes.renterRegister}>
-                Register as renter
+                Register as tenant
               </a>
               <a
                 className={buttonClasses({ variant: "secondary", size: "lg" })}
@@ -146,7 +127,7 @@ export default function Home() {
 
         <Reveal as="section" className="py-10 sm:py-12" aria-labelledby="fintech-title">
           <p className="mb-3 text-sm font-bold uppercase tracking-[0.08em] text-primary">
-            Fintech for renters
+            Fintech for tenants
           </p>
           <h2
             id="fintech-title"
@@ -173,8 +154,8 @@ export default function Home() {
                     </span>
                   </div>
                   <CardDescription>
-                    Reduce upfront deposit pressure while the landlord still
-                    receives the full protected deposit.
+                    We can help cover up to 85% of your deposit on day one,
+                    while the landlord still receives the full protected amount.
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -220,38 +201,13 @@ export default function Home() {
             How it works from first enquiry to next step.
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-7 text-muted">
-            Two simple routes. Renters move toward viewings. Landlords move
+            Two simple routes. Tenants move toward viewings. Landlords move
             toward listing support or Advanced Rent.
           </p>
           <div className="mt-8 grid gap-8 lg:grid-cols-2">
-            <ProcessFlow title="For renters" steps={renterSteps} />
+            <ProcessFlow title="For tenants" steps={renterSteps} />
             <ProcessFlow title="For landlords" steps={landlordSteps} />
           </div>
-        </Reveal>
-
-        <Reveal as="section" className="py-10" aria-labelledby="trust-title">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.08em] text-primary">
-            Trust signals
-          </p>
-          <h2
-            id="trust-title"
-            className="max-w-3xl text-2xl font-bold text-foreground sm:text-3xl"
-          >
-            Clear, consent-led, and human-reviewed.
-          </h2>
-          <Stagger className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {trustItems.map((item) => (
-              <StaggerItem key={item.title}>
-                <div className="h-full rounded-md border border-border bg-surface p-5">
-                  <span className="grid size-10 place-items-center rounded-full bg-accent-linen text-foreground">
-                    <item.icon size={20} weight="bold" aria-hidden="true" />
-                  </span>
-                  <h3 className="mt-4 font-bold text-foreground">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-muted">{item.body}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
         </Reveal>
 
         <Reveal>
@@ -259,7 +215,7 @@ export default function Home() {
             title="Ready to take the next step?"
             body="Register once. A Proper Rent agent will review the details and follow up with the right route."
             primaryHref={site.routes.renterRegister}
-            primaryLabel="Register as renter"
+            primaryLabel="Register as tenant"
             secondaryHref={site.routes.landlordRegister}
             secondaryLabel="Register as landlord"
           />

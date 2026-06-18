@@ -4,9 +4,12 @@ import { absoluteUrl, site } from "@/lib/site";
 
 const sitemapRoutes = [
   site.routes.home,
-  site.routes.renters,
+  site.routes.tenants,
   site.routes.landlords,
   site.routes.howItWorks,
+  site.routes.about,
+  site.routes.blog,
+  site.routes.contact,
   site.routes.privacy,
   site.routes.terms,
   site.routes.renterRegister,

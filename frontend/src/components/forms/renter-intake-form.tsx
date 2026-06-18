@@ -56,10 +56,17 @@ const employmentOptions = [
 
 const incomeOptions = [
   { value: "", label: "Prefer not to say" },
-  { value: "under_25000", label: "Under 25,000" },
-  { value: "25000-35000", label: "25,000-35,000" },
-  { value: "35000-50000", label: "35,000-50,000" },
-  { value: "50000_plus", label: "50,000+" },
+  { value: "under_10000", label: "Under £10,000" },
+  { value: "10000-15000", label: "£10,000 – £15,000" },
+  { value: "15000-20000", label: "£15,000 – £20,000" },
+  { value: "20000-25000", label: "£20,000 – £25,000" },
+  { value: "25000-30000", label: "£25,000 – £30,000" },
+  { value: "30000-35000", label: "£30,000 – £35,000" },
+  { value: "35000-40000", label: "£35,000 – £40,000" },
+  { value: "40000-50000", label: "£40,000 – £50,000" },
+  { value: "50000-60000", label: "£50,000 – £60,000" },
+  { value: "60000-80000", label: "£60,000 – £80,000" },
+  { value: "80000_plus", label: "£80,000+" },
 ] as const;
 
 const guarantorOptions = [
@@ -75,7 +82,8 @@ const depositOptions = [
 ] as const;
 
 const currentHousingOptions = [
-  { value: "renting", label: "Currently renting" },
+  { value: "renting", label: "Currently renting privately" },
+  { value: "social_housing", label: "Social housing / DSS" },
   { value: "family", label: "Living with family or friends" },
   { value: "owning", label: "Currently own a home" },
 ] as const;
@@ -641,7 +649,7 @@ export function RenterIntakeForm() {
                 </Field>
 
                 <p className="text-sm leading-6 text-muted">
-                  Your details go to one human agent. They are never sold or shared with
+                  Your details go directly to the Proper Rent agent. They are never sold or shared with
                   third parties.
                 </p>
               </div>
@@ -699,8 +707,8 @@ function RenterIntakeSuccess({ message }: { message: string }) {
           ))}
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link className={buttonClasses()} href={site.routes.renters}>
-            Back to renters
+          <Link className={buttonClasses()} href={site.routes.tenants}>
+            Back to tenants
           </Link>
           <Link className={buttonClasses({ variant: "secondary" })} href={site.routes.howItWorks}>
             What happens next

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s | Proper Rent",
   },
   description:
-    "Proper Rent helps renters and landlords move from website interest to a human letting agent.",
+    "Proper Rent helps tenants and landlords move from website interest to a letting agent.",
   icons: {
     icon: "/favicon.svg",
   },

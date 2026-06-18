@@ -42,22 +42,22 @@ const segmentIcons = {
 } as const;
 
 export const metadata: Metadata = pageMetadata({
-  title: "For Renters",
+  title: "For Tenants",
   description:
-    "Register your rental requirements with Proper Rent, understand deposit and guarantor support, and move toward agent-led viewings.",
-  path: site.routes.renters,
+    "Register your requirements with Proper Rent, understand deposit and guarantor support, and move toward agent-led viewings.",
+  path: site.routes.tenants,
 });
 
-export default function RentersPage() {
+export default function TenantsPage() {
   return (
     <SiteShell>
       <Container>
         <PageHero
-          eyebrow="For renters"
+          eyebrow="For tenants"
           title="Register your requirements. Move toward real viewings."
           body="Share what you need once. A Proper Rent agent reviews your details, checks suitable next steps, and helps you move forward."
           actions={[
-            { href: site.routes.renterRegister, label: "Register as renter" },
+            { href: site.routes.renterRegister, label: "Register as tenant" },
             {
               href: site.routes.howItWorks,
               label: "How it works",
@@ -99,8 +99,8 @@ export default function RentersPage() {
         </Section>
 
         <Section
-          eyebrow="Fintech for renters"
-          title="Reduce the blockers that slow renters down."
+          eyebrow="Fintech for tenants"
+          title="Reduce the blockers that slow tenants down."
           body="These are general support options. A Proper Rent agent confirms what applies to your situation before anything is finalised."
         >
           <Stagger className="grid gap-4 md:grid-cols-2">
@@ -126,7 +126,7 @@ export default function RentersPage() {
         <Reveal as="section">
           <Section
             eyebrow="Who it's for"
-            title="Built for renters who get overlooked elsewhere."
+            title="Built for tenants who get overlooked elsewhere."
             body="If deposits, guarantors, payslip rules, or referencing have slowed you down, Proper Rent helps you find a clearer next step."
           >
             <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -150,13 +150,13 @@ export default function RentersPage() {
           </Section>
         </Reveal>
 
-        <FaqSection items={renterFaqs} pagePath={site.routes.renters} />
+        <FaqSection items={renterFaqs} pagePath={site.routes.tenants} />
 
         <CtaBand
           title="Ready to register your requirements?"
           body="Submit your details once. A Proper Rent agent will review your requirements and follow up with the right next step."
           primaryHref={site.routes.renterRegister}
-          primaryLabel="Start renter registration"
+          primaryLabel="Start tenant registration"
           secondaryHref={site.routes.privacy}
           secondaryLabel="Read privacy notes"
         />

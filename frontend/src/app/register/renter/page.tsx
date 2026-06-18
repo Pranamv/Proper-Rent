@@ -19,8 +19,8 @@ export default function RenterRegisterPage() {
     <SiteShell>
       <Container className="pb-12">
         <PageHero
-          eyebrow="Renter registration"
-          title="Tell us what you need from your next rental."
+          eyebrow="Tenant registration"
+          title="Tell us what you need from your next home."
           body="Complete the multi-step intake form so the Proper Rent agent can review your requirements, understand your readiness, and follow up with the right next steps."
           className="lg:grid-cols-[1fr_0.72fr]"
           aside={
@@ -34,6 +34,11 @@ export default function RenterRegisterPage() {
             </div>
           }
         />
+        <div className="mb-8 rounded-md border border-primary/20 bg-accent/40 px-6 py-5">
+          <p className="text-base font-bold leading-7 text-foreground sm:text-lg">
+            We strive to enable those with difficulty renting to successfully sign contracts and move in — using our state of the art financial tools.
+          </p>
+        </div>
         <RenterIntakeForm />
       </Container>
     </SiteShell>

@@ -14,12 +14,7 @@ export const renterFaqs: FaqItem[] = [
   {
     question: "Can I ask about Deposit Share or a guarantor before registering?",
     answer:
-      "Yes. The renter page and assistant explain those options in general terms. A Proper Rent agent confirms what applies to your situation.",
-  },
-  {
-    question: "Should I share my phone or email in chat?",
-    answer:
-      "No. Use the intake form for contact details. Chat transcripts are scrubbed before storage, and structured contact details belong in the form.",
+      "Yes. The tenant page explains those options in general terms. A Proper Rent agent confirms what applies to your situation after you register.",
   },
 ];
 
@@ -112,15 +107,15 @@ export const advancedRentHighlights = [
 
 export const howItWorksSteps = [
   {
-    title: "Ask general questions",
-    body: "Visitors can use the chatbot for Proper Rent, letting-process, and generic fintech questions. It does not claim live availability.",
+    title: "Learn about your options",
+    body: "The website explains the Proper Rent process, deposit support, and guarantor options before you register.",
   },
   {
     title: "Register through the form",
-    body: "The renter or landlord form collects the structured details and consent that the agent needs for follow-up.",
+    body: "The tenant or landlord form collects the structured details and consent the agent needs for follow-up.",
   },
   {
     title: "Agent follows up",
-    body: "A human agent reviews the briefing, confirms current options, and handles viewing, listing, or Scraye introduction work.",
+    body: "The agent reviews the brief, confirms current options, and moves things forward with the right next step.",
   },
 ];

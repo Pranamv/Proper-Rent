@@ -769,7 +769,7 @@ export interface components {
              */
             created_at: string;
             /** Current Housing */
-            current_housing?: ("renting" | "family" | "owning") | null;
+            current_housing?: ("renting" | "social_housing" | "family" | "owning") | null;
             /** Deposit Availability */
             deposit_availability?: ("full" | "partial" | "limited") | null;
             /** Email */
@@ -841,7 +841,7 @@ export interface components {
              */
             created_at: string;
             /** Current Housing */
-            current_housing?: ("renting" | "family" | "owning") | null;
+            current_housing?: ("renting" | "social_housing" | "family" | "owning") | null;
             /** Deposit Availability */
             deposit_availability?: ("full" | "partial" | "limited") | null;
             /** Email */
@@ -1054,7 +1054,7 @@ export interface components {
              * Current Housing
              * @enum {string}
              */
-            current_housing: "renting" | "family" | "owning";
+            current_housing: "renting" | "social_housing" | "family" | "owning";
             /**
              * Deposit Availability
              * @enum {string}

@@ -19,7 +19,35 @@ import { CONSENT_VERSION, consentCopy } from "@/lib/consent";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
+const routeOptions = [
+  {
+    value: "listing" as const,
+    label: "Listing Support",
+    description:
+      "Help finding and securing the right tenant. An agent reviews the property and guides the letting process.",
+  },
+  {
+    value: "advanced_rent" as const,
+    label: "Advanced Rent",
+    description:
+      "Receive future rent upfront as a lump sum. A financial service — your tenant continues paying monthly as normal.",
+  },
+  {
+    value: "both" as const,
+    label: "Both",
+    description:
+      "Interested in listing support and Advanced Rent. The agent will discuss which combination makes sense.",
+  },
+] as const;
+
+type RouteChoice = "listing" | "advanced_rent" | "both" | "";
+
 const steps = [
+  {
+    title: "What are you looking for?",
+    description: "Select the service you want to discuss. These are two distinct options — you can use one or both.",
+    fields: [] as const,
+  },
   {
     title: "Contact details",
     description: "These details are saved under consent and used for agent follow-up.",
@@ -27,7 +55,7 @@ const steps = [
   },
   {
     title: "Property details",
-    description: "Share enough information for the agent to assess listing and Advanced Rent next steps.",
+    description: "Share enough information for the agent to assess your chosen route.",
     fields: ["propertyAddress", "bedrooms", "askingRent"] as const,
   },
   {
@@ -38,6 +66,7 @@ const steps = [
 ] as const;
 
 type FormValues = {
+  routeChoice: RouteChoice;
   fullName: string;
   email: string;
   phone: string;
@@ -55,6 +84,7 @@ type FormField = keyof FormValues;
 type FormErrors = Partial<Record<FormField, string>>;
 
 const initialValues: FormValues = {
+  routeChoice: "",
   fullName: "",
   email: "",
   phone: "",
@@ -91,7 +121,7 @@ export function LandlordIntakeForm() {
   function handleTextChange(
     field: Exclude<
       FormField,
-      "advancedRentInterest" | "listingInterest" | "consentGiven"
+      "routeChoice" | "advancedRentInterest" | "listingInterest" | "consentGiven"
     >,
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
@@ -99,6 +129,19 @@ export function LandlordIntakeForm() {
   }
 
   function goToNextStep() {
+    if (activeStep === 0) {
+      const routeErrors = validateRouteStep(values);
+      setErrors((current) => ({ ...current, ...routeErrors }));
+      if (Object.keys(routeErrors).length > 0) return;
+      setValues((current) => ({
+        ...current,
+        listingInterest: current.routeChoice === "listing" || current.routeChoice === "both",
+        advancedRentInterest: current.routeChoice === "advanced_rent" || current.routeChoice === "both",
+      }));
+      setActiveStep((current) => Math.min(current + 1, steps.length - 1));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     const nextErrors = validateStep(values, activeStep);
     setErrors((current) => ({ ...current, ...nextErrors }));
     if (Object.keys(nextErrors).length > 0) {
@@ -204,6 +247,32 @@ export function LandlordIntakeForm() {
             {submitError ? <FormAlert>{submitError}</FormAlert> : null}
 
             {activeStep === 0 ? (
+              <div className="grid gap-4">
+                {errors.routeChoice ? (
+                  <p className="text-sm font-medium text-danger">{errors.routeChoice}</p>
+                ) : null}
+                {routeOptions.map((option) => (
+                  <button
+                    className={cn(
+                      "w-full rounded-md border bg-surface p-5 text-left transition-colors",
+                      values.routeChoice === option.value
+                        ? "border-primary bg-accent/40"
+                        : "border-border hover:border-primary/50",
+                    )}
+                    key={option.value}
+                    onClick={() => updateValue("routeChoice", option.value)}
+                    type="button"
+                  >
+                    <span className="block font-bold text-foreground">{option.label}</span>
+                    <span className="mt-1 block text-sm leading-6 text-muted">
+                      {option.description}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {activeStep === 1 ? (
               <div className="grid gap-5">
                 <div className="grid gap-5 md:grid-cols-2">
                   <Field error={errors.fullName}>
@@ -243,7 +312,7 @@ export function LandlordIntakeForm() {
               </div>
             ) : null}
 
-            {activeStep === 1 ? (
+            {activeStep === 2 ? (
               <div className="grid gap-5">
                 <Field error={errors.propertyAddress}>
                   <FieldLabel htmlFor="propertyAddress">Property address</FieldLabel>
@@ -298,22 +367,12 @@ export function LandlordIntakeForm() {
                     />
                   </Field>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <InterestCheckbox
-                    checked={values.listingInterest}
-                    description="I want to discuss listing this property through the Proper Rent / Scraye process."
-                    id="listingInterest"
-                    label="Listing interest"
-                    onChange={(checked) => updateValue("listingInterest", checked)}
-                  />
-                  <InterestCheckbox
-                    checked={values.advancedRentInterest}
-                    description="I want to discuss Advanced Rent options for receiving rent upfront."
-                    id="advancedRentInterest"
-                    label="Advanced Rent interest"
-                    onChange={(checked) => updateValue("advancedRentInterest", checked)}
-                  />
-                </div>
+                {values.routeChoice ? (
+                  <div className="rounded-md border border-primary/20 bg-accent/30 px-4 py-3 text-sm text-foreground">
+                    <span className="font-semibold">Selected: </span>
+                    {routeOptions.find((o) => o.value === values.routeChoice)?.label}
+                  </div>
+                ) : null}
                 <Field>
                   <FieldLabel htmlFor="notes">Anything else?</FieldLabel>
                   <TextArea
@@ -328,13 +387,17 @@ export function LandlordIntakeForm() {
               </div>
             ) : null}
 
-            {activeStep === 2 ? (
+            {activeStep === 3 ? (
               <div className="grid gap-5">
                 <details className="rounded-md border border-border bg-surface-subtle p-4">
                   <summary className="cursor-pointer text-sm font-semibold text-foreground">
                     Check your answers
                   </summary>
                   <dl className="mt-4 grid gap-3 text-sm md:grid-cols-2">
+                    <SummaryItem
+                      label="Service"
+                      value={routeOptions.find((o) => o.value === values.routeChoice)?.label ?? ""}
+                    />
                     <SummaryItem label="Name" value={values.fullName} />
                     <SummaryItem label="Email" value={values.email} />
                     <SummaryItem label="Phone" value={values.phone} />
@@ -342,14 +405,6 @@ export function LandlordIntakeForm() {
                     <SummaryItem label="Bedrooms" value={formatBedrooms(values.bedrooms)} />
                     <SummaryItem label="Asking rent" value={formatRent(values.askingRent)} />
                     <SummaryItem label="Available from" value={values.availableFrom} />
-                    <SummaryItem
-                      label="Listing interest"
-                      value={values.listingInterest ? "Yes" : "No"}
-                    />
-                    <SummaryItem
-                      label="Advanced Rent interest"
-                      value={values.advancedRentInterest ? "Yes" : "No"}
-                    />
                   </dl>
                 </details>
 
@@ -389,7 +444,7 @@ export function LandlordIntakeForm() {
                   </div>
                 </Field>
                 <p className="text-sm leading-6 text-muted">
-                  Your details go to one human agent. They are never sold or shared with
+                  Your details go directly to the Proper Rent agent. They are never sold or shared with
                   third parties.
                 </p>
               </div>
@@ -424,36 +479,6 @@ export function LandlordIntakeForm() {
   );
 }
 
-function InterestCheckbox({
-  checked,
-  description,
-  id,
-  label,
-  onChange,
-}: {
-  checked: boolean;
-  description: string;
-  id: string;
-  label: string;
-  onChange: (checked: boolean) => void;
-}) {
-  return (
-    <div className="flex gap-3 rounded-md border border-border bg-surface-subtle p-4">
-      <CheckboxInput
-        checked={checked}
-        id={id}
-        name={id}
-        onChange={(event) => onChange(event.target.checked)}
-      />
-      <span>
-        <FieldLabel className="inline" htmlFor={id}>
-          {label}
-        </FieldLabel>
-        <span className="mt-1 block text-sm leading-6 text-muted">{description}</span>
-      </span>
-    </div>
-  );
-}
 
 function LandlordIntakeSuccess({ message }: { message: string }) {
   return (
@@ -554,6 +579,13 @@ function validateAll(values: FormValues): FormErrors {
   }
 
   return nextErrors;
+}
+
+function validateRouteStep(values: FormValues): FormErrors {
+  if (!values.routeChoice) {
+    return { routeChoice: "Select the service you want to discuss." };
+  }
+  return {};
 }
 
 function buildPayload(values: FormValues): LandlordIntakeRequest {

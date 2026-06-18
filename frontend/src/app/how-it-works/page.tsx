@@ -2,7 +2,6 @@ import {
   Bank,
   Buildings,
   CalendarCheck,
-  ChatCircleText,
   ClipboardText,
   HouseLine,
   ListChecks,
@@ -31,7 +30,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = pageMetadata({
   title: "How It Works",
   description:
-    "See what happens after registering with Proper Rent, from renter requirements and landlord property details to human agent follow-up.",
+    "See what happens after registering with Proper Rent, from tenant requirements and landlord property details to agent follow-up.",
   path: site.routes.howItWorks,
 });
 
@@ -51,14 +50,14 @@ const renterSteps = [
     title: "Register requirements",
     body: "Share your budget, areas, bedrooms, move timing, and rental situation.",
     detail: "Useful details include deposit position, guarantor needs, and how soon you want to move.",
-    outcome: "The agent receives a clear renter brief.",
+    outcome: "The agent receives a clear tenant brief.",
   },
   {
     icon: UserCheck,
     title: "Agent review",
     body: "A Proper Rent agent checks your details and decides the most useful next step.",
     detail: "They look at your move timing, practical fit, and whether support options may help.",
-    outcome: "You get a human follow-up, not a generic auto-reply.",
+    outcome: "You get a focused follow-up from a Proper Rent agent.",
   },
   {
     icon: CalendarCheck,
@@ -123,11 +122,6 @@ const agentWorkflow = [
     title: "Priority, not rejection",
     body: "Lead priority helps the agent decide who to contact first. Website registrations are not filtered out.",
   },
-  {
-    icon: ChatCircleText,
-    title: "Chat stays general",
-    body: "The assistant can explain the process, but the agent confirms live options and next steps.",
-  },
 ] as const;
 
 const boundaries = [
@@ -135,7 +129,7 @@ const boundaries = [
     title: "What the website helps with",
     items: [
       "Explain the Proper Rent process before you register.",
-      "Collect renter or landlord details through focused forms.",
+      "Collect tenant or landlord details through focused forms.",
       "Send each registration into the agent review workflow.",
     ],
   },
@@ -147,14 +141,6 @@ const boundaries = [
       "The right next step before any tenancy or listing decision.",
     ],
   },
-  {
-    title: "What is not shown on the site",
-    items: [
-      "Live Scraye listings or a public property search feed.",
-      "Property-specific fintech quotes before agent review.",
-      "Final tenancy, listing, or affordability decisions made by AI.",
-    ],
-  },
 ] as const;
 
 export default function HowItWorksPage() {
@@ -164,9 +150,9 @@ export default function HowItWorksPage() {
         <PageHero
           eyebrow="How it works"
           title="See what happens after you register."
-          body="Proper Rent gives renters and landlords a clear starting point: submit the right details once, get human review, then move toward a practical next step."
+          body="Proper Rent gives tenants and landlords a clear starting point: submit the right details once, get agent review, then move toward a practical next step."
           actions={[
-            { href: site.routes.renterRegister, label: "Register as renter" },
+            { href: site.routes.renterRegister, label: "Register as tenant" },
             {
               href: site.routes.landlordRegister,
               label: "Register as landlord",
@@ -179,12 +165,12 @@ export default function HowItWorksPage() {
         <Section
           eyebrow="Process detail"
           title="Two routes. Same principle: human review before the next move."
-          body="Renters and landlords need different information, but the process is designed to feel the same: register, get reviewed, then move forward with an agent."
+          body="Tenants and landlords need different information, but the process is designed to feel the same: register, get reviewed, then move forward with an agent."
         >
           <div className="grid gap-5 lg:grid-cols-2">
             <RouteProcess
               accentClass="bg-primary text-primary-foreground"
-              eyebrow="For renters"
+              eyebrow="For tenants"
               steps={renterSteps}
               title="From requirements to viewings."
             />
@@ -235,7 +221,7 @@ export default function HowItWorksPage() {
           >
             Useful guidance without pretending everything is automated.
           </h2>
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
             {boundaries.map((group) => (
               <Card className="h-full shadow-none" key={group.title}>
                 <CardHeader>
@@ -261,9 +247,9 @@ export default function HowItWorksPage() {
 
         <CtaBand
           title="Start with the form that matches you."
-          body="Renters share requirements. Landlords share property details. A Proper Rent agent reviews the registration and follows up with the right next step."
+          body="Tenants share requirements. Landlords share property details. A Proper Rent agent reviews the registration and follows up with the right next step."
           primaryHref={site.routes.renterRegister}
-          primaryLabel="Register as renter"
+          primaryLabel="Register as tenant"
           secondaryHref={site.routes.landlordRegister}
           secondaryLabel="Register as landlord"
         />
