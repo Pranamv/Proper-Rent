@@ -13,6 +13,8 @@ export type {
   AdminLeadStatus,
   AdminLeadSummary,
   AdminLeadUpdateRequest,
+  ChatHistoryMessage,
+  ChatHistoryResponse,
   ChatRequest,
   ChatResponse,
   HealthResponse,

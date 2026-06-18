@@ -34,7 +34,34 @@ Phase 1 has no `properties` data — the chatbot answers fintech/process questio
 
 **Never returned:** `intent_score`, internal conversation id, system prompt, raw LLM response, any internal field. The running score is server-side only.
 
+**PII handling:** stored transcripts are scrubbed before persistence, and provider-bound prompt content is also scrubbed for email and common UK phone patterns. Contact details belong in the intake forms, not chat.
+
 **Errors:** `422` (message too long / missing session_id). If the LLM gateway is unavailable or times out, return `200` with the normal response shape and a graceful fallback `reply`; never propagate the raw provider error.
+
+### `GET /api/v1/chat/history` — public
+
+Restores the visible chat transcript for the current anonymous website session. This endpoint exists so public page navigation can remount the chat widget without losing the visitor's visible conversation.
+
+**Query params:** `session_id` (required, 1-128 chars)
+
+**Response 200:**
+```json
+{
+  "session_id": "string",
+  "messages": [
+    {
+      "role": "user | assistant",
+      "content": "string",
+      "suggested_action": "show_intake_form | null",
+      "ts": "2026-06-18T10:00:00Z"
+    }
+  ]
+}
+```
+
+If no conversation exists for the session, return `200` with an empty `messages` array.
+
+**Exposure rule:** return only scrubbed `role`, `content`, `suggested_action`, and `ts`. Re-scrub transcript content before returning it so older rows cannot leak email or phone patterns. Never return conversation ids, renter ids, scores, prompt text, raw provider payloads, or arbitrary transcript metadata.
 
 ---
 
@@ -46,30 +73,32 @@ Phase 1 has no `properties` data — the chatbot answers fintech/process questio
 ```json
 {
   "source_channel": "website",
-  "session_id": "string (optional)",
-  "full_name": "string",
+  "session_id": "string (optional, ≤128 chars)",
+  "full_name": "string (≤200 chars)",
   "email": "string (valid email)",
-  "phone": "string",
+  "phone": "string (≤50 chars)",
   "bedrooms_required": 2,
   "areas_preferred": ["Manchester City Centre", "Salford"],
   "max_rent": 1200,
   "move_in_from": "2026-08-01",
   "move_in_by": "2026-09-01",
   "employment_status": "employed_full",
-  "annual_income_range": "25000-35000",
+  "annual_income_range": "25000-35000 (optional, ≤100 chars)",
   "has_guarantor": "no",
   "deposit_availability": "partial",
   "current_housing": "renting",
-  "how_heard": "facebook",
+  "how_heard": "facebook (optional, ≤100 chars)",
   "furnished_preference": "no_preference",
-  "pets": "none",
-  "accessibility_needs": "string (optional)",
+  "pets": "none (optional, ≤100 chars)",
+  "accessibility_needs": "string (optional, ≤1000 chars)",
   "has_rented_before": true,
-  "notes": "string (optional)",
+  "notes": "string (optional, ≤2000 chars)",
   "consent_given": true,
   "consent_version": "2026-06-13"
 }
 ```
+
+`areas_preferred` must include 1-12 entries; each area entry is limited to 100 characters.
 
 **Response 201:**
 ```json
@@ -96,11 +125,11 @@ Phase 1 has no `properties` data — the chatbot answers fintech/process questio
 **Request:**
 ```json
 {
-  "full_name": "string", "email": "string", "phone": "string",
-  "property_address": "string", "bedrooms": 2, "asking_rent": 1400,
+  "full_name": "string (≤200 chars)", "email": "string (valid email)", "phone": "string (≤50 chars)",
+  "property_address": "string (≤500 chars)", "bedrooms": 2, "asking_rent": 1400,
   "available_from": "2026-08-01",
   "advanced_rent_interest": true, "listing_interest": true,
-  "notes": "string (optional)",
+  "notes": "string (optional, ≤2000 chars)",
   "consent_given": true, "consent_version": "2026-06-13"
 }
 ```

@@ -8,6 +8,7 @@ import {
   updateLeadStatusAction,
 } from "@/app/admin/(protected)/leads/actions";
 import { buttonClasses } from "@/components/ui/button";
+import { SelectInput } from "@/components/ui/field";
 import type { AdminLeadStatus } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -71,10 +72,10 @@ export function LeadStatusUpdateForm({
         Status for {leadName}
       </label>
       <div className="flex items-center gap-1.5">
-        <select
+        <SelectInput
           aria-describedby={state.message ? messageId : undefined}
           className={cn(
-            "h-8 min-w-32 rounded-full border bg-surface px-2.5 text-xs font-semibold",
+            "h-8 w-auto min-w-32 rounded-full border bg-surface px-2.5 pr-8 text-xs font-semibold",
             "text-foreground focus-visible:outline-none focus-visible:ring-2",
             "focus-visible:ring-primary focus-visible:ring-offset-2",
             "focus-visible:ring-offset-background disabled:cursor-not-allowed",
@@ -94,7 +95,7 @@ export function LeadStatusUpdateForm({
               {option.label}
             </option>
           ))}
-        </select>
+        </SelectInput>
         <button
           className={buttonClasses({
             className: "h-8 px-2.5 text-xs",

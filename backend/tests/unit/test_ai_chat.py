@@ -82,8 +82,9 @@ async def run_pii_free_persistence_test() -> None:
         assert conversation.transcript[1]["content"] == "Use the form and an agent will follow up."
 
         assert llm.calls
-        assert "renter@example.com" in llm.calls[0][-1].content
-        assert "07123 456789" in llm.calls[0][-1].content
+        assert "renter@example.com" not in llm.calls[0][-1].content
+        assert "07123 456789" not in llm.calls[0][-1].content
+        assert "[redacted]" in llm.calls[0][-1].content
     finally:
         await engine.dispose()
 

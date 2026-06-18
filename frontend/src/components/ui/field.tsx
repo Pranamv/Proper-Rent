@@ -1,3 +1,4 @@
+import { CaretDown } from "@phosphor-icons/react/dist/ssr";
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -84,17 +85,24 @@ export function SelectInput({
   ...props
 }: ComponentPropsWithoutRef<"select">) {
   return (
-    <select
-      className={cn(
-        "h-11 w-full rounded-md border border-border bg-surface px-3 text-sm",
-        "text-foreground",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-        "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        className,
-      )}
-      {...props}
-    />
+    <span className="relative block">
+      <select
+        className={cn(
+          "h-11 w-full appearance-none rounded-md border border-border bg-surface px-3 pr-10 text-sm",
+          "text-foreground shadow-sm",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+          "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          className,
+        )}
+        {...props}
+      />
+      <CaretDown
+        aria-hidden="true"
+        className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted"
+        weight="bold"
+      />
+    </span>
   );
 }
 

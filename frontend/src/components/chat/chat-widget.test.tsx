@@ -6,6 +6,7 @@ import { ChatWidget } from "@/components/chat/chat-widget";
 
 const mocks = vi.hoisted(() => ({
   createChatReply: vi.fn(),
+  getChatHistory: vi.fn(),
   resolvePublicSessionId: vi.fn(() => "session-vitest"),
 }));
 
@@ -16,6 +17,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
     publicApi: {
       ...actual.publicApi,
       createChatReply: mocks.createChatReply,
+      getChatHistory: mocks.getChatHistory,
     },
   };
 });
@@ -27,7 +29,44 @@ vi.mock("@/lib/session", () => ({
 describe("ChatWidget", () => {
   beforeEach(() => {
     mocks.createChatReply.mockReset();
+    mocks.getChatHistory.mockReset();
+    mocks.getChatHistory.mockResolvedValue({
+      messages: [],
+      session_id: "session-vitest",
+    });
     mocks.resolvePublicSessionId.mockReturnValue("session-vitest");
+  });
+
+  it("restores scrubbed chat history for the current session", async () => {
+    mocks.getChatHistory.mockResolvedValue({
+      session_id: "session-vitest",
+      messages: [
+        {
+          role: "user",
+          content: "I need a two bed near Salford.",
+          suggested_action: null,
+          ts: "2026-06-18T10:00:00Z",
+        },
+        {
+          role: "assistant",
+          content: "Register once and an agent can follow up.",
+          suggested_action: "show_intake_form",
+          ts: "2026-06-18T10:00:01Z",
+        },
+      ],
+    });
+    const user = userEvent.setup();
+
+    render(<ChatWidget />);
+    await user.click(screen.getByRole("button", { name: /open proper rent chat/i }));
+
+    expect(await screen.findByText("I need a two bed near Salford.")).toBeInTheDocument();
+    expect(screen.getByText("Register once and an agent can follow up.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /open renter intake form/i })).toHaveAttribute(
+      "href",
+      "/register/renter?session_id=session-vitest",
+    );
+    expect(mocks.getChatHistory).toHaveBeenCalledWith("session-vitest");
   });
 
   it("opens, sends a message, and renders the intake suggestion", async () => {

@@ -17,6 +17,18 @@ export type ChatResponse = {
   session_id: string;
 };
 
+export type ChatHistoryMessage = {
+  role: "assistant" | "user";
+  content: string;
+  suggested_action?: SuggestedAction | null;
+  ts?: string | null;
+};
+
+export type ChatHistoryResponse = {
+  session_id: string;
+  messages: ChatHistoryMessage[];
+};
+
 export type RenterLeadRequest = {
   source_channel?: "website";
   session_id?: string | null;

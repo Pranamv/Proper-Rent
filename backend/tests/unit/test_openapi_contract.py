@@ -11,6 +11,7 @@ EXPECTED_PHASE_1_PATHS = {
     "/api/v1/admin/leads/{renter_id}",
     "/api/v1/admin/leads/{renter_id}/conversation",
     "/api/v1/chat",
+    "/api/v1/chat/history",
     "/api/v1/health",
     "/api/v1/landlords",
     "/api/v1/leads",
@@ -41,6 +42,8 @@ def test_openapi_public_responses_do_not_expose_internal_fields() -> None:
     schemas = create_app(Settings(app_env="test")).openapi()["components"]["schemas"]
 
     public_response_schemas = {
+        "ChatHistoryMessage",
+        "ChatHistoryResponse",
         "ChatResponse",
         "LandlordIntakeResponse",
         "RenterLeadResponse",

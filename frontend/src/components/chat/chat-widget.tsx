@@ -6,7 +6,7 @@ import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { TextInput } from "@/components/ui/field";
 import { publicApi } from "@/lib/api";
-import type { SuggestedAction } from "@/lib/api";
+import type { ChatHistoryMessage, SuggestedAction } from "@/lib/api";
 import { motionClasses } from "@/lib/motion";
 import { resolvePublicSessionId } from "@/lib/session";
 import { site } from "@/lib/site";
@@ -46,10 +46,42 @@ export function ChatWidget() {
   const inputRef = useRef<HTMLInputElement>(null);
   const isOpenRef = useRef(isOpen);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const restoredSessionRef = useRef<string | null>(null);
 
   useEffect(() => {
     setSessionId(resolvePublicSessionId());
   }, []);
+
+  useEffect(() => {
+    if (!sessionId || restoredSessionRef.current === sessionId) {
+      return;
+    }
+
+    let isCancelled = false;
+    restoredSessionRef.current = sessionId;
+
+    void publicApi
+      .getChatHistory(sessionId)
+      .then((history) => {
+        if (isCancelled || history.session_id !== sessionId || history.messages.length === 0) {
+          return;
+        }
+
+        setMessages((current) => {
+          if (current.some((message) => message.role === "user")) {
+            return current;
+          }
+          return restoreChatMessages(history.messages);
+        });
+      })
+      .catch(() => {
+        // History restore is best-effort; sending new chat messages should still work.
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [sessionId]);
 
   useEffect(() => {
     isOpenRef.current = isOpen;
@@ -333,4 +365,17 @@ function createMessageId(prefix: string) {
     return `${prefix}-${crypto.randomUUID()}`;
   }
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function restoreChatMessages(historyMessages: ChatHistoryMessage[]): ChatMessage[] {
+  const restoredMessages = historyMessages
+    .filter((message) => message.content.trim().length > 0)
+    .map((message, index) => ({
+      id: `history-${index}-${message.ts ?? message.role}`,
+      role: message.role,
+      content: message.content,
+      suggestedAction: message.suggested_action ?? null,
+    }));
+
+  return restoredMessages.length > 0 ? restoredMessages : [INITIAL_MESSAGE];
 }

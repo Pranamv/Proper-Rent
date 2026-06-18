@@ -228,7 +228,7 @@ function LandlordOverview({ landlord }: { landlord: AdminLandlordDetail }) {
               label="Listing interest"
               value={formatBoolean(landlord.listing_interest)}
             />
-            <AdminMetaItem label="Priority" value={interestSummary(landlord)} />
+            <AdminMetaItem label="Interest summary" value={interestSummary(landlord)} />
           </dl>
         </div>
       </InfoCard>

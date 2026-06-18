@@ -388,6 +388,7 @@ export function RenterIntakeForm() {
                   <FieldLabel htmlFor="areasPreferred">Preferred areas</FieldLabel>
                   <TextArea
                     id="areasPreferred"
+                    maxLength={1200}
                     name="areasPreferred"
                     onChange={(event) => handleTextChange("areasPreferred", event)}
                     placeholder="Manchester City Centre, Salford, Ancoats"
@@ -449,6 +450,7 @@ export function RenterIntakeForm() {
                   <FieldLabel htmlFor="accessibilityNeeds">Accessibility needs</FieldLabel>
                   <TextArea
                     id="accessibilityNeeds"
+                    maxLength={1000}
                     name="accessibilityNeeds"
                     onChange={(event) => handleTextChange("accessibilityNeeds", event)}
                     placeholder="Step-free access, lift, parking, or anything the agent should know."
@@ -564,6 +566,7 @@ export function RenterIntakeForm() {
                   <FieldLabel htmlFor="notes">Anything else?</FieldLabel>
                   <TextArea
                     id="notes"
+                    maxLength={2000}
                     name="notes"
                     onChange={(event) => handleTextChange("notes", event)}
                     placeholder="Move reason, viewing availability, preferred contact time, or extra context for the agent."

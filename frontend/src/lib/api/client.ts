@@ -10,6 +10,7 @@ import type {
   AdminLeadListResponse,
   AdminLeadStatus,
   AdminLeadUpdateRequest,
+  ChatHistoryResponse,
   ChatRequest,
   ChatResponse,
   HealthResponse,
@@ -78,6 +79,8 @@ export async function apiFetch<ResponseBody>(
 
 export const publicApi = {
   health: () => apiFetch<HealthResponse>("/health"),
+  getChatHistory: (sessionId: string) =>
+    apiFetch<ChatHistoryResponse>(`/chat/history${buildSessionQuery(sessionId)}`),
   createChatReply: (payload: ChatRequest) =>
     apiFetch<ChatResponse>("/chat", { body: payload }),
   createRenterLead: (payload: RenterLeadRequest) =>
@@ -179,4 +182,9 @@ function buildLandlordQuery(params: AdminLandlordListParams) {
 
   const queryString = query.toString();
   return queryString ? `?${queryString}` : "";
+}
+
+function buildSessionQuery(sessionId: string) {
+  const query = new URLSearchParams({ session_id: sessionId });
+  return `?${query.toString()}`;
 }

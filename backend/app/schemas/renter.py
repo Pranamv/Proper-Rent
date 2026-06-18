@@ -1,6 +1,6 @@
 from datetime import date
 from decimal import Decimal
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import EmailStr, Field
@@ -15,6 +15,8 @@ from app.schemas.base import (
     SourceChannel,
 )
 
+AreaPreference = Annotated[str, Field(min_length=1, max_length=100)]
+
 
 class RenterLeadRequest(ApiSchema):
     source_channel: SourceChannel = "website"
@@ -23,7 +25,7 @@ class RenterLeadRequest(ApiSchema):
     email: EmailStr
     phone: str = Field(min_length=1, max_length=50)
     bedrooms_required: int = Field(ge=0, le=20)
-    areas_preferred: list[str] = Field(min_length=1)
+    areas_preferred: list[AreaPreference] = Field(min_length=1, max_length=12)
     max_rent: Decimal = Field(gt=0)
     move_in_from: date | None = None
     move_in_by: date | None = None
@@ -35,9 +37,9 @@ class RenterLeadRequest(ApiSchema):
     how_heard: str | None = Field(default=None, max_length=100)
     furnished_preference: FurnishedPreference = "no_preference"
     pets: str | None = Field(default=None, max_length=100)
-    accessibility_needs: str | None = None
+    accessibility_needs: str | None = Field(default=None, max_length=1000)
     has_rented_before: bool | None = None
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=2000)
     consent_given: Literal[True]
     consent_version: str = Field(min_length=1, max_length=40)
 

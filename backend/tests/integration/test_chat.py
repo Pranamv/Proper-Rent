@@ -168,6 +168,77 @@ def test_chat_endpoint_uses_canned_reply_without_llm_call(
     assert "renter intake form" in conversation.transcript[1]["content"]
 
 
+def test_chat_history_endpoint_returns_scrubbed_session_transcript(
+    chat_context: ChatEndpointContext,
+) -> None:
+    asyncio.run(
+        seed_conversation(
+            chat_context.session_factory,
+            session_id="restore-session",
+            transcript=[
+                {
+                    "role": "user",
+                    "content": "My email is renter@example.com and phone is 07123 456789.",
+                    "ts": "2026-06-18T10:00:00Z",
+                    "internal_note": "not public",
+                },
+                {
+                    "role": "assistant",
+                    "content": "Please use the renter intake form.",
+                    "suggested_action": "show_intake_form",
+                    "ts": "2026-06-18T10:00:01Z",
+                },
+                {
+                    "role": "system",
+                    "content": "Internal message that should not be returned.",
+                },
+            ],
+        )
+    )
+
+    response = chat_context.client.get(
+        "/api/v1/chat/history",
+        params={"session_id": "restore-session"},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    assert response.json() == {
+        "session_id": "restore-session",
+        "messages": [
+            {
+                "role": "user",
+                "content": "My email is [redacted] and phone is [redacted].",
+                "suggested_action": None,
+                "ts": "2026-06-18T10:00:00Z",
+            },
+            {
+                "role": "assistant",
+                "content": "Please use the renter intake form.",
+                "suggested_action": "show_intake_form",
+                "ts": "2026-06-18T10:00:01Z",
+            },
+        ],
+    }
+    assert "renter@example.com" not in response.text
+    assert "07123 456789" not in response.text
+    assert "internal_note" not in response.text
+    assert "Internal message" not in response.text
+
+
+def test_chat_history_endpoint_returns_empty_history_for_unknown_session(
+    chat_context: ChatEndpointContext,
+) -> None:
+    response = chat_context.client.get(
+        "/api/v1/chat/history",
+        params={"session_id": "unknown-session"},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    assert response.json() == {"session_id": "unknown-session", "messages": []}
+
+
 def test_chat_endpoint_rate_limits_public_requests(
     chat_context: ChatEndpointContext,
 ) -> None:
@@ -260,7 +331,7 @@ def test_chat_endpoint_returns_200_with_fallback_reply(
     assert conversation.transcript[-1]["content"] == LLM_FALLBACK_REPLY
 
 
-def test_chat_endpoint_scrubs_pii_before_persisting_transcript(
+def test_chat_endpoint_scrubs_pii_before_persisting_and_llm_call(
     chat_context: ChatEndpointContext,
 ) -> None:
     response = chat_context.client.post(
@@ -282,8 +353,9 @@ def test_chat_endpoint_scrubs_pii_before_persisting_transcript(
 
     assert chat_context.llm.calls
     user_prompt = chat_context.llm.calls[-1][-1].content
-    assert "renter@example.com" in user_prompt
-    assert "07123 456789" in user_prompt
+    assert "renter@example.com" not in user_prompt
+    assert "07123 456789" not in user_prompt
+    assert "[redacted]" in user_prompt
 
 
 def test_chat_endpoint_ignores_mismatched_renter_id_context(
@@ -328,6 +400,17 @@ async def fetch_conversation(
         return await session.scalar(
             select(Conversation).where(Conversation.session_id == session_id)
         )
+
+
+async def seed_conversation(
+    session_factory: async_sessionmaker[AsyncSession],
+    *,
+    session_id: str,
+    transcript: list[dict[str, object]],
+) -> None:
+    async with session_factory() as session:
+        session.add(Conversation(session_id=session_id, channel="website", transcript=transcript))
+        await session.commit()
 
 
 async def count_conversations(session_factory: async_sessionmaker[AsyncSession]) -> int:

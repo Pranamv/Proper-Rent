@@ -250,6 +250,7 @@ export function LandlordIntakeForm() {
                   <TextArea
                     autoComplete="street-address"
                     id="propertyAddress"
+                    maxLength={500}
                     name="propertyAddress"
                     onChange={(event) => handleTextChange("propertyAddress", event)}
                     placeholder="Flat, street, town or city, postcode if available"
@@ -317,6 +318,7 @@ export function LandlordIntakeForm() {
                   <FieldLabel htmlFor="notes">Anything else?</FieldLabel>
                   <TextArea
                     id="notes"
+                    maxLength={2000}
                     name="notes"
                     onChange={(event) => handleTextChange("notes", event)}
                     placeholder="Current vacancy status, tenant timing, preferred contact time, or other useful context."

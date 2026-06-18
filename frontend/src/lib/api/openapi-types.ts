@@ -399,6 +399,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/chat/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Chat History */
+        get: {
+            parameters: {
+                query: {
+                    session_id: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successful Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChatHistoryResponse"];
+                    };
+                };
+                /** @description Validation Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["HTTPValidationError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -879,6 +926,27 @@ export interface components {
             lead_status?: ("new" | "contacted" | "qualified" | "viewing_arranged" | "offer_made" | "let_agreed" | "completed" | "lost") | null;
             /** Notes */
             notes?: string | null;
+        };
+        /** ChatHistoryMessage */
+        ChatHistoryMessage: {
+            /** Content */
+            content: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "assistant" | "user";
+            /** Suggested Action */
+            suggested_action?: "show_intake_form" | null;
+            /** Ts */
+            ts?: string | null;
+        };
+        /** ChatHistoryResponse */
+        ChatHistoryResponse: {
+            /** Messages */
+            messages: components["schemas"]["ChatHistoryMessage"][];
+            /** Session Id */
+            session_id: string;
         };
         /** ChatRequest */
         ChatRequest: {

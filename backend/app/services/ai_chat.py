@@ -244,7 +244,7 @@ class AIChatService:
         else:
             llm_messages = build_llm_messages(
                 conversation=conversation,
-                user_message=normalized_message,
+                user_message=scrub_pii(normalized_message),
                 renter=renter,
             )
             llm_started_at = perf_counter()
@@ -265,6 +265,7 @@ class AIChatService:
             conversation.transcript,
             user_message=normalized_message,
             assistant_reply=reply,
+            suggested_action=suggested_action,
             timestamp=timestamp,
         )
         conversation.intent_score_output = calculate_running_intent_score(
@@ -448,6 +449,7 @@ def append_chat_turn(
     *,
     user_message: str,
     assistant_reply: str,
+    suggested_action: SuggestedAction | None,
     timestamp: datetime,
 ) -> list[TranscriptEntry]:
     stored_transcript = [dict(entry) for entry in transcript]
@@ -457,6 +459,7 @@ def append_chat_turn(
             transcript_entry(
                 role="assistant",
                 content=scrub_pii(assistant_reply),
+                suggested_action=suggested_action,
                 timestamp=timestamp,
             ),
         ]
@@ -468,13 +471,17 @@ def transcript_entry(
     *,
     role: Literal["user", "assistant"],
     content: str,
+    suggested_action: SuggestedAction | None = None,
     timestamp: datetime,
 ) -> TranscriptEntry:
-    return {
+    entry: TranscriptEntry = {
         "role": role,
         "content": content,
         "ts": timestamp.isoformat().replace("+00:00", "Z"),
     }
+    if role == "assistant" and suggested_action is not None:
+        entry["suggested_action"] = suggested_action
+    return entry
 
 
 def calculate_running_intent_score(

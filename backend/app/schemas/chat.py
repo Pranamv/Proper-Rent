@@ -18,3 +18,15 @@ class ChatResponse(ApiSchema):
     reply: str
     suggested_action: SuggestedAction | None = None
     session_id: str
+
+
+class ChatHistoryMessage(ApiSchema):
+    role: Literal["assistant", "user"]
+    content: str
+    suggested_action: SuggestedAction | None = None
+    ts: str | None = None
+
+
+class ChatHistoryResponse(ApiSchema):
+    session_id: str
+    messages: list[ChatHistoryMessage]

@@ -1369,6 +1369,74 @@
         "title": "AdminLeadUpdateRequest",
         "type": "object"
       },
+      "ChatHistoryMessage": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "assistant",
+              "user"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "suggested_action": {
+            "anyOf": [
+              {
+                "const": "show_intake_form",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Action"
+          },
+          "ts": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ts"
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatHistoryMessage",
+        "type": "object"
+      },
+      "ChatHistoryResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatHistoryMessage"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "messages"
+        ],
+        "title": "ChatHistoryResponse",
+        "type": "object"
+      },
       "ChatRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1541,6 +1609,7 @@
           "notes": {
             "anyOf": [
               {
+                "maxLength": 2000,
                 "type": "string"
               },
               {
@@ -1556,6 +1625,7 @@
             "type": "string"
           },
           "property_address": {
+            "maxLength": 500,
             "minLength": 1,
             "title": "Property Address",
             "type": "string"
@@ -1600,6 +1670,7 @@
           "accessibility_needs": {
             "anyOf": [
               {
+                "maxLength": 1000,
                 "type": "string"
               },
               {
@@ -1622,8 +1693,11 @@
           },
           "areas_preferred": {
             "items": {
+              "maxLength": 100,
+              "minLength": 1,
               "type": "string"
             },
+            "maxItems": 12,
             "minItems": 1,
             "title": "Areas Preferred",
             "type": "array"
@@ -1768,6 +1842,7 @@
           "notes": {
             "anyOf": [
               {
+                "maxLength": 2000,
                 "type": "string"
               },
               {
@@ -2416,6 +2491,49 @@
           }
         },
         "summary": "Create Chat Reply",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/v1/chat/history": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatHistoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Chat History",
         "tags": [
           "chat"
         ]
