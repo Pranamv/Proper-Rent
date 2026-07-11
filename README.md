@@ -2,7 +2,7 @@
 
 Proper Rent is a Phase 1 website and chatbot MVP for UK lettings lead generation. The initial scaffold follows `docs/11-phase-1-implementation-plan.md` P1.0: a runnable FastAPI backend, a runnable Next.js frontend shell, environment documentation, tests, and CI.
 
-Phase 1 deliberately excludes listings, Scraye sync, property search, social channels, RAG, and commission tracking.
+Phase 1 deliberately excludes listings, Scraye sync, property search, social channels, RAG, and commission tracking..
 
 ## Local Setup
 
