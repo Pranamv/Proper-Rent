@@ -65,7 +65,7 @@ npm run smoke:public
 npm audit --audit-level=high
 ```
 
-Read-only production smoke::
+Read-only production smoke:
 
 ```bash
 cd frontend
